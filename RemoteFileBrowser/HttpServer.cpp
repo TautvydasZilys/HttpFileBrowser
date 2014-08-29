@@ -60,7 +60,9 @@ void HttpServer::HandleRequest()
 		return;	
 	}
 
-	auto path = requestType.substr(5, lastSpacePosition - 5);
+	auto path = Utilities::DecodeUrl(requestType.substr(5, lastSpacePosition - 5));
+	std::replace(begin(path), end(path), '/', '\\');
+
 	auto httpVersion = requestType.substr(lastSpacePosition + 1);
 
 	auto response = m_ExecutionHandler(path, httpVersion);

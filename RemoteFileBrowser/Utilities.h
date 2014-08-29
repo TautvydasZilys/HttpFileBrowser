@@ -2,6 +2,8 @@
 
 namespace Utilities
 {
+	std::wstring Win32ErrorToMessage(int win32ErrorCode);
+
 	void Log(const wchar_t* message);
 
 	inline void Log(const std::wstring& message)
@@ -25,8 +27,33 @@ namespace Utilities
 	{
 		return Utf16ToUtf8(wstr.c_str(), wstr.length());
 	}
+	
+	std::string DecodeUrl(const std::string& url);
 
+	enum class FileStatus
+	{
+		FileNotFound,
+		AccessDenied,
+		Directory,
+		File
+	};
+
+	struct FileInfo
+	{
+		std::string fileName;
+		FileStatus fileStatus;
+		std::string dateModified;
+
+		FileInfo(const std::string& fileName, FileStatus fileStatus, const std::string& dateModified);
+		FileInfo(std::string&& fileName, FileStatus fileStatus, std::string&& dateModified);
+	};
+
+	FileStatus QueryFileStatus(const std::wstring& path);
+	std::vector<FileInfo> EnumerateFiles(std::wstring path);
 	std::vector<std::string> EnumerateSystemVolumes();
+
+	// Very specialized function: appends file length, "\r\n\r\n" and file contents to the target buffer
+	bool AppendFileLengthAndReadItWholeTo(const std::wstring& path, std::string& targetBuffer);
 };
 
 #if _DEBUG
