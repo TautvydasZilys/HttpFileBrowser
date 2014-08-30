@@ -17,6 +17,7 @@ FileBrowserResponseHandler::FileBrowserResponseHandler(const string& requestedPa
 	m_FileStatus(Utilities::QueryFileStatus(m_WidePath)),
 	m_ErrorCode(ERROR_SUCCESS)
 {
+	Utilities::Log(L"Requested path: \"" + m_WidePath + L"\".");
 }
 
 string FileBrowserResponseHandler::Execute()
@@ -56,7 +57,6 @@ string FileBrowserResponseHandler::FormFileResponse()
 
 	if (Utilities::AppendFileLengthAndReadItWholeTo(m_WidePath, httpHeader))
 	{
-		Utilities::Log(L"Sending back \"" + m_WidePath + L"\".");
 		return httpHeader;
 	}
 
