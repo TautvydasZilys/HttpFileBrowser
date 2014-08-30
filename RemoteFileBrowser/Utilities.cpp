@@ -8,7 +8,7 @@ namespace Utilities
 	static wofstream s_OutputFile;
 	static const wchar_t kLogFileName[] = L"LogFile.log";
 
-	void OutputMessage(const wchar_t* message)
+	static void OutputMessage(const wchar_t* message)
 	{
 		if (IsDebuggerPresent())
 		{
@@ -23,12 +23,12 @@ namespace Utilities
 		s_OutputFile << message;
 	}
 
-	inline void OutputMessage(const wstring& message)
+	static inline void OutputMessage(const wstring& message)
 	{
 		OutputMessage(message.c_str());
 	}
 
-	wstring SystemTimeToString(SYSTEMTIME* systemTime)
+	static wstring SystemTimeToString(SYSTEMTIME* systemTime)
 	{
 		const int bufferSize = 256;
 		wchar_t buffer[bufferSize];
@@ -45,7 +45,7 @@ namespace Utilities
 		return buffer;
 	}
 
-	wstring GetCurrentTimestamp()
+	static wstring GetCurrentTimestamp()
 	{
 		return SystemTimeToString(nullptr);
 	}
@@ -55,6 +55,8 @@ namespace Utilities
 		OutputMessage(GetCurrentTimestamp());
 		OutputMessage(message);
 		OutputMessage(L"\r\n");
+
+		s_OutputFile.flush();
 	}
 
 	wstring Win32ErrorToMessage(int win32ErrorCode)
