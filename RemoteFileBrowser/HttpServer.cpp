@@ -13,7 +13,7 @@ void HttpServer::StartServiceClient(SOCKET incomingSocket, sockaddr_in clientAdd
 }
 
 HttpServer::HttpServer(SOCKET incomingSocket, sockaddr_in clientAddress, HttpRequestExecutionHandler executionHandler) :
-	m_ConnectionSocket(incomingSocket), m_ClientAddress(clientAddress), m_ExecutionHandler(executionHandler)
+	m_ConnectionSocket(incomingSocket), m_ClientAddress(clientAddress), m_ReceivedData(nullptr), m_HasReportedUserAgent(false), m_ExecutionHandler(executionHandler)
 {
 }
 
@@ -78,31 +78,34 @@ std::string HttpServer::ParseRequest()
 	int lineFeedPos = FindNextCharacter(position, '\r');
 	string requestType(m_ReceivedData, lineFeedPos);
 
-	// Parse rest of header
+	// Parse rest of header only if we haven't reported user agent yet
 
-	map<string, string> httpHeader;
-	position = lineFeedPos + 2;
-
-	for (;;)
+	if (!m_HasReportedUserAgent)
 	{
-		int semicolonPos = FindNextCharacter(position, ':');
+		map<string, string> httpHeader;
+		position = lineFeedPos + 2;
 
-		if (semicolonPos >= m_BytesReceived - 2)
+		for (;;)
 		{
-			break;
+			int semicolonPos = FindNextCharacter(position, ':');
+
+			if (semicolonPos >= m_BytesReceived - 2)
+			{
+				break;
+			}
+
+			lineFeedPos = FindNextCharacter(semicolonPos + 2, '\r');
+
+			string key(m_ReceivedData + position, semicolonPos - position);
+			string value(m_ReceivedData + semicolonPos + 2, lineFeedPos - semicolonPos - 2);
+
+			httpHeader.emplace(std::move(key), std::move(value));
+			position = lineFeedPos + 2;
 		}
 
-		lineFeedPos = FindNextCharacter(semicolonPos + 2, '\r');
-
-		string key(m_ReceivedData + position, semicolonPos - position);
-		string value(m_ReceivedData + semicolonPos + 2, lineFeedPos - semicolonPos - 2);
-
-		httpHeader.emplace(std::move(key), std::move(value));
-		position = lineFeedPos + 2;
+		Utilities::Log(L"Client user agent: " + Utilities::Utf8ToUtf16(httpHeader["User-Agent"]));
+		m_HasReportedUserAgent = true;
 	}
-
-	auto userAgent = httpHeader["User-Agent"];
-	Utilities::Log(L"Client user agent: " + Utilities::Utf8ToUtf16(userAgent));
 
 	return requestType;
 }

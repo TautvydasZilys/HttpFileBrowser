@@ -11,6 +11,7 @@ private:
 	sockaddr_in m_ClientAddress;
 	int m_BytesReceived;
 	const char* m_ReceivedData;
+	bool m_HasReportedUserAgent;
 	HttpRequestExecutionHandler m_ExecutionHandler;
 
 private:
