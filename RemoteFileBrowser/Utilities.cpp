@@ -137,6 +137,18 @@ namespace Utilities
 		}
 	}
 
+	static char HexDigitToHexChar(int digit)
+	{
+		if (digit < 10)
+		{
+			return digit + '0';
+		}
+		else
+		{
+			return digit + 'A' - 10;
+		}
+	}
+
 	string DecodeUrl(const string& url)
 	{
 		string decoded;
@@ -147,7 +159,13 @@ namespace Utilities
 
 		while (i < urlLength)
 		{
-			if (url[i] != '%')
+			if (url[i] == '+')
+			{
+				decoded += ' ';
+				i++;
+				continue;
+			}
+			else if (url[i] != '%')
 			{
 				decoded += url[i];
 				i++;
@@ -164,6 +182,71 @@ namespace Utilities
 		}
 
 		return decoded;
+	}
+
+	static bool NeedsUrlEncoding(char c)
+	{
+		if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+		{
+			return false;
+		}
+
+		switch (c)
+		{
+		case '-':
+		case '_':
+		case '.':
+		case '!':
+		case '*':
+		case '\'':
+		case '(':
+		case ')':
+			return false;
+		}
+
+		return true;
+	}
+
+	string EncodeUrl(const string& url)
+	{
+		// First count resulting string length, then encode
+
+		string encoded;
+		int encodedLength = 0;
+
+		for (auto& c : url)
+		{
+			if (c == ' ' || !NeedsUrlEncoding(c))
+			{
+				encodedLength++;
+			}
+			else
+			{
+				encodedLength += 3;
+			}
+		}
+
+		encoded.reserve(encodedLength);
+
+		for (auto& c : url)
+		{
+			if (c == ' ')
+			{
+				encoded += '+';
+			}
+			else if (!NeedsUrlEncoding(c))
+			{
+				encoded += c;
+			}
+			else
+			{
+				encoded += '%';
+				encoded += HexDigitToHexChar(c >> 4);
+				encoded += HexDigitToHexChar(c & 0xf);
+			}
+		}
+
+		return encoded;
 	}
 
 	FileInfo::FileInfo(const string& fileName, FileStatus fileStatus, const string& dateModified) :

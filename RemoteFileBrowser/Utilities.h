@@ -27,8 +27,9 @@ namespace Utilities
 	{
 		return Utf16ToUtf8(wstr.c_str(), wstr.length());
 	}
-	
+
 	std::string DecodeUrl(const std::string& url);
+	std::string EncodeUrl(const std::string& url);
 
 	enum class FileStatus
 	{

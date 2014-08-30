@@ -56,6 +56,7 @@ string FileBrowserResponseHandler::FormFileResponse()
 
 	if (Utilities::AppendFileLengthAndReadItWholeTo(m_WidePath, httpHeader))
 	{
+		Utilities::Log(L"Sending back \"" + m_WidePath + L"\".");
 		return httpHeader;
 	}
 
@@ -178,6 +179,7 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 
 		for (auto& file : files)
 		{
+			string filePath;
 			string fileType;
 
 			if (file.fileStatus == Utilities::FileStatus::Directory)
@@ -189,8 +191,17 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 				fileType = file.fileName.substr(file.fileName.find_last_of('.') + 1);
 			}
 
+			if (m_RequestedPath[m_RequestedPath.length() - 1] == '\\')
+			{
+				filePath = Utilities::EncodeUrl(m_RequestedPath + file.fileName);
+			}
+			else
+			{
+				filePath = Utilities::EncodeUrl(m_RequestedPath + '\\' + file.fileName);
+			}
+			
 			html << "<tr>"
-						"<td><a href=\"/" << m_RequestedPath << "\\" << file.fileName << "\">" << file.fileName << "</a></td>"
+						"<td><a href=\"/" << filePath << "\">" << file.fileName << "</a></td>"
 						"<td>" << fileType << "</td>"
 						"<td>" << file.dateModified << "</td>"
 					"</tr>";
