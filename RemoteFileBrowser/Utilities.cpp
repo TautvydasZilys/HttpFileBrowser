@@ -33,26 +33,23 @@ namespace Utilities
 		const int bufferSize = 256;
 		wchar_t buffer[bufferSize];
 
-		auto dateLength = GetDateFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, DATE_SHORTDATE, systemTime, nullptr, buffer + 1, bufferSize - 1, nullptr);
-		buffer[dateLength] = ' ';
-		auto timeLength = GetTimeFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, 0, systemTime, nullptr, buffer + dateLength + 1, bufferSize - dateLength - 1);
-
-		buffer[0] = '[';
-		buffer[dateLength + timeLength] = ']';
-		buffer[dateLength + timeLength + 1] = ' ';
-		buffer[dateLength + timeLength + 2] = '\0';
+		auto dateLength = GetDateFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, DATE_SHORTDATE, systemTime, nullptr, buffer, bufferSize, nullptr);
+		buffer[dateLength - 1] = ' ';
+		auto timeLength = GetTimeFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, 0, systemTime, nullptr, buffer + dateLength, bufferSize - dateLength);
 
 		return buffer;
 	}
-
-	static wstring GetCurrentTimestamp()
+	
+	static void OutputCurrentTimestamp()
 	{
-		return SystemTimeToString(nullptr);
+		OutputMessage(L"[");
+		OutputMessage(SystemTimeToString(nullptr));
+		OutputMessage(L"] ");
 	}
 
 	void Log(const wchar_t* message)
 	{
-		OutputMessage(GetCurrentTimestamp());
+		OutputCurrentTimestamp();
 		OutputMessage(message);
 		OutputMessage(L"\r\n");
 
