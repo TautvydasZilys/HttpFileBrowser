@@ -247,14 +247,44 @@ namespace Utilities
 
 		return encoded;
 	}
+	
+	string FormatFileSize(uint64_t size)
+	{
+		stringstream result;
+		result.setf(ios::fixed);
+		result.precision(3);
 
-	FileInfo::FileInfo(const string& fileName, FileStatus fileStatus, const string& dateModified) :
-		fileName(std::move(fileName)), fileStatus(fileStatus), dateModified(std::move(dateModified))
+		if (size < 1024)
+		{
+			result << size << " B";
+		}
+		else if (size < 1024 * 1024)
+		{
+			result << static_cast<float>(size) / 1024 << " KB";
+		}
+		else if (size < 1024 * 1024 * 1024)
+		{
+			result << static_cast<float>(size / 1024) / 1024 << " MB";
+		}
+		else if (size < static_cast<uint64_t>(1024 * 1024 * 1024) * 1024)
+		{
+			result << static_cast<float>(size / 1024 / 1024) / 1024 << " GB";
+		}
+		else if (size < static_cast<uint64_t>(1024 * 1024 * 1024) * 1024 * 1024)
+		{
+			result << static_cast<float>(size / 1024 / 1024 / 1024) / 1024 << " TB";
+		}
+
+		return result.str();
+	}
+
+	FileInfo::FileInfo(const string& fileName, FileStatus fileStatus, const string& dateModified, uint64_t fileSize) :
+		fileName(std::move(fileName)), fileStatus(fileStatus), dateModified(std::move(dateModified)), fileSize(fileSize)
 	{
 	}
 
-	FileInfo::FileInfo(string&& fileName, FileStatus fileStatus, string&& dateModified) :
-		fileName(std::move(fileName)), fileStatus(fileStatus), dateModified(std::move(dateModified))
+	FileInfo::FileInfo(string&& fileName, FileStatus fileStatus, string&& dateModified, uint64_t fileSize) :
+		fileName(std::move(fileName)), fileStatus(fileStatus), dateModified(std::move(dateModified)), fileSize(fileSize)
 	{
 	}
 
@@ -304,8 +334,9 @@ namespace Utilities
 			string dateModified(Utf16ToUtf8(SystemTimeToString(&modifiedTime)));
 
 			auto fileStatus = ((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) ? FileStatus::Directory : FileStatus::File;
+			auto fileSize = (static_cast<uint64_t>(findData.nFileSizeHigh) << 32) | findData.nFileSizeLow;
 
-			result.emplace_back(std::move(fileName), fileStatus, std::move(dateModified));
+			result.emplace_back(std::move(fileName), fileStatus, std::move(dateModified), fileSize);
 		}
 		while (FindNextFileW(findHandle, &findData) != FALSE);
 

@@ -31,6 +31,8 @@ namespace Utilities
 	std::string DecodeUrl(const std::string& url);
 	std::string EncodeUrl(const std::string& url);
 
+	std::string FormatFileSize(uint64_t size);
+
 	enum class FileStatus
 	{
 		FileNotFound,
@@ -44,9 +46,10 @@ namespace Utilities
 		std::string fileName;
 		FileStatus fileStatus;
 		std::string dateModified;
+		uint64_t fileSize;
 
-		FileInfo(const std::string& fileName, FileStatus fileStatus, const std::string& dateModified);
-		FileInfo(std::string&& fileName, FileStatus fileStatus, std::string&& dateModified);
+		FileInfo(const std::string& fileName, FileStatus fileStatus, const std::string& dateModified, uint64_t fileSize);
+		FileInfo(std::string&& fileName, FileStatus fileStatus, std::string&& dateModified, uint64_t fileSize);
 	};
 
 	FileStatus QueryFileStatus(const std::wstring& path);

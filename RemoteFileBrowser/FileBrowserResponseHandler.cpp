@@ -180,6 +180,7 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 		html << "<tr>"
 					"<th>File name</th>"
 					"<th>File type</th>"
+					"<th>File size</th>"
 					"<th>Date modified</th>"
 				"</tr>";
 
@@ -187,6 +188,8 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 		{
 			string filePath;
 			string fileType;
+
+			// Figure out file type
 
 			if (file.fileStatus == Utilities::FileStatus::Directory)
 			{
@@ -197,6 +200,8 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 				fileType = file.fileName.substr(file.fileName.find_last_of('.') + 1);
 			}
 
+			// Prepare file path for the hyperlink
+
 			if (m_RequestedPath[m_RequestedPath.length() - 1] == '\\')
 			{
 				filePath = Utilities::EncodeUrl(m_RequestedPath + file.fileName);
@@ -206,9 +211,19 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 				filePath = Utilities::EncodeUrl(m_RequestedPath + '\\' + file.fileName);
 			}
 			
+			// Format file size
+
+			string fileSize;
+
+			if (file.fileSize > 0)
+			{
+				fileSize = Utilities::FormatFileSize(file.fileSize);
+			}
+
 			html << "<tr>"
 						"<td><a href=\"/" << filePath << "\">" << file.fileName << "</a></td>"
 						"<td>" << fileType << "</td>"
+						"<td>" << fileSize << "</td>"
 						"<td>" << file.dateModified << "</td>"
 					"</tr>";
 		}
