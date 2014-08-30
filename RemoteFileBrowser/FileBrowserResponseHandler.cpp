@@ -165,6 +165,12 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentFileDownloadError(string
 
 void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream& html)
 {
+	if (m_WidePath.length() > MAX_PATH - 4)
+	{
+		GenerateHtmlBodyContentError(html, "Specified path is too long.");
+		return;
+	}
+
 	auto files = Utilities::EnumerateFiles(m_WidePath);
 
 	if (files.size() > 0)
@@ -211,7 +217,18 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 	}
 	else
 	{
-		html << "The directory is empty.";
+		auto errorCode = GetLastError();
+
+		if (errorCode != ERROR_SUCCESS)
+		{
+			auto wideErrorMessage = Utilities::Win32ErrorToMessage(errorCode);
+			auto errorMessage = Utilities::Utf16ToUtf8(wideErrorMessage);
+			GenerateHtmlBodyContentError(html, errorMessage);
+		}
+		else
+		{
+			html << "The directory is empty.";
+		}
 	}
 }
 
