@@ -20,6 +20,7 @@ private:
 	void Execute();
 
 	void SendData(const char* data, int length) const;
+	void SendNotFoundResponse() const;
 
 	void SendFileResponse() const;
 	void SendBuiltinFile() const;
@@ -38,7 +39,6 @@ private:
 	void GenerateHtmlBodyContentAccessDenied(std::stringstream& html) const;
 	void GenerateHtmlBodyContentError(std::stringstream& html, const std::string& errorMessage) const;
 	void GenerateHtmlBodyContentFileNotFound(std::stringstream& html) const;
-	void GenerateHtmlBodyContentFileDownloadError(std::stringstream& html) const;
 	void GenerateHtmlBodyContentOfDirectory(std::stringstream& html) const;
 	void GenerateHtmlBodyContentOfSystemVolumes(std::stringstream& html) const;
 

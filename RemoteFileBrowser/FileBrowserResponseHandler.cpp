@@ -47,9 +47,15 @@ void FileBrowserResponseHandler::SendData(const char* data, int length) const
 	}
 }
 
+void FileBrowserResponseHandler::SendNotFoundResponse() const
+{
+	auto httpHeader = m_HttpVersion + " 404 Not Found\r\n";
+	SendData(httpHeader.c_str(), httpHeader.length());
+}
+
 void FileBrowserResponseHandler::SendFileResponse() const
 {
-	if (m_RequestedPath == "scripts.js" || m_RequestedPath == "style.css")
+	if (m_RequestedPath.length() > 1 && m_RequestedPath[1] != ':')
 	{
 		SendBuiltinFile();
 		return;
@@ -94,7 +100,7 @@ void FileBrowserResponseHandler::SendBuiltinFile() const
 	}
 	else
 	{
-		Utilities::Log(L"Unexpected file in FileBrowserResponseHandler::SendBuiltinFile(): " + m_WidePath);
+		SendNotFoundResponse();
 		return;
 	}
 
@@ -273,10 +279,6 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContent(stringstream& html) con
 			GenerateHtmlBodyContentOfDirectory(html);
 			break;
 
-		case Utilities::FileStatus::File:	// This will only be hit if error was triggered while trying to download the file
-			GenerateHtmlBodyContentFileDownloadError(html);
-			break;
-
 		default:
 			Utilities::Log(L"ERROR: unexpected file status in FileBrowserResponseHandler::GenerateHtmlBodyContent (" + to_wstring(static_cast<int>(m_FileStatus)) + L").");
 		}
@@ -299,14 +301,6 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentAccessDenied(stringstrea
 void FileBrowserResponseHandler::GenerateHtmlBodyContentFileNotFound(stringstream& html) const
 {
 	auto errorMessage = "Error: \"" + m_RequestedPath + "\" does not exist.";
-	GenerateHtmlBodyContentError(html, errorMessage);
-}
-
-void FileBrowserResponseHandler::GenerateHtmlBodyContentFileDownloadError(stringstream& html) const
-{
-	auto wideErrorMessage = Utilities::Win32ErrorToMessage(m_ErrorCode);
-	auto errorMessage = "Error - failed to download file: " + Utilities::Utf16ToUtf8(wideErrorMessage);
-
 	GenerateHtmlBodyContentError(html, errorMessage);
 }
 
