@@ -8,17 +8,21 @@ body {
     color: white;
     font-style: normal;
     font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
 }
 
 a {
     color: white;
-    outline: none;
     text-decoration: underline;
+    font-size: 16px;
+}
+
+a:hover {
+    color: #ccc;
 }
 
 table {
     width: 100%;
-    min-width: 1010px;
 }
 
 table thead {
@@ -29,7 +33,7 @@ table thead {
 table th {
     padding-left: 20px;
     padding-right : 20px;
-    border: 1px solid black;
+    min-width: 120px;
 }
 
 table td {
