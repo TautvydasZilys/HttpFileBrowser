@@ -6,6 +6,7 @@ namespace Utilities
 	using namespace std;
 
 	static wofstream s_OutputFile;
+	static mutex s_LogMutex;
 	static const wchar_t kLogFileName[] = L"LogFile.log";
 
 	static void OutputMessage(const wchar_t* message)
@@ -49,6 +50,8 @@ namespace Utilities
 
 	void Log(const wchar_t* message)
 	{
+		lock_guard<mutex> lock(s_LogMutex);
+
 		OutputCurrentTimestamp();
 		OutputMessage(message);
 		OutputMessage(L"\r\n");
