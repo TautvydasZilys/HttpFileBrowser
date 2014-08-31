@@ -349,14 +349,8 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 
 			// Prepare file path for the hyperlink
 
-			if (m_RequestedPath[m_RequestedPath.length() - 1] == '\\')
-			{
-				filePath = Utilities::EncodeUrl(m_RequestedPath + file.fileName);
-			}
-			else
-			{
-				filePath = Utilities::EncodeUrl(m_RequestedPath + '\\' + file.fileName);
-			}
+			filePath = Utilities::CombinePaths(m_RequestedPath, file.fileName);
+			Utilities::EncodeUrlInline(filePath);
 			
 			// Format file size
 

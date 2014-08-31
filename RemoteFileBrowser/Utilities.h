@@ -28,8 +28,34 @@ namespace Utilities
 		return Utf16ToUtf8(wstr.c_str(), wstr.length());
 	}
 
-	std::string DecodeUrl(const std::string& url);
-	std::string EncodeUrl(const std::string& url);
+	void DecodeUrlInline(std::string& url);
+
+	inline std::string DecodeUrl(const std::string& url)
+	{
+		std::string result = url;
+		DecodeUrlInline(result);
+		return result;
+	}
+
+	void EncodeUrlInline(std::string& url);
+
+	inline std::string EncodeUrl(const std::string& url)
+	{
+		std::string result = url;
+		EncodeUrlInline(result);
+		return result;
+	}
+
+	void RemoveLastPathComponentInline(std::string& path);
+
+	inline std::string RemoveLastPathComponent(const std::string& path)
+	{
+		std::string result = path;
+		RemoveLastPathComponentInline(result);
+		return result;
+	}
+
+	std::string CombinePaths(const std::string& left, const std::string& right);
 
 	std::string FormatFileSize(uint64_t size);
 

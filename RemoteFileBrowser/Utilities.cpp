@@ -148,25 +148,23 @@ namespace Utilities
 		}
 	}
 
-	string DecodeUrl(const string& url)
+	void DecodeUrlInline(string& url)
 	{
-		string decoded;
 		auto urlLength = url.length();
 		unsigned int i = 0;
-
-		decoded.reserve(urlLength);
-
+		unsigned int decodedLength = 0;
+		
 		while (i < urlLength)
 		{
 			if (url[i] == '+')
 			{
-				decoded += ' ';
+				url[decodedLength++] = ' ';
 				i++;
 				continue;
 			}
 			else if (url[i] != '%')
 			{
-				decoded += url[i];
+				url[decodedLength++] = url[i];
 				i++;
 				continue;
 			}
@@ -176,11 +174,11 @@ namespace Utilities
 				break;
 			}
 
-			decoded += static_cast<char>(HexCharToNumber(url[i + 1]) * 16 + HexCharToNumber(url[i + 2]));
+			url[decodedLength++] = static_cast<char>(HexCharToNumber(url[i + 1]) * 16 + HexCharToNumber(url[i + 2]));
 			i += 3;
 		}
 
-		return decoded;
+		url.resize(decodedLength);
 	}
 
 	static bool NeedsUrlEncoding(char c)
@@ -206,48 +204,110 @@ namespace Utilities
 		return true;
 	}
 
-	string EncodeUrl(const string& url)
+	void EncodeUrlInline(string& url)
 	{
 		// First count resulting string length, then encode
 
 		string encoded;
 		int encodedLength = 0;
+		bool needsEncoding = false;
 
 		for (auto& c : url)
 		{
-			if (c == ' ' || !NeedsUrlEncoding(c))
+			if (c == ' ')
+			{
+				encodedLength++;
+				needsEncoding = true;
+			}
+			else if (!NeedsUrlEncoding(c))
 			{
 				encodedLength++;
 			}
 			else
 			{
 				encodedLength += 3;
+				needsEncoding = true;
 			}
 		}
 
-		encoded.reserve(encodedLength);
-
-		for (auto& c : url)
+		if (!needsEncoding)
 		{
+			return;
+		}
+
+		if (encodedLength != url.length())
+		{
+			url.reserve(encodedLength);
+		}
+
+		int encodedIndex = encodedLength - 1;
+
+		for (unsigned int i = url.length() - 1; i > -1; i--)
+		{
+			auto c = url[i];
+
 			if (c == ' ')
 			{
-				encoded += '+';
+				url[encodedIndex--] += '+';
 			}
 			else if (!NeedsUrlEncoding(c))
 			{
-				encoded += c;
+				url[encodedIndex--] = c;
 			}
 			else
 			{
-				encoded += '%';
-				encoded += HexDigitToHexChar(c >> 4);
-				encoded += HexDigitToHexChar(c & 0xf);
+				url[encodedIndex--] = HexDigitToHexChar(c & 0xf);
+				url[encodedIndex--] = '%';
+				url[encodedIndex--] = HexDigitToHexChar(c >> 4);
 			}
 		}
+	}
 
-		return encoded;
+	void RemoveLastPathComponentInline(string& path)
+	{
+		if (path.length() < 2)
+		{
+			return;
+		}
+
+		int i = path.length() - 2;
+
+		while (i > -1 && (path[i] != '\\' && path[i] != '/'))
+		{
+			i--;
+		}
+
+		path.resize(i + 1);
 	}
 	
+	string CombinePaths(const string& left, const string& right)
+	{
+		if (right == ".")
+		{
+			return left;
+		}
+		else if (right == "..")
+		{
+			return RemoveLastPathComponent(left);
+		}
+
+		auto leftLastChar = left[left.length() - 1];
+
+		if (leftLastChar == '\\' || leftLastChar == '/')
+		{
+			return left + right;
+		}
+
+		string combined;		
+		combined.reserve(left.length() + right.length() + 1);
+
+		combined.append(left);
+		combined.append("\\", 1);
+		combined.append(right);
+
+		return combined;
+	}
+
 	string FormatFileSize(uint64_t size)
 	{
 		stringstream result;
