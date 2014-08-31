@@ -33,6 +33,12 @@
     <ClCompile Include="FileBrowserResponseHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AssetDatabase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamableFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PrecompiledHeader.h">
@@ -50,5 +56,22 @@
     <ClInclude Include="FileBrowserResponseHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AssetDatabase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamableFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Event.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="scripts.js">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="style.css">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

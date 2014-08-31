@@ -52,6 +52,8 @@ void HttpServer::HandleRequest()
 		return;
 	}
 
+	// Get request looks like this:
+	// GET <ActualRequestedData> <httpVersion>
 	auto lastSpacePosition = requestType.find(' ', 5);
 
 	// Check whether there's http version specified; if not - request is invalid
@@ -60,13 +62,13 @@ void HttpServer::HandleRequest()
 		return;	
 	}
 
-	auto path = Utilities::DecodeUrl(requestType.substr(5, lastSpacePosition - 5));
-	std::replace(begin(path), end(path), '/', '\\');
+	// Extract and fix up requested path
+	auto requestedPath = Utilities::DecodeUrl(requestType.substr(5, lastSpacePosition - 5));
+	std::replace(begin(requestedPath), end(requestedPath), '/', '\\');
 
 	auto httpVersion = requestType.substr(lastSpacePosition + 1);
 
-	auto response = m_ExecutionHandler(path, httpVersion);
-	SendResponse(response);
+	m_ExecutionHandler(m_ConnectionSocket, requestedPath, httpVersion);
 }
 
 std::string HttpServer::ParseRequest()
@@ -82,28 +84,7 @@ std::string HttpServer::ParseRequest()
 
 	if (!m_HasReportedUserAgent)
 	{
-		map<string, string> httpHeader;
-		position = lineFeedPos + 2;
-
-		for (;;)
-		{
-			int semicolonPos = FindNextCharacter(position, ':');
-
-			if (semicolonPos >= m_BytesReceived - 2)
-			{
-				break;
-			}
-
-			lineFeedPos = FindNextCharacter(semicolonPos + 2, '\r');
-
-			string key(m_ReceivedData + position, semicolonPos - position);
-			string value(m_ReceivedData + semicolonPos + 2, lineFeedPos - semicolonPos - 2);
-
-			httpHeader.emplace(std::move(key), std::move(value));
-			position = lineFeedPos + 2;
-		}
-
-		Utilities::Log(L"Client user agent: " + Utilities::Utf8ToUtf16(httpHeader["User-Agent"]));
+		ReportUserAgent(lineFeedPos + 2);
 		m_HasReportedUserAgent = true;
 	}
 
@@ -134,6 +115,31 @@ int HttpServer::FindNextCharacter(int position, char character)
 	}
 
 	return position;
+}
+
+void HttpServer::ReportUserAgent(int dataOffset)
+{
+	map<string, string> httpHeader;
+
+	for (;;)
+	{
+		int semicolonPos = FindNextCharacter(dataOffset, ':');
+
+		if (semicolonPos >= m_BytesReceived - 2)
+		{
+			break;
+		}
+
+		auto lineFeedPos = FindNextCharacter(semicolonPos + 2, '\r');
+
+		string key(m_ReceivedData + dataOffset, semicolonPos - dataOffset);
+		string value(m_ReceivedData + semicolonPos + 2, lineFeedPos - semicolonPos - 2);
+
+		httpHeader.emplace(std::move(key), std::move(value));
+		dataOffset = lineFeedPos + 2;
+	}
+
+	Utilities::Log(L"Client user agent: " + Utilities::Utf8ToUtf16(httpHeader["User-Agent"]));
 }
 
 void HttpServer::ReportConnectionDroppedError()

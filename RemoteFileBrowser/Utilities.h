@@ -56,8 +56,7 @@ namespace Utilities
 	std::vector<FileInfo> EnumerateFiles(std::wstring path);
 	std::vector<std::string> EnumerateSystemVolumes();
 
-	// Very specialized function: appends file length, "\r\n\r\n" and file contents to the target buffer
-	bool AppendFileLengthAndReadItWholeTo(const std::wstring& path, std::string& targetBuffer);
+	std::vector<uint8_t> ReadFileToVector(const std::wstring& path);
 };
 
 #if _DEBUG

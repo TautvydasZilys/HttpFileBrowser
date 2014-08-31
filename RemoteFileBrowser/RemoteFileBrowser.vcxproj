@@ -80,8 +80,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AssetDatabase.cpp" />
     <ClCompile Include="FileBrowserResponseHandler.cpp" />
     <ClCompile Include="HttpServer.cpp" />
+    <ClCompile Include="StreamableFile.cpp" />
     <ClCompile Include="TcpListener.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PrecompiledHeader.cpp">
@@ -91,11 +93,26 @@
     <ClCompile Include="Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AssetDatabase.h" />
+    <ClInclude Include="Event.h" />
     <ClInclude Include="FileBrowserResponseHandler.h" />
     <ClInclude Include="HttpServer.h" />
+    <ClInclude Include="StreamableFile.h" />
     <ClInclude Include="TcpListener.h" />
     <ClInclude Include="PrecompiledHeader.h" />
     <ClInclude Include="Utilities.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="scripts.js" />
+    <None Include="style.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="scripts.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="style.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

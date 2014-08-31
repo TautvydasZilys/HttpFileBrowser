@@ -1,8 +1,9 @@
 #pragma once
 
-// 1st arg - relative request URL
-// 2nd arg - http version
-typedef std::function<std::string(const std::string&, const std::string&)> HttpRequestExecutionHandler;
+// 1st arg - client socket
+// 2nd arg - relative request URL
+// 3rd arg - http version
+typedef std::function<void(SOCKET, const std::string&, const std::string&)> HttpRequestExecutionHandler;
 
 class HttpServer
 {
@@ -25,6 +26,7 @@ private:
 	std::string FormFinalResponse(const std::string& html, const std::string& httpVersion);
 	void SendResponse(const std::string& response);
 	int FindNextCharacter(int position, char character);
+	void ReportUserAgent(int dataOffset);
 	void ReportConnectionDroppedError();
 
 public:

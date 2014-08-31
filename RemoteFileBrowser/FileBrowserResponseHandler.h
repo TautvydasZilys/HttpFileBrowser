@@ -8,6 +8,7 @@ namespace Utilities
 class FileBrowserResponseHandler
 {
 private:
+	SOCKET m_ClientSocket;
 	const std::string& m_HttpVersion;
 	const std::string& m_RequestedPath;
 	std::wstring m_WidePath;
@@ -15,25 +16,32 @@ private:
 	int m_ErrorCode;
 
 private:
-	FileBrowserResponseHandler(const std::string& requestedPath, const std::string& httpVersion);
-	std::string Execute();
+	FileBrowserResponseHandler(SOCKET clientSocket, const std::string& requestedPath, const std::string& httpVersion);
+	void Execute();
 
-	std::string WrapHtmlInHttpHeader(const std::string& html);
+	void SendData(const char* data, int length) const;
 
-	std::string FormFileResponse();	
-	std::string FormHtmlResponse();
+	void SendFileResponse() const;
+	void SendBuiltinFile() const;
+	void StreamFile() const;
 
-	void FormHtmlResponseHead(std::stringstream& html);
-	void FormHtmlResponseBody(std::stringstream& html);
-	void GenerateHtmlBodyContent(std::stringstream& html);
+	std::string FormHttpHeaderForFile(const std::string& contentType, const std::string& fileName, uint64_t fileLength) const;
 
-	void GenerateHtmlBodyContentAccessDenied(std::stringstream& html);
-	void GenerateHtmlBodyContentError(std::stringstream& html, const std::string& errorMessage);
-	void GenerateHtmlBodyContentFileNotFound(std::stringstream& html);
-	void GenerateHtmlBodyContentFileDownloadError(std::stringstream& html);
-	void GenerateHtmlBodyContentOfDirectory(std::stringstream& html);
-	void GenerateHtmlBodyContentOfSystemVolumes(std::stringstream& html);
+	void SendHtmlResponse() const;
+	std::string FormHtmlResponse() const;
+	std::string WrapHtmlInHttpHeader(const std::string& html) const;
+
+	void FormHtmlResponseHead(std::stringstream& html) const;
+	void FormHtmlResponseBody(std::stringstream& html) const;
+	void GenerateHtmlBodyContent(std::stringstream& html) const;
+
+	void GenerateHtmlBodyContentAccessDenied(std::stringstream& html) const;
+	void GenerateHtmlBodyContentError(std::stringstream& html, const std::string& errorMessage) const;
+	void GenerateHtmlBodyContentFileNotFound(std::stringstream& html) const;
+	void GenerateHtmlBodyContentFileDownloadError(std::stringstream& html) const;
+	void GenerateHtmlBodyContentOfDirectory(std::stringstream& html) const;
+	void GenerateHtmlBodyContentOfSystemVolumes(std::stringstream& html) const;
 
 public:
-	static std::string ExecuteRequest(const std::string& requestedPath, const std::string& httpVersion);
+	static void ExecuteRequest(SOCKET clientSocket, const std::string& requestedPath, const std::string& httpVersion);
 };

@@ -395,55 +395,39 @@ namespace Utilities
 		return volumes;
 	}
 
-	bool AppendFileLengthAndReadItWholeTo(const wstring& path, string& targetBuffer)
+	vector<uint8_t> ReadFileToVector(const std::wstring& path)
 	{
-		bool succeeded = false;
-		auto fileHandle = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
+		auto fileHandle = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
 
 		if (fileHandle == INVALID_HANDLE_VALUE)
 		{
-			goto finish;
+			FatalError(GetLastError(), L"Failed to open \"" + path + L"\": ");
 		}
 
 		LARGE_INTEGER fileSize;
 		if (GetFileSizeEx(fileHandle, &fileSize) == FALSE)
 		{
-			goto finish;
+			FatalError(GetLastError(), L"Failed to get size of \"" + path + L"\": ");
 		}
 
-		// Max 64 MB files supported at this time
 		if (fileSize.QuadPart > 64 * 1024 * 1024)
 		{
-			SetLastError(ERROR_FILE_TOO_LARGE);
-			goto finish;
+			FatalError(ERROR_FILE_TOO_LARGE, L"\"" + path + L"\": ");
 		}
 
-		targetBuffer += to_string(fileSize.QuadPart);
-		targetBuffer += "\r\n\r\n";
-		
-		auto bufferSizeBefore = targetBuffer.size();
-		targetBuffer.resize(bufferSizeBefore + static_cast<unsigned int>(fileSize.QuadPart));
+		vector<uint8_t> fileBytes(static_cast<size_t>(fileSize.QuadPart));
 
-		DWORD numberOfBytesRead;
-		if (ReadFile(fileHandle, &targetBuffer[0] + bufferSizeBefore, static_cast<DWORD>(fileSize.QuadPart), &numberOfBytesRead, nullptr) == FALSE)
+		if (fileSize.QuadPart > 0)
 		{
-			goto finish;
+			DWORD numberOfBytesRead;
+			if (ReadFile(fileHandle, &fileBytes[0], static_cast<DWORD>(fileSize.QuadPart), &numberOfBytesRead, nullptr) == FALSE ||
+				numberOfBytesRead != fileSize.QuadPart)
+			{
+				FatalError(GetLastError(), L"Failed to read \"" + path + L"\": ");
+			}
 		}
 
-		if (numberOfBytesRead != fileSize.QuadPart)
-		{
-			goto finish;
-		}
-
-		succeeded = true;
-
-	finish:
-
-		if (fileHandle != INVALID_HANDLE_VALUE)
-		{
-			CloseHandle(fileHandle);
-		}
-		
-		return succeeded;
+		CloseHandle(fileHandle);
+		return fileBytes;
 	}
 }
