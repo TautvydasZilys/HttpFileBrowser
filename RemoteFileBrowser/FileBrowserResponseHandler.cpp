@@ -96,7 +96,7 @@ void FileBrowserResponseHandler::SendBuiltinFile() const
 		auto& file = AssetDatabase::GetStyleFile();
 		contentLength = file.size();
 		data = reinterpret_cast<const char*>(file.data());
-		contentType == "text/css";
+		contentType = "text/css";
 	}
 	else
 	{
@@ -238,8 +238,8 @@ void FileBrowserResponseHandler::FormHtmlResponseHead(stringstream& html) const
 	html << "<head>"
 				"<title>HTTP File Browser - " << m_RequestedPath << "</title>"
 				"<meta charset=\"utf-8\" />"
-				"<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />"
-				"<script src=\"scripts.js\"></script>"
+				"<link rel=\"stylesheet\" type=\"text/css\" href=\"/style.css\" />"
+				"<script src=\"/scripts.js\"></script>"
 			"</head>";
 }
 
