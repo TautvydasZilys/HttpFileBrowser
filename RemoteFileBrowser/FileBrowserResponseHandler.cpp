@@ -248,7 +248,7 @@ void FileBrowserResponseHandler::FormHtmlResponseBody(stringstream& html) const
 	html << "<body>"
 				"<h1>HTTP File Browser</h1>"
 				"<br/>"
-				"<h2>File system at path \"" << m_RequestedPath << "\":"
+				"<h2>File system at path \"" << m_RequestedPath << "\":</h2>"
 				"<br/>"
 				"<br/>";
 
