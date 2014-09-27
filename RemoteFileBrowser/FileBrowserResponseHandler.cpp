@@ -39,7 +39,6 @@ void FileBrowserResponseHandler::Execute()
 void FileBrowserResponseHandler::SendData(const char* data, int length) const
 {
 	auto sendResult = send(m_ClientSocket, data, length, 0);
-	Assert(sendResult != SOCKET_ERROR);
 
 	if (sendResult == SOCKET_ERROR)
 	{
