@@ -5,14 +5,15 @@
 namespace AssetDatabase
 {
 	using namespace std;
+	using namespace Utilities;
 
 	static vector<uint8_t> s_ScriptsFile;
 	static vector<uint8_t> s_StyleFile;
 
 	void Initialize()
 	{
-		s_ScriptsFile = Utilities::ReadFileToVector(L"scripts.js");
-		s_StyleFile = Utilities::ReadFileToVector(L"style.css");
+		s_ScriptsFile = FileSystem::ReadFileToVector(L"scripts.js");
+		s_StyleFile = FileSystem::ReadFileToVector(L"style.css");
 	}
 
 	const std::vector<uint8_t>& GetScriptsFile()

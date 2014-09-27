@@ -2,7 +2,10 @@
 
 namespace Utilities
 {
-	enum class FileStatus;
+	namespace FileSystem
+	{
+		enum class FileStatus;
+	}
 }
 
 class FileBrowserResponseHandler
@@ -12,7 +15,7 @@ private:
 	const std::string& m_HttpVersion;
 	const std::string& m_RequestedPath;
 	std::wstring m_WidePath;
-	Utilities::FileStatus m_FileStatus;
+	Utilities::FileSystem::FileStatus m_FileStatus;
 	int m_ErrorCode;
 
 private:

@@ -3,6 +3,7 @@
 #include "Utilities.h"
 
 using namespace std;
+using namespace Utilities;
 
 static const int kDataBufferSize = 4096;
 
@@ -48,7 +49,7 @@ void HttpServer::HandleRequest()
 	// Only 'GET' request is supported
 	if (requestType.length() < 3 || requestType[0] != 'G' && requestType[1] != 'E' && requestType[2] != 'T')
 	{
-		Utilities::Log(L"Unknown request type: " + Utilities::Utf8ToUtf16(requestType));
+		Logging::Log(L"Unknown request type: " + Encoding::Utf8ToUtf16(requestType));
 		return;
 	}
 
@@ -63,7 +64,7 @@ void HttpServer::HandleRequest()
 	}
 
 	// Extract and fix up requested path
-	auto requestedPath = Utilities::DecodeUrl(requestType.substr(5, lastSpacePosition - 5));
+	auto requestedPath = Encoding::DecodeUrl(requestType.substr(5, lastSpacePosition - 5));
 	std::replace(begin(requestedPath), end(requestedPath), '/', '\\');
 
 	auto httpVersion = requestType.substr(lastSpacePosition + 1);
@@ -98,7 +99,7 @@ void HttpServer::SendResponse(const string& response)
 
 	if (sendResult == SOCKET_ERROR)
 	{
-		Utilities::Error(WSAGetLastError(), L"Failed to send response: ");
+		Logging::Error(WSAGetLastError(), L"Failed to send response: ");
 	}
 }
 
@@ -139,7 +140,7 @@ void HttpServer::ReportUserAgent(int dataOffset)
 		dataOffset = lineFeedPos + 2;
 	}
 
-	Utilities::Log(L"Client user agent: " + Utilities::Utf8ToUtf16(httpHeader["User-Agent"]));
+	Logging::Log(L"Client user agent: " + Utilities::Encoding::Utf8ToUtf16(httpHeader["User-Agent"]));
 }
 
 void HttpServer::ReportConnectionDroppedError()
@@ -153,5 +154,5 @@ void HttpServer::ReportConnectionDroppedError()
 		m_ClientAddress.sin_addr.S_un.S_un_b.s_b3,
 		m_ClientAddress.sin_addr.S_un.S_un_b.s_b4);
 
-	Utilities::Error(WSAGetLastError(), msgBuffer);
+	Logging::Error(WSAGetLastError(), msgBuffer);
 }

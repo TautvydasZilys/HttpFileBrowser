@@ -4,34 +4,7 @@
 
 namespace TcpListener
 {
-	template <typename Action>
-	inline static void PerformActionIfFailed(bool failed, const std::wstring& message, Action action)
-	{
-		if (!failed)
-		{
-			return;
-		}
-
-		Assert(false);
-		auto errorCode = WSAGetLastError();
-		action(errorCode, message);
-	}
-
-	inline static void LogErrorIfFailed(bool failed, const std::wstring& message)
-	{
-		PerformActionIfFailed(failed, message, [](int errorCode, const std::wstring& msg)
-		{
-			Utilities::Error(errorCode, msg);
-		});
-	}
-
-	inline static void LogFatalErrorIfFailed(bool failed, const std::wstring& message)
-	{
-		PerformActionIfFailed(failed, message, [](int errorCode, const std::wstring& msg)
-		{
-			Utilities::FatalError(errorCode, msg);
-		});
-	}
+	using namespace Utilities;
 
 	void Initialize()
 	{
@@ -40,7 +13,7 @@ namespace TcpListener
 
 		ZeroMemory(&wsaData, sizeof(wsaData));
 
-		Utilities::Log(L"Initializing WinSock 2.2.");
+		Logging::Log(L"Initializing WinSock 2.2.");
 
 		do
 		{
@@ -57,15 +30,15 @@ namespace TcpListener
 				wsaError == WSAEINPROGRESS ||
 				wsaError == WSAEPROCLIM);
 
-		LogFatalErrorIfFailed(wsaError != ERROR_SUCCESS, L"Failed to initialize WinSock: ");
+		Logging::LogFatalErrorIfFailed(wsaError != ERROR_SUCCESS, L"Failed to initialize WinSock: ");
 	}
 
 	void Cleanup()
 	{
-		Utilities::Log(L"Cleaning up WinSock.");
+		Logging::Log(L"Cleaning up WinSock.");
 		
 		auto cleanupResult = WSACleanup();
-		LogErrorIfFailed(cleanupResult != NO_ERROR, L"Failed to cleanup WinSock: ");
+		Logging::LogErrorIfFailed(cleanupResult != NO_ERROR, L"Failed to cleanup WinSock: ");
 	}
 
 	static SOCKET CreateListeningSocket(int port)
@@ -73,13 +46,13 @@ namespace TcpListener
 		// Open listening socket
 
 		auto listeningSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		LogFatalErrorIfFailed(listeningSocket == INVALID_SOCKET, L"Failed to open a listening socket: ");
+		Logging::LogFatalErrorIfFailed(listeningSocket == INVALID_SOCKET, L"Failed to open a TCP socket: ");
 
 		// Make it able reuse the address
 
 		BOOL trueValue = TRUE;
 		auto result = setsockopt(listeningSocket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&trueValue), sizeof(trueValue));
-		LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to set the listening socket to reuse its address: ");
+		Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to set the listening socket to reuse its address: ");
 
 		// Bind it to port
 
@@ -91,12 +64,12 @@ namespace TcpListener
 		inAddress.sin_port = htons(port);
 
 		result = bind(listeningSocket, reinterpret_cast<sockaddr*>(&inAddress), sizeof(inAddress));
-		LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to bind the listening socket: ");
+		Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to bind the listening socket: ");
 
 		// Listen on the socket
 
 		result = listen(listeningSocket, SOMAXCONN);
-		LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to listen on the listening socket: ");
+		Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to listen on the listening socket: ");
 
 		return listeningSocket;
 	}
@@ -111,7 +84,7 @@ namespace TcpListener
 			clientAddress.sin_addr.S_un.S_un_b.s_b3,
 			clientAddress.sin_addr.S_un.S_un_b.s_b4);
 
-		Utilities::Log(msgBuffer);
+		Logging::Log(msgBuffer);
 
 		std::thread t([callback, acceptedSocket, clientAddress](){ callback(acceptedSocket, clientAddress); });
 		t.detach();
@@ -133,12 +106,12 @@ namespace TcpListener
 			}
 			else
 			{
-				LogErrorIfFailed(true, L"Failed to accept connection: ");
+				Logging::LogErrorIfFailed(true, L"Failed to accept connection: ");
 			}
 		}
 
-		Utilities::Log(L"Closing listening socket.");
+		Logging::Log(L"Closing listening socket.");
 		auto closeResult = closesocket(listeningSocket);
-		LogErrorIfFailed(closeResult == SOCKET_ERROR, L"Failed to close listening socket: ");
+		Logging::LogErrorIfFailed(closeResult == SOCKET_ERROR, L"Failed to close listening socket: ");
 	}
 }

@@ -6,6 +6,7 @@
 #include "Utilities.h"
 
 using namespace std;
+using namespace Utilities;
 
 void FileBrowserResponseHandler::ExecuteRequest(SOCKET clientSocket, const string& requestedPath, const string& httpVersion)
 {
@@ -17,16 +18,16 @@ FileBrowserResponseHandler::FileBrowserResponseHandler(SOCKET clientSocket, cons
 	m_ClientSocket(clientSocket),
 	m_HttpVersion(httpVersion), 
 	m_RequestedPath(requestedPath), 
-	m_WidePath(Utilities::Utf8ToUtf16(requestedPath)),
-	m_FileStatus(Utilities::QueryFileStatus(m_WidePath)),
+	m_WidePath(Encoding::Utf8ToUtf16(requestedPath)),
+	m_FileStatus(FileSystem::QueryFileStatus(m_WidePath)),
 	m_ErrorCode(ERROR_SUCCESS)
 {
-	Utilities::Log(L"Requested path: \"" + m_WidePath + L"\".");
+	Logging::Log(L"Requested path: \"" + m_WidePath + L"\".");
 }
 
 void FileBrowserResponseHandler::Execute()
 {
-	if (m_FileStatus == Utilities::FileStatus::File)
+	if (m_FileStatus == FileSystem::FileStatus::File)
 	{
 		SendFileResponse();
 	}
@@ -42,7 +43,7 @@ void FileBrowserResponseHandler::SendData(const char* data, int length) const
 
 	if (sendResult == SOCKET_ERROR)
 	{
-		Utilities::Error(WSAGetLastError(), L"Failed to send response: ");
+		Logging::Error(WSAGetLastError(), L"Failed to send response: ");
 	}
 }
 
@@ -69,7 +70,7 @@ void FileBrowserResponseHandler::SendFileResponse() const
 	{
 		// StreamFile will throw exception on failure
 
-		Utilities::Error(GetLastError(), L"Failed to send file \"" + m_WidePath + L"\": ");
+		Logging::Error(GetLastError(), L"Failed to send file \"" + m_WidePath + L"\": ");
 		closesocket(m_ClientSocket);
 
 		SetLastError(ERROR_SUCCESS);
@@ -266,20 +267,20 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContent(stringstream& html) con
 	{
 		switch (m_FileStatus)
 		{
-		case Utilities::FileStatus::AccessDenied:
+		case FileSystem::FileStatus::AccessDenied:
 			GenerateHtmlBodyContentAccessDenied(html);
 			break;
 
-		case Utilities::FileStatus::FileNotFound:
+		case FileSystem::FileStatus::FileNotFound:
 			GenerateHtmlBodyContentFileNotFound(html);
 			break;
 
-		case Utilities::FileStatus::Directory:
+		case FileSystem::FileStatus::Directory:
 			GenerateHtmlBodyContentOfDirectory(html);
 			break;
 
 		default:
-			Utilities::Log(L"ERROR: unexpected file status in FileBrowserResponseHandler::GenerateHtmlBodyContent (" + to_wstring(static_cast<int>(m_FileStatus)) + L").");
+			Logging::Log(L"ERROR: unexpected file status in FileBrowserResponseHandler::GenerateHtmlBodyContent (" + to_wstring(static_cast<int>(m_FileStatus)) + L").");
 		}
 	}
 }
@@ -305,13 +306,15 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentFileNotFound(stringstrea
 
 void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream& html) const
 {
+	using namespace Utilities::FileSystem;
+
 	if (m_WidePath.length() > MAX_PATH - 4)
 	{
 		GenerateHtmlBodyContentError(html, "Specified path is too long.");
 		return;
 	}
 
-	auto files = Utilities::EnumerateFiles(m_WidePath);
+	auto files = EnumerateFiles(m_WidePath);
 
 	if (files.size() > 0)
 	{
@@ -331,7 +334,7 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 
 			// Figure out file type
 
-			if (file.fileStatus == Utilities::FileStatus::Directory)
+			if (file.fileStatus == FileStatus::Directory)
 			{
 				fileType = "";
 			}
@@ -342,8 +345,8 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 
 			// Prepare file path for the hyperlink
 
-			filePath = Utilities::CombinePaths(m_RequestedPath, file.fileName);
-			Utilities::EncodeUrlInline(filePath);
+			filePath = CombinePaths(m_RequestedPath, file.fileName);
+			Encoding::EncodeUrlInline(filePath);
 			
 			// Format file size
 
@@ -351,7 +354,7 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 
 			if (file.fileSize > 0)
 			{
-				fileSize = Utilities::FormatFileSize(file.fileSize);
+				fileSize = FormatFileSizeString(file.fileSize);
 			}
 
 			html << "<tr>"
@@ -370,8 +373,8 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 
 		if (errorCode != ERROR_SUCCESS)
 		{
-			auto wideErrorMessage = Utilities::Win32ErrorToMessage(errorCode);
-			auto errorMessage = Utilities::Utf16ToUtf8(wideErrorMessage);
+			auto wideErrorMessage = Logging::Win32ErrorToMessage(errorCode);
+			auto errorMessage = Encoding::Utf16ToUtf8(wideErrorMessage);
 			GenerateHtmlBodyContentError(html, errorMessage);
 		}
 		else
@@ -385,7 +388,7 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfSystemVolumes(stringst
 {
 	html << "<table>";
 
-	for (const auto& file : Utilities::EnumerateSystemVolumes())
+	for (const auto& file : FileSystem::EnumerateSystemVolumes())
 	{
 		html << "<tr><td><a href=\"/" << file << "\">" << file << "</a></td></tr>";
 	}
