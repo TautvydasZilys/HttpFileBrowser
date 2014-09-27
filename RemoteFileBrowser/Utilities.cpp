@@ -76,7 +76,7 @@ wstring Utilities::Logging::Win32ErrorToMessage(int win32ErrorCode)
 	return buffer;
 }
 
-static void Terminate()
+static void Terminate(int errorCode = -1)
 {
 	using namespace Utilities::Logging;
 
@@ -85,7 +85,7 @@ static void Terminate()
 		s_OutputFile.close();
 	}
 
-	*(int*)0 = 0;	// Just crash™ - let user know we crashed by bringing up WER dialog
+	__fastfail(errorCode); // Just crash™ - let user know we crashed by bringing up WER dialog
 }
 
 void Utilities::Logging::Error(int win32ErrorCode, const wstring& message)
@@ -101,7 +101,7 @@ void Utilities::Logging::FatalError(int win32ErrorCode, const wstring& message)
 	Log(L"Terminating due to critical error:");
 	Log(message + errorMessage);
 
-	Terminate();
+	Terminate(win32ErrorCode);
 }
 
 
