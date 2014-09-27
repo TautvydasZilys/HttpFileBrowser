@@ -3,7 +3,6 @@
 #include "Event.h"
 #include "FileBrowserResponseHandler.h"
 #include "StreamableFile.h"
-#include "Utilities.h"
 
 using namespace std;
 using namespace Utilities;

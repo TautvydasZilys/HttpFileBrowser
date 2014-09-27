@@ -1,6 +1,5 @@
 #include "PrecompiledHeader.h"
 #include "AssetDatabase.h"
-#include "Utilities.h"
 
 namespace AssetDatabase
 {

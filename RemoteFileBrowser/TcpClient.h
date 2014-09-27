@@ -1,14 +1,9 @@
 #pragma once
 
-template <typename ConnectionHandler>
-class TcpClient
+namespace TcpClient
 {
-	ConnectionHandler m_Callback;
-	SOCKET m_Socket;
-
-public:
-	TcpClient(ConnectionHandler callback);
-	~TcpClient();
+	template <typename ConnectionHandler>
+	inline void Connect(const std::wstring& hostName, ConnectionHandler connectionHandler);
 };
 
 #include "TcpClient.inl"
