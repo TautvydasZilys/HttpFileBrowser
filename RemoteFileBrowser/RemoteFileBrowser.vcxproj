@@ -84,6 +84,7 @@
     <ClCompile Include="FileBrowserResponseHandler.cpp" />
     <ClCompile Include="HttpServer.cpp" />
     <ClCompile Include="StreamableFile.cpp" />
+    <ClCompile Include="WSAInitializer.cpp" />
     <ClInclude Include="TcpClient.inl">
       <FileType>CppCode</FileType>
     </ClInclude>
@@ -94,6 +95,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Utilities.cpp" />
+    <ClInclude Include="WSAInitializer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetDatabase.h" />
