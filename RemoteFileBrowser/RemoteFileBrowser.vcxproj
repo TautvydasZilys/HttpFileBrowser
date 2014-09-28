@@ -85,6 +85,7 @@
     <ClCompile Include="HttpServer.cpp" />
     <ClCompile Include="StreamableFile.cpp" />
     <ClCompile Include="WSAInitializer.cpp" />
+    <ClInclude Include="CriticalSection.h" />
     <ClInclude Include="TcpClient.inl">
       <FileType>CppCode</FileType>
     </ClInclude>

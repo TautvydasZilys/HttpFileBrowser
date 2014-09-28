@@ -5,7 +5,7 @@ using namespace Utilities;
 
 // Logging
 
-mutex Logging::s_LogMutex;
+CriticalSection Logging::s_LogCriticalSection;
 
 static wofstream s_OutputFile;
 static const wchar_t kLogFileName[] = L"LogFile.log";

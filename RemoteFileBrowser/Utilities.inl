@@ -39,8 +39,7 @@ inline void Utilities::Logging::OutputMessage(const std::wstring& message)
 template <typename ...Message>
 inline void Utilities::Logging::Log(Message&& ...message)
 {
-	using namespace std;
-	lock_guard<mutex> lock(s_LogMutex);
+	CriticalSection::Lock lock(s_LogCriticalSection);
 
 	OutputCurrentTimestamp();
 	OutputMessages(std::forward<Message>(message)...);

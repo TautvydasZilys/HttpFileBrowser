@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CriticalSection.h"
+
 namespace Utilities
 {
 	class Logging
@@ -43,7 +45,7 @@ namespace Utilities
 
 		static void Terminate(int errorCode = -1);
 
-		static std::mutex s_LogMutex;
+		static CriticalSection s_LogCriticalSection;
 	};
 
 	namespace Encoding
