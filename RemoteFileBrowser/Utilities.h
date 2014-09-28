@@ -21,8 +21,10 @@ namespace Utilities
 		template <typename ...Message>
 		static inline void FatalError(int win32ErrorCode, Message&& ...message);
 
-		static inline void LogErrorIfFailed(bool failed, const std::wstring& message);
-		static inline void LogFatalErrorIfFailed(bool failed, const std::wstring& message);
+		template <typename ...Message>
+		static inline void LogErrorIfFailed(bool failed, Message&& ...message);
+		template <typename ...Message>
+		static inline void LogFatalErrorIfFailed(bool failed, Message&& ...message);
 
 		Logging() = delete;
 		Logging(const Logging&) = delete;
@@ -36,8 +38,8 @@ namespace Utilities
 		template <typename FirstMessage, typename ...Message>
 		static inline void OutputMessages(const FirstMessage& message, Message&& ...messages);
 
-		template <typename Action>
-		static inline void PerformActionIfFailed(bool failed, const std::wstring& message, Action action);
+		template <typename Action, typename ...Message>
+		static inline void PerformActionIfFailed(bool failed, Action action, Message&& ...message);
 
 		static void Terminate(int errorCode = -1);
 

@@ -67,8 +67,8 @@ inline void Utilities::Logging::FatalError(int win32ErrorCode, Message&& ...mess
 	Terminate(win32ErrorCode);
 }
 
-template <typename Action>
-inline void Utilities::Logging::PerformActionIfFailed(bool failed, const std::wstring& message, Action action)
+template <typename Action, typename ...Message>
+inline void Utilities::Logging::PerformActionIfFailed(bool failed, Action action, Message&& ...message)
 {
 	if (!failed)
 	{
@@ -76,24 +76,26 @@ inline void Utilities::Logging::PerformActionIfFailed(bool failed, const std::ws
 	}
 
 	Assert(false);
-	auto errorCode = WSAGetLastError();
-	action(errorCode, message);
+	auto errorCode = GetLastError();
+	action(errorCode, std::forward<Message>(message)...);
 }
 
-inline void Utilities::Logging::LogErrorIfFailed(bool failed, const std::wstring& message)
+template <typename ...Message>
+inline void Utilities::Logging::LogErrorIfFailed(bool failed, Message&& ...message)
 {
-	PerformActionIfFailed(failed, message, [](int errorCode, const std::wstring& msg)
+	PerformActionIfFailed(failed, [](int errorCode, Message&& ...msg)
 	{
-		Error(errorCode, msg);
-	});
+		Error(errorCode, std::forward<Message>(msg)...);
+	}, std::forward<Message>(message)...);
 }
 
-inline void Utilities::Logging::LogFatalErrorIfFailed(bool failed, const std::wstring& message)
+template <typename ...Message>
+inline void Utilities::Logging::LogFatalErrorIfFailed(bool failed, Message&& ...message)
 {
-	PerformActionIfFailed(failed, message, [](int errorCode, const std::wstring& msg)
+	PerformActionIfFailed(failed, [](int errorCode, Message&& ...msg)
 	{
-		FatalError(errorCode, msg);
-	});
+		FatalError(errorCode, std::forward<Message>(msg)...);
+	}, std::forward<Message>(message)...);
 }
 
 // Encoding
