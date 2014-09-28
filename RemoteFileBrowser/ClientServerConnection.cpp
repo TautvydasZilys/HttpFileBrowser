@@ -57,6 +57,11 @@ void ClientServerConnection::Create(SOCKET connectionSocket)
 			return;
 		}
 
+		if (ipNumeric == 0)	// IP can't be 0
+		{
+			return;
+		}
+
 		TcpListener::Run(port, ipNumeric, [](SOCKET incomingSocket, sockaddr_in clientAddress)
 		{
 			HttpServer::StartServiceClient(incomingSocket, clientAddress, &FileBrowserResponseHandler::ExecuteRequest);
