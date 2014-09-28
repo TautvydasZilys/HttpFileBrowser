@@ -1,6 +1,6 @@
 // TcpClient inline implementation file
 
-static void LogEndpointAddress(const ADDRINFOW* addressInfo)
+inline void LogEndpointAddress(const ADDRINFOW* addressInfo)
 {
 	Assert(addressInfo->ai_addr->sa_family == AF_INET);
 

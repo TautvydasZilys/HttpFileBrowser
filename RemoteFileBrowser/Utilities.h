@@ -13,9 +13,9 @@ namespace Utilities
 		void FatalError(int win32ErrorCode, const std::wstring& message);
 
 		template <typename Action>
-		inline static void PerformActionIfFailed(bool failed, const std::wstring& message, Action action);
-		inline static void LogErrorIfFailed(bool failed, const std::wstring& message);
-		inline static void LogFatalErrorIfFailed(bool failed, const std::wstring& message);
+		inline void PerformActionIfFailed(bool failed, const std::wstring& message, Action action);
+		inline void LogErrorIfFailed(bool failed, const std::wstring& message);
+		inline void LogFatalErrorIfFailed(bool failed, const std::wstring& message);
 	}
 
 	namespace Encoding

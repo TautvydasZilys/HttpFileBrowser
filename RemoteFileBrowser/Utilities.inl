@@ -14,7 +14,7 @@
 // Logging
 
 template <typename Action>
-inline static void Utilities::Logging::PerformActionIfFailed(bool failed, const std::wstring& message, Action action)
+inline void Utilities::Logging::PerformActionIfFailed(bool failed, const std::wstring& message, Action action)
 {
 	if (!failed)
 	{
@@ -26,7 +26,7 @@ inline static void Utilities::Logging::PerformActionIfFailed(bool failed, const 
 	action(errorCode, message);
 }
 
-inline static void Utilities::Logging::LogErrorIfFailed(bool failed, const std::wstring& message)
+inline void Utilities::Logging::LogErrorIfFailed(bool failed, const std::wstring& message)
 {
 	PerformActionIfFailed(failed, message, [](int errorCode, const std::wstring& msg)
 	{
@@ -34,7 +34,7 @@ inline static void Utilities::Logging::LogErrorIfFailed(bool failed, const std::
 	});
 }
 
-inline static void Utilities::Logging::LogFatalErrorIfFailed(bool failed, const std::wstring& message)
+inline void Utilities::Logging::LogFatalErrorIfFailed(bool failed, const std::wstring& message)
 {
 	PerformActionIfFailed(failed, message, [](int errorCode, const std::wstring& msg)
 	{
