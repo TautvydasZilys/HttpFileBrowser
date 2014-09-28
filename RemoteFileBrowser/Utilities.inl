@@ -42,12 +42,39 @@ inline void Utilities::Logging::LogFatalErrorIfFailed(bool failed, const std::ws
 	});
 }
 
-// Encoding
-
-inline void Utilities::Logging::Log(const std::wstring& message)
+template <typename Message>
+inline void Utilities::Logging::OutputMessages(const Message& message)
 {
-	Log(message.c_str());
+	OutputMessage(message);
 }
+
+template <typename FirstMessage, typename ...Message>
+inline void Utilities::Logging::OutputMessages(const FirstMessage& message, Message&&... messages)
+{
+	OutputMessage(message);
+	OutputMessages(std::forward<Message>(messages)...);
+}
+
+inline void Utilities::Logging::OutputMessage(const std::wstring& message)
+{
+	OutputMessage(message.c_str());
+}
+
+template <typename ...Message>
+inline void Utilities::Logging::Log(Message&& ...message)
+{
+	using namespace std;
+
+	static mutex s_LogMutex;
+	lock_guard<mutex> lock(s_LogMutex);
+
+	OutputCurrentTimestamp();
+	OutputMessages(std::forward<Message>(message)...);
+	OutputMessage(L"\r\n");
+}
+
+
+// Encoding
 
 inline std::wstring Utilities::Encoding::Utf8ToUtf16(const std::string& str)
 {

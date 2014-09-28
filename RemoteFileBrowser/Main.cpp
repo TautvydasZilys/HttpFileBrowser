@@ -12,6 +12,8 @@ int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 
 	AssetDatabase::Initialize();
 
+	TcpClient::Connect(L"Google.com", [](SOCKET){});
+
 	TcpListener::Run(1337, [](SOCKET incomingSocket, sockaddr_in clientAddress)
 	{
 		HttpServer::StartServiceClient(incomingSocket, clientAddress, &FileBrowserResponseHandler::ExecuteRequest);

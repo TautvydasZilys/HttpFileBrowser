@@ -6,8 +6,20 @@ namespace Utilities
 	{
 		std::wstring Win32ErrorToMessage(int win32ErrorCode);
 
-		void Log(const wchar_t* message);
-		inline void Log(const std::wstring& message);
+		// Output* functions are NOT thread safe
+		// Use Log instead
+		template <typename Message>
+		inline void OutputMessages(const Message& message);
+
+		template <typename FirstMessage, typename ...Message>
+		inline void OutputMessages(const FirstMessage& message, Message&&... messages);
+
+		inline void OutputMessage(const std::wstring& message);
+		void OutputMessage(const wchar_t* message);
+		void OutputCurrentTimestamp();		
+
+		template <typename ...Message>
+		inline void Log(Message&& ...message);
 
 		void Error(int win32ErrorCode, const std::wstring& message);
 		void FatalError(int win32ErrorCode, const std::wstring& message);

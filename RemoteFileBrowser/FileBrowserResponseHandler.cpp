@@ -21,7 +21,7 @@ FileBrowserResponseHandler::FileBrowserResponseHandler(SOCKET clientSocket, cons
 	m_FileStatus(FileSystem::QueryFileStatus(m_WidePath)),
 	m_ErrorCode(ERROR_SUCCESS)
 {
-	Logging::Log(L"Requested path: \"" + m_WidePath + L"\".");
+	Logging::Log(L"Requested path: \"", m_WidePath, L"\".");
 }
 
 void FileBrowserResponseHandler::Execute()
@@ -279,7 +279,7 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContent(stringstream& html) con
 			break;
 
 		default:
-			Logging::Log(L"ERROR: unexpected file status in FileBrowserResponseHandler::GenerateHtmlBodyContent (" + to_wstring(static_cast<int>(m_FileStatus)) + L").");
+			Logging::Log(L"ERROR: unexpected file status in FileBrowserResponseHandler::GenerateHtmlBodyContent (", to_wstring(static_cast<int>(m_FileStatus)), L").");
 		}
 	}
 }

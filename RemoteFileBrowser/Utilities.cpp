@@ -9,15 +9,12 @@ namespace Utilities
 	namespace Logging
 	{
 		static wofstream s_OutputFile;
-		static mutex s_LogMutex;
 		static const wchar_t kLogFileName[] = L"LogFile.log";
 	}
 }
 
-static void OutputMessage(const wchar_t* message)
+void Utilities::Logging::OutputMessage(const wchar_t* message)
 {
-	using namespace Utilities::Logging;
-
 	if (IsDebuggerPresent())
 	{
 		OutputDebugStringW(message);
@@ -31,39 +28,31 @@ static void OutputMessage(const wchar_t* message)
 	s_OutputFile << message;
 }
 
-static inline void OutputMessage(const wstring& message)
+static const int kSystemTimeBufferSize = 256;
+
+static inline void SystemTimeToStringInline(wchar_t (&buffer)[kSystemTimeBufferSize], SYSTEMTIME* systemTime = nullptr)
 {
-	OutputMessage(message.c_str());
+	auto dateLength = GetDateFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, DATE_SHORTDATE, systemTime, nullptr, buffer, kSystemTimeBufferSize, nullptr);
+	buffer[dateLength - 1] = ' ';
+	auto timeLength = GetTimeFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, 0, systemTime, nullptr, buffer + dateLength, kSystemTimeBufferSize - dateLength);
 }
 
-static wstring SystemTimeToString(SYSTEMTIME* systemTime)
+static wstring SystemTimeToString(SYSTEMTIME* systemTime = nullptr)
 {
-	const int bufferSize = 256;
-	wchar_t buffer[bufferSize];
-
-	auto dateLength = GetDateFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, DATE_SHORTDATE, systemTime, nullptr, buffer, bufferSize, nullptr);
-	buffer[dateLength - 1] = ' ';
-	auto timeLength = GetTimeFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, 0, systemTime, nullptr, buffer + dateLength, bufferSize - dateLength);
-
+	wchar_t buffer[kSystemTimeBufferSize];
+	SystemTimeToStringInline(buffer, systemTime);
 	return buffer;
 }
 
-static void OutputCurrentTimestamp()
+void Utilities::Logging::OutputCurrentTimestamp()
 {
 	OutputMessage(L"[");
-	OutputMessage(SystemTimeToString(nullptr));
+
+	wchar_t buffer[kSystemTimeBufferSize];
+	SystemTimeToStringInline(buffer);
+	OutputMessage(buffer);
+
 	OutputMessage(L"] ");
-}
-
-void Utilities::Logging::Log(const wchar_t* message)
-{
-	lock_guard<mutex> lock(s_LogMutex);
-
-	OutputCurrentTimestamp();
-	OutputMessage(message);
-	OutputMessage(L"\r\n");
-
-	s_OutputFile.flush();
 }
 
 wstring Utilities::Logging::Win32ErrorToMessage(int win32ErrorCode)
@@ -90,7 +79,7 @@ static void Terminate(int errorCode = -1)
 void Utilities::Logging::Error(int win32ErrorCode, const wstring& message)
 {
 	auto errorMessage = Win32ErrorToMessage(win32ErrorCode);
-	Log(message + errorMessage);
+	Log(message, errorMessage);
 }
 
 void Utilities::Logging::FatalError(int win32ErrorCode, const wstring& message)
@@ -98,7 +87,7 @@ void Utilities::Logging::FatalError(int win32ErrorCode, const wstring& message)
 	auto errorMessage = Win32ErrorToMessage(win32ErrorCode);
 
 	Log(L"Terminating due to critical error:");
-	Log(message + errorMessage);
+	Log(message, errorMessage);
 
 	Terminate(win32ErrorCode);
 }

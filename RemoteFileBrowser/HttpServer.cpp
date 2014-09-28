@@ -48,7 +48,7 @@ void HttpServer::HandleRequest()
 	// Only 'GET' request is supported
 	if (requestType.length() < 3 || requestType[0] != 'G' && requestType[1] != 'E' && requestType[2] != 'T')
 	{
-		Logging::Log(L"Unknown request type: " + Encoding::Utf8ToUtf16(requestType));
+		Logging::Log(L"Unknown request type: ", Encoding::Utf8ToUtf16(requestType));
 		return;
 	}
 
@@ -139,7 +139,7 @@ void HttpServer::ReportUserAgent(int dataOffset)
 		dataOffset = lineFeedPos + 2;
 	}
 
-	Logging::Log(L"Client user agent: " + Utilities::Encoding::Utf8ToUtf16(httpHeader["User-Agent"]));
+	Logging::Log(L"Client user agent: ", Utilities::Encoding::Utf8ToUtf16(httpHeader["User-Agent"]));
 }
 
 void HttpServer::ReportConnectionDroppedError()

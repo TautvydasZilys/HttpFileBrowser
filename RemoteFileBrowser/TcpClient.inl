@@ -21,7 +21,7 @@ inline void TcpClient::Connect(const std::wstring& hostName, ConnectionHandler c
 {
 	using namespace Utilities;
 
-	Logging::Log(L"Attempting to connect to \"" + hostName + L"\".");
+	Logging::Log(L"Attempting to connect to \"", hostName, L"\".");
 
 	// Setup socket
 
