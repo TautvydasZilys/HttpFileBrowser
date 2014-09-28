@@ -123,6 +123,13 @@ inline std::string Utilities::Encoding::EncodeUrl(const std::string& url)
 	return result;
 }
 
+inline std::string Utilities::Encoding::EncodeBase64(const std::string& data)
+{
+	std::string result = data;
+	EncodeBase64Inline(result);
+	return result;
+}
+
 // File system
 
 inline std::string Utilities::FileSystem::RemoveLastPathComponent(const std::string& path)

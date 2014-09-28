@@ -54,7 +54,7 @@ namespace TcpListener
 		t.detach();
 	}
 
-	void Run(int port, std::function<void(SOCKET, sockaddr_in)> callback)
+	void Run(int port, int acceptConnectionOnlyFromIp, std::function<void(SOCKET, sockaddr_in)> callback)
 	{
 		auto listeningSocket = CreateListeningSocket(port);
 
@@ -66,7 +66,14 @@ namespace TcpListener
 			
 			if (acceptedSocket != INVALID_SOCKET)
 			{
-				StartIncomingConnectionThread(callback, acceptedSocket, clientAddress);
+				if (acceptConnectionOnlyFromIp == 0 || acceptConnectionOnlyFromIp == clientAddress.sin_addr.S_un.S_addr)
+				{
+					StartIncomingConnectionThread(callback, acceptedSocket, clientAddress);
+				}
+				else
+				{
+					closesocket(acceptedSocket);
+				}
 			}
 			else
 			{

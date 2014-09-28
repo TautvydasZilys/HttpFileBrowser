@@ -57,7 +57,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalOptions>ws2_32.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>ws2_32.lib Iphlpapi.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -76,16 +76,22 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalOptions>ws2_32.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>ws2_32.lib Iphlpapi.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AssetDatabase.cpp" />
+    <ClCompile Include="ClientServerConnection.cpp" />
     <ClCompile Include="FileBrowserResponseHandler.cpp" />
+    <ClCompile Include="HttpHeaderBuilder.cpp" />
     <ClCompile Include="HttpServer.cpp" />
+    <ClCompile Include="RestCommunicator.cpp" />
     <ClCompile Include="StreamableFile.cpp" />
     <ClCompile Include="WSAInitializer.cpp" />
+    <ClInclude Include="ClientServerConnection.h" />
     <ClInclude Include="CriticalSection.h" />
+    <ClInclude Include="HttpHeaderBuilder.h" />
+    <ClInclude Include="RestCommunicator.h" />
     <ClInclude Include="TcpClient.inl">
       <FileType>CppCode</FileType>
     </ClInclude>

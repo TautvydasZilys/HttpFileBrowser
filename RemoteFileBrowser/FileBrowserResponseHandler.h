@@ -1,13 +1,5 @@
 #pragma once
 
-namespace Utilities
-{
-	namespace FileSystem
-	{
-		enum class FileStatus;
-	}
-}
-
 class FileBrowserResponseHandler
 {
 private:

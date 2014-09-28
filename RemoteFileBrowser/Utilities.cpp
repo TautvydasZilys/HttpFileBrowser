@@ -241,6 +241,73 @@ void Encoding::EncodeUrlInline(string& url)
 	}
 }
 
+static char s_Base64Table1[64] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
+								  'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 
+								  'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 
+								  'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '9', '+', '/' };
+
+static vector<char> s_Base64Table(s_Base64Table1, s_Base64Table1 + 64);
+
+void Encoding::EncodeBase64Inline(std::string& data)
+{
+	int dataLength = data.length();
+	if (dataLength == 0) return;
+
+	int remainder = dataLength % 3;
+	int blockCount = dataLength / 3 + (remainder == 0 ? 0 : 1);
+	data.resize(4 * blockCount);
+
+	int i;
+
+	// Handle padding
+	if (remainder > 0)
+	{
+		auto lastByte = static_cast<uint8_t>(data[dataLength - 1]);
+
+		if (remainder == 1)
+		{
+			// bbbbbb'bb 0000'0000 00'000000
+			data[data.length() - 1] = '=';
+			data[data.length() - 2] = '=';
+			data[data.length() - 3] = s_Base64Table[lastByte & 0x03];
+			data[data.length() - 4] = s_Base64Table[(lastByte & 0xFC) >> 2];
+		}
+		else if (remainder == 2)
+		{
+			// bbbbbb'bb bbbb'bbbb 00'000000
+			auto preLastByte = static_cast<uint8_t>(data[dataLength - 2]);
+
+			data[data.length() - 1] = '=';
+			data[data.length() - 2] = s_Base64Table[(lastByte & 0x0F) << 2];
+			data[data.length() - 3] = s_Base64Table[((preLastByte & 0x03) << 4) | ((lastByte & 0xF0) >> 4)];
+			data[data.length() - 4] = s_Base64Table[(preLastByte & 0xFC) >> 2];
+		}
+
+		i = blockCount - 2;
+	}
+	else
+	{
+		i = blockCount - 1;
+	}
+
+	// Encode main blocks
+	for (; i > -1; i--)
+	{
+		//     a         b         c
+		// bbbbbb'bb bbbb'bbbb bb'bbbbbb
+
+		auto dataIndex = 3 * i;
+		auto resultIndex = 4 * i;
+		auto a = static_cast<uint8_t>(data[dataIndex]);
+		auto b = static_cast<uint8_t>(data[dataIndex + 1]);
+		auto c = static_cast<uint8_t>(data[dataIndex + 2]);
+
+		data[resultIndex] = s_Base64Table[(a & 0xFC) >> 2];
+		data[resultIndex + 1] = s_Base64Table[((a & 0x03) << 4) | ((b & 0xF0) >> 4)];
+		data[resultIndex + 2] = s_Base64Table[((b & 0x0F) << 2) | ((c & 0xC0) >> 6)];
+		data[resultIndex + 3] = s_Base64Table[c & 0x3F];
+	}
+}
 
 // File system
 
@@ -477,4 +544,42 @@ vector<uint8_t> FileSystem::ReadFileToVector(const std::wstring& path)
 
 	CloseHandle(fileHandle);
 	return fileBytes;
+}
+
+
+// System
+
+static string GetMacAddress()
+{
+	ULONG infoSize = 0;
+
+	auto result = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_SKIP_FRIENDLY_NAME, nullptr, nullptr, &infoSize);
+	Logging::LogFatalErrorIfFailed(result != ERROR_BUFFER_OVERFLOW, L"Failed to get memory size needed for adapters addresses: ");
+
+	unique_ptr<uint8_t[]> adapterAddressBuffer(new uint8_t[infoSize]);
+	auto adapterAddresses = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(adapterAddressBuffer.get());
+
+	result = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_SKIP_FRIENDLY_NAME, nullptr, adapterAddresses, &infoSize);
+	Logging::LogFatalErrorIfFailed(result != ERROR_SUCCESS, L"Failed to get adapters addresses: ");
+
+	auto macLength = adapterAddresses->PhysicalAddressLength;
+	string macAddress;
+
+	macAddress.resize(macLength);
+	memcpy(&macAddress[0], adapterAddresses->PhysicalAddress, macLength);
+
+	return macAddress;
+}
+
+static string GetUniqueSystemIdImpl()
+{
+	auto macAddress = GetMacAddress();
+	Encoding::EncodeBase64Inline(macAddress);
+	return macAddress;
+}
+
+const string& Utilities::System::GetUniqueSystemId()
+{
+	static string s_UniqueSystemId = GetUniqueSystemIdImpl();
+	return s_UniqueSystemId;
 }

@@ -61,6 +61,9 @@ namespace Utilities
 
 		void EncodeUrlInline(std::string& url);
 		inline std::string EncodeUrl(const std::string& url);
+
+		void EncodeBase64Inline(std::string& data);
+		inline std::string EncodeBase64(const std::string& data);
 	}
 
 	namespace FileSystem
@@ -96,6 +99,11 @@ namespace Utilities
 		std::vector<std::string> EnumerateSystemVolumes();
 
 		std::vector<uint8_t> ReadFileToVector(const std::wstring& path);
+	}
+
+	namespace System
+	{
+		const std::string& GetUniqueSystemId();
 	}
 };
 

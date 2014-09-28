@@ -1,5 +1,6 @@
 #include "PrecompiledHeader.h"
 #include "AssetDatabase.h"
+#include "ClientServerConnection.h"
 #include "FileBrowserResponseHandler.h"
 #include "HttpServer.h"
 #include "TcpListener.h"
@@ -12,12 +13,12 @@ int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 
 	AssetDatabase::Initialize();
 
-	TcpClient::Connect(L"Google.com", [](SOCKET){});
-
-	TcpListener::Run(1337, [](SOCKET incomingSocket, sockaddr_in clientAddress)
+	TcpClient::Connect(L"Google.com", &ClientServerConnection::Create);
+	/*
+	TcpListener::Run(1337, 0, [](SOCKET incomingSocket, sockaddr_in clientAddress)
 	{
 		HttpServer::StartServiceClient(incomingSocket, clientAddress, &FileBrowserResponseHandler::ExecuteRequest);
 	});
-
+	*/
 	return 0;
 }
