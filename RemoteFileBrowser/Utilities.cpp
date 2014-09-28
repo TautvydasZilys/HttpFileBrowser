@@ -1,19 +1,16 @@
 #include "PrecompiledHeader.h"
 
 using namespace std;
+using namespace Utilities;
 
 // Logging
 
-namespace Utilities
-{
-	namespace Logging
-	{
-		static wofstream s_OutputFile;
-		static const wchar_t kLogFileName[] = L"LogFile.log";
-	}
-}
+mutex Logging::s_LogMutex;
 
-void Utilities::Logging::OutputMessage(const wchar_t* message)
+static wofstream s_OutputFile;
+static const wchar_t kLogFileName[] = L"LogFile.log";
+
+void Logging::OutputMessage(const wchar_t* message)
 {
 	if (IsDebuggerPresent())
 	{
@@ -28,46 +25,40 @@ void Utilities::Logging::OutputMessage(const wchar_t* message)
 	s_OutputFile << message;
 }
 
-static const int kSystemTimeBufferSize = 256;
-
-static inline void SystemTimeToStringInline(wchar_t (&buffer)[kSystemTimeBufferSize], SYSTEMTIME* systemTime = nullptr)
+static inline void SystemTimeToStringInline(wchar_t (&buffer)[Logging::kBufferSize], SYSTEMTIME* systemTime = nullptr)
 {
-	auto dateLength = GetDateFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, DATE_SHORTDATE, systemTime, nullptr, buffer, kSystemTimeBufferSize, nullptr);
+	auto dateLength = GetDateFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, DATE_SHORTDATE, systemTime, nullptr, buffer, Logging::kBufferSize, nullptr);
 	buffer[dateLength - 1] = ' ';
-	auto timeLength = GetTimeFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, 0, systemTime, nullptr, buffer + dateLength, kSystemTimeBufferSize - dateLength);
+	auto timeLength = GetTimeFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, 0, systemTime, nullptr, buffer + dateLength, Logging::kBufferSize - dateLength);
 }
 
 static wstring SystemTimeToString(SYSTEMTIME* systemTime = nullptr)
 {
-	wchar_t buffer[kSystemTimeBufferSize];
+	wchar_t buffer[Logging::kBufferSize];
 	SystemTimeToStringInline(buffer, systemTime);
 	return buffer;
 }
 
-void Utilities::Logging::OutputCurrentTimestamp()
+void Logging::OutputCurrentTimestamp()
 {
 	OutputMessage(L"[");
 
-	wchar_t buffer[kSystemTimeBufferSize];
+	wchar_t buffer[kBufferSize];
 	SystemTimeToStringInline(buffer);
 	OutputMessage(buffer);
 
 	OutputMessage(L"] ");
 }
 
-wstring Utilities::Logging::Win32ErrorToMessage(int win32ErrorCode)
+wstring Logging::Win32ErrorToMessage(int win32ErrorCode)
 {
-	const int bufferSize = 256;
-	wchar_t buffer[bufferSize];
-
-	FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, win32ErrorCode, 0, buffer, bufferSize, nullptr);
+	wchar_t buffer[kBufferSize];
+	Win32ErrorToMessageInline(win32ErrorCode, buffer);
 	return buffer;
 }
 
-static void Terminate(int errorCode = -1)
+void Logging::Terminate(int errorCode)
 {
-	using namespace Utilities::Logging;
-
 	if (s_OutputFile.is_open())
 	{
 		s_OutputFile.close();
@@ -76,26 +67,9 @@ static void Terminate(int errorCode = -1)
 	__fastfail(errorCode); // Just crash™ - let user know we crashed by bringing up WER dialog
 }
 
-void Utilities::Logging::Error(int win32ErrorCode, const wstring& message)
-{
-	auto errorMessage = Win32ErrorToMessage(win32ErrorCode);
-	Log(message, errorMessage);
-}
-
-void Utilities::Logging::FatalError(int win32ErrorCode, const wstring& message)
-{
-	auto errorMessage = Win32ErrorToMessage(win32ErrorCode);
-
-	Log(L"Terminating due to critical error:");
-	Log(message, errorMessage);
-
-	Terminate(win32ErrorCode);
-}
-
-
 // Encoding
 
-wstring Utilities::Encoding::Utf8ToUtf16(const char* str, size_t strLength)
+wstring Encoding::Utf8ToUtf16(const char* str, size_t strLength)
 {
 	if (strLength == 0) return wstring();
 
@@ -108,7 +82,7 @@ wstring Utilities::Encoding::Utf8ToUtf16(const char* str, size_t strLength)
 	return wstring(buffer.get(), length);
 }
 
-string Utilities::Encoding::Utf16ToUtf8(const wchar_t* wstr, size_t wstrLength)
+string Encoding::Utf16ToUtf8(const wchar_t* wstr, size_t wstrLength)
 {
 	if (wstrLength == 0) return string();
 
@@ -152,7 +126,7 @@ static char HexDigitToHexChar(int digit)
 	}
 }
 
-void Utilities::Encoding::DecodeUrlInline(string& url)
+void Encoding::DecodeUrlInline(string& url)
 {
 	auto urlLength = url.length();
 	unsigned int i = 0;
@@ -208,7 +182,7 @@ static bool NeedsUrlEncoding(char c)
 	return true;
 }
 
-void Utilities::Encoding::EncodeUrlInline(string& url)
+void Encoding::EncodeUrlInline(string& url)
 {
 	// First count resulting string length, then encode
 
@@ -270,7 +244,7 @@ void Utilities::Encoding::EncodeUrlInline(string& url)
 
 // File system
 
-void Utilities::FileSystem::RemoveLastPathComponentInline(string& path)
+void FileSystem::RemoveLastPathComponentInline(string& path)
 {
 	if (path.length() < 2)
 	{
@@ -287,7 +261,7 @@ void Utilities::FileSystem::RemoveLastPathComponentInline(string& path)
 	path.resize(i + 1);
 }
 	
-string Utilities::FileSystem::CombinePaths(const string& left, const string& right)
+string FileSystem::CombinePaths(const string& left, const string& right)
 {
 	if (right == ".")
 	{
@@ -315,7 +289,7 @@ string Utilities::FileSystem::CombinePaths(const string& left, const string& rig
 	return combined;
 }
 
-string Utilities::FileSystem::FormatFileSizeString(uint64_t size)
+string FileSystem::FormatFileSizeString(uint64_t size)
 {
 	stringstream result;
 	result.setf(ios::fixed);
@@ -345,17 +319,17 @@ string Utilities::FileSystem::FormatFileSizeString(uint64_t size)
 	return result.str();
 }
 
-Utilities::FileSystem::FileInfo::FileInfo(const string& fileName, FileStatus fileStatus, const string& dateModified, uint64_t fileSize) :
+FileSystem::FileInfo::FileInfo(const string& fileName, FileStatus fileStatus, const string& dateModified, uint64_t fileSize) :
 	fileName(std::move(fileName)), fileStatus(fileStatus), dateModified(std::move(dateModified)), fileSize(fileSize)
 {
 }
 
-Utilities::FileSystem::FileInfo::FileInfo(string&& fileName, FileStatus fileStatus, string&& dateModified, uint64_t fileSize) :
+FileSystem::FileInfo::FileInfo(string&& fileName, FileStatus fileStatus, string&& dateModified, uint64_t fileSize) :
 	fileName(std::move(fileName)), fileStatus(fileStatus), dateModified(std::move(dateModified)), fileSize(fileSize)
 {
 }
 
-Utilities::FileSystem::FileStatus Utilities::FileSystem::QueryFileStatus(const wstring& path)
+FileSystem::FileStatus FileSystem::QueryFileStatus(const wstring& path)
 {
 	auto fileAttributes = GetFileAttributesW(path.c_str());
 
@@ -370,10 +344,10 @@ Utilities::FileSystem::FileStatus Utilities::FileSystem::QueryFileStatus(const w
 	return (fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 ? FileStatus::Directory : FileStatus::File;
 }
 
-vector<Utilities::FileSystem::FileInfo> Utilities::FileSystem::EnumerateFiles(wstring path)
+vector<FileSystem::FileInfo> FileSystem::EnumerateFiles(wstring path)
 {
-	using namespace Utilities::Encoding;
-	using namespace Utilities::FileSystem;
+	using namespace Encoding;
+	using namespace FileSystem;
 
 	vector<FileInfo> result;
 
@@ -427,9 +401,9 @@ vector<Utilities::FileSystem::FileInfo> Utilities::FileSystem::EnumerateFiles(ws
 	return result;
 }
 
-vector<string> Utilities::FileSystem::EnumerateSystemVolumes()
+vector<string> FileSystem::EnumerateSystemVolumes()
 {
-	using namespace Utilities::Encoding;
+	using namespace Encoding;
 
 	const int bufferSize = 256;
 	wchar_t buffer[bufferSize];
@@ -467,26 +441,26 @@ vector<string> Utilities::FileSystem::EnumerateSystemVolumes()
 	return volumes;
 }
 
-vector<uint8_t> Utilities::FileSystem::ReadFileToVector(const std::wstring& path)
+vector<uint8_t> FileSystem::ReadFileToVector(const std::wstring& path)
 {
-	using namespace Utilities::Logging;
+	using namespace Utilities;
 
 	auto fileHandle = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
 
 	if (fileHandle == INVALID_HANDLE_VALUE)
 	{
-		FatalError(GetLastError(), L"Failed to open \"" + path + L"\": ");
+		Logging::FatalError(GetLastError(), L"Failed to open \"", path, L"\": ");
 	}
 
 	LARGE_INTEGER fileSize;
 	if (GetFileSizeEx(fileHandle, &fileSize) == FALSE)
 	{
-		FatalError(GetLastError(), L"Failed to get size of \"" + path + L"\": ");
+		Logging::FatalError(GetLastError(), L"Failed to get size of \"", path, L"\": ");
 	}
 
 	if (fileSize.QuadPart > 64 * 1024 * 1024)
 	{
-		FatalError(ERROR_FILE_TOO_LARGE, L"\"" + path + L"\": ");
+		Logging::FatalError(ERROR_FILE_TOO_LARGE, L"\"", path, L"\": ");
 	}
 
 	vector<uint8_t> fileBytes(static_cast<size_t>(fileSize.QuadPart));
@@ -497,7 +471,7 @@ vector<uint8_t> Utilities::FileSystem::ReadFileToVector(const std::wstring& path
 		if (ReadFile(fileHandle, &fileBytes[0], static_cast<DWORD>(fileSize.QuadPart), &numberOfBytesRead, nullptr) == FALSE ||
 			numberOfBytesRead != fileSize.QuadPart)
 		{
-			FatalError(GetLastError(), L"Failed to read \"" + path + L"\": ");
+			Logging::FatalError(GetLastError(), L"Failed to read \"", path, L"\": ");
 		}
 	}
 

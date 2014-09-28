@@ -13,6 +13,60 @@
 
 // Logging
 
+inline void Utilities::Logging::Win32ErrorToMessageInline(int win32ErrorCode, wchar_t(&buffer)[kBufferSize])
+{
+	FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, win32ErrorCode, 0, buffer, kBufferSize, nullptr);
+}
+
+template <typename Message>
+inline void Utilities::Logging::OutputMessages(const Message& message)
+{
+	OutputMessage(message);
+}
+
+template <typename FirstMessage, typename ...Message>
+inline void Utilities::Logging::OutputMessages(const FirstMessage& message, Message&& ...messages)
+{
+	OutputMessage(message);
+	OutputMessages(std::forward<Message>(messages)...);
+}
+
+inline void Utilities::Logging::OutputMessage(const std::wstring& message)
+{
+	OutputMessage(message.c_str());
+}
+
+template <typename ...Message>
+inline void Utilities::Logging::Log(Message&& ...message)
+{
+	using namespace std;
+	lock_guard<mutex> lock(s_LogMutex);
+
+	OutputCurrentTimestamp();
+	OutputMessages(std::forward<Message>(message)...);
+	OutputMessage(L"\r\n");
+}
+
+template <typename ...Message>
+inline void Utilities::Logging::Error(int win32ErrorCode, Message&& ...message)
+{
+	wchar_t errorMessage[kBufferSize];
+
+	Win32ErrorToMessageInline(win32ErrorCode, errorMessage);
+	Log(std::forward<Message>(message)..., errorMessage);
+}
+
+template <typename ...Message>
+inline void Utilities::Logging::FatalError(int win32ErrorCode, Message&& ...message)
+{
+	wchar_t errorMessage[kBufferSize];
+
+	Win32ErrorToMessageInline(win32ErrorCode, errorMessage);
+	Log(L"Terminating due to critical error:\r\n\t\t", std::forward<Message>(message)..., errorMessage);
+
+	Terminate(win32ErrorCode);
+}
+
 template <typename Action>
 inline void Utilities::Logging::PerformActionIfFailed(bool failed, const std::wstring& message, Action action)
 {
@@ -41,38 +95,6 @@ inline void Utilities::Logging::LogFatalErrorIfFailed(bool failed, const std::ws
 		FatalError(errorCode, msg);
 	});
 }
-
-template <typename Message>
-inline void Utilities::Logging::OutputMessages(const Message& message)
-{
-	OutputMessage(message);
-}
-
-template <typename FirstMessage, typename ...Message>
-inline void Utilities::Logging::OutputMessages(const FirstMessage& message, Message&&... messages)
-{
-	OutputMessage(message);
-	OutputMessages(std::forward<Message>(messages)...);
-}
-
-inline void Utilities::Logging::OutputMessage(const std::wstring& message)
-{
-	OutputMessage(message.c_str());
-}
-
-template <typename ...Message>
-inline void Utilities::Logging::Log(Message&& ...message)
-{
-	using namespace std;
-
-	static mutex s_LogMutex;
-	lock_guard<mutex> lock(s_LogMutex);
-
-	OutputCurrentTimestamp();
-	OutputMessages(std::forward<Message>(message)...);
-	OutputMessage(L"\r\n");
-}
-
 
 // Encoding
 

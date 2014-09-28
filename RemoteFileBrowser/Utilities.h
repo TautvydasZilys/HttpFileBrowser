@@ -2,33 +2,47 @@
 
 namespace Utilities
 {
-	namespace Logging
+	class Logging
 	{
-		std::wstring Win32ErrorToMessage(int win32ErrorCode);
+	public:
+		static const int kBufferSize = 256;
 
-		// Output* functions are NOT thread safe
-		// Use Log instead
-		template <typename Message>
-		inline void OutputMessages(const Message& message);
-
-		template <typename FirstMessage, typename ...Message>
-		inline void OutputMessages(const FirstMessage& message, Message&&... messages);
-
-		inline void OutputMessage(const std::wstring& message);
-		void OutputMessage(const wchar_t* message);
-		void OutputCurrentTimestamp();		
+		static inline void Win32ErrorToMessageInline(int win32ErrorCode, wchar_t (&buffer)[kBufferSize]);
+		static std::wstring Win32ErrorToMessage(int win32ErrorCode);
+		
+		static inline void OutputMessage(const std::wstring& message);
+		static void OutputMessage(const wchar_t* message);
+		static void OutputCurrentTimestamp();
 
 		template <typename ...Message>
-		inline void Log(Message&& ...message);
+		static inline void Log(Message&& ...message);
+		template <typename ...Message>
+		static inline void Error(int win32ErrorCode, Message&& ...message);
+		template <typename ...Message>
+		static inline void FatalError(int win32ErrorCode, Message&& ...message);
 
-		void Error(int win32ErrorCode, const std::wstring& message);
-		void FatalError(int win32ErrorCode, const std::wstring& message);
+		static inline void LogErrorIfFailed(bool failed, const std::wstring& message);
+		static inline void LogFatalErrorIfFailed(bool failed, const std::wstring& message);
+
+		Logging() = delete;
+		Logging(const Logging&) = delete;
+		~Logging() = delete;
+
+	private:
+		// Output* functions are NOT thread safe
+		template <typename Message>
+		static inline void OutputMessages(const Message& message);
+
+		template <typename FirstMessage, typename ...Message>
+		static inline void OutputMessages(const FirstMessage& message, Message&& ...messages);
 
 		template <typename Action>
-		inline void PerformActionIfFailed(bool failed, const std::wstring& message, Action action);
-		inline void LogErrorIfFailed(bool failed, const std::wstring& message);
-		inline void LogFatalErrorIfFailed(bool failed, const std::wstring& message);
-	}
+		static inline void PerformActionIfFailed(bool failed, const std::wstring& message, Action action);
+
+		static void Terminate(int errorCode = -1);
+
+		static std::mutex s_LogMutex;
+	};
 
 	namespace Encoding
 	{

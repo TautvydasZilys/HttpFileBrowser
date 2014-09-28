@@ -69,7 +69,7 @@ void FileBrowserResponseHandler::SendFileResponse() const
 	{
 		// StreamFile will throw exception on failure
 
-		Logging::Error(GetLastError(), L"Failed to send file \"" + m_WidePath + L"\": ");
+		Logging::Error(GetLastError(), L"Failed to send file \"", m_WidePath, L"\": ");
 		closesocket(m_ClientSocket);
 
 		SetLastError(ERROR_SUCCESS);
