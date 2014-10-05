@@ -10,15 +10,13 @@
 int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	WSAInitializer winSockContext;
-
 	AssetDatabase::Initialize();
 
-	TcpClient::Connect(L"Google.com", &ClientServerConnection::Create);
-	/*
-	TcpListener::Run(1337, 0, [](SOCKET incomingSocket, sockaddr_in clientAddress)
+	for (;;)
 	{
-		HttpServer::StartServiceClient(incomingSocket, clientAddress, &FileBrowserResponseHandler::ExecuteRequest);
-	});
-	*/
+		TcpClient::Connect(L"Google.com", &ClientServerConnection::Create);
+		Sleep(2000);	// If connection drops, wait 2 seconds and try again
+	}
+
 	return 0;
 }

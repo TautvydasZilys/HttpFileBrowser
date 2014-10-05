@@ -10,8 +10,8 @@ using namespace Utilities;
 
 // Send the server my unique ID
 // Receive my ID in the server
-// Receive client IPs
 // Listen for incoming clients
+// Receive client IPs and whitelist them
 void ClientServerConnection::Create(SOCKET connectionSocket)
 {
 	static const string postUrl = "/registerConnection";
