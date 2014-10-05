@@ -87,6 +87,7 @@
     <ClCompile Include="HttpServer.cpp" />
     <ClCompile Include="RestCommunicator.cpp" />
     <ClCompile Include="StreamableFile.cpp" />
+    <ClCompile Include="TcpListener.cpp" />
     <ClCompile Include="WSAInitializer.cpp" />
     <ClInclude Include="ClientServerConnection.h" />
     <ClInclude Include="CriticalSection.h" />
@@ -95,7 +96,9 @@
     <ClInclude Include="TcpClient.inl">
       <FileType>CppCode</FileType>
     </ClInclude>
-    <ClCompile Include="TcpListener.cpp" />
+    <ClInclude Include="TcpListener.inl">
+      <FileType>CppCode</FileType>
+    </ClInclude>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PrecompiledHeader.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

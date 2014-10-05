@@ -48,11 +48,11 @@ void RestCommunicator::Post(SOCKET s, const string& path, const string& key, con
 	SendPostRequest(s, path, httpBody);
 }
 
-unordered_map<string, string> RestCommunicator::Receive(SOCKET s)
+bool RestCommunicator::Receive(SOCKET s, unordered_map<string, string>& results)
 {
-	unordered_map<string, string> results;
-
 	// TODO: implement
 
-	return results;
+	results.clear();
+
+	return false;
 }

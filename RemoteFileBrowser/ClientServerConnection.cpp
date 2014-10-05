@@ -32,17 +32,30 @@ void ClientServerConnection::Create(SOCKET connectionSocket)
 
 	auto port = htons(socketAddress.sin_port);
 
+	// Start listening for connection
+
+	TcpListener listener;
+	listener.RunAsync(port, [](SOCKET incomingSocket, sockaddr_in clientAddress)
+	{
+		HttpServer::StartServiceClient(incomingSocket, clientAddress, &FileBrowserResponseHandler::ExecuteRequest);
+	});
+
 	// Receive client IPs
 
 	for (;;)
 	{
-		auto clientInfo = RestCommunicator::Receive(connectionSocket);
+		unordered_map<string, string> clientInfo;
+
+		if (!RestCommunicator::Receive(connectionSocket, clientInfo))	// Connection dropped
+		{
+			return;
+		}
 		
 		static const string ipKey("ip");
 		auto clientIp = clientInfo.find(ipKey);
 
-		if (clientIp == clientInfo.end())	// Either connection terminated, or server sent us garbage
-		{									// Drop connection from our side either way
+		if (clientIp == clientInfo.end())	// Server sent us garbage
+		{									// Drop connection from our side
 			return;
 		}
 
@@ -62,9 +75,6 @@ void ClientServerConnection::Create(SOCKET connectionSocket)
 			return;
 		}
 
-		TcpListener::Run(port, ipNumeric, [](SOCKET incomingSocket, sockaddr_in clientAddress)
-		{
-			HttpServer::StartServiceClient(incomingSocket, clientAddress, &FileBrowserResponseHandler::ExecuteRequest);
-		});
+		listener.WhitelistIP(ipNumeric);
 	}	
 }
