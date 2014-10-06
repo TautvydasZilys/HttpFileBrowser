@@ -6,9 +6,10 @@ using System.Web;
 
 namespace BackendServer.Models
 {
-    public class UserIdentityModel
+    public class HostIdentityModel
     {
         [Required]
         public string SystemUniqueId { get; set; }
+        public string EndPoint { get; set; }
     }
 }

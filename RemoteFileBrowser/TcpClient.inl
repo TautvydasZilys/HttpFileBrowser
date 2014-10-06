@@ -12,7 +12,7 @@ inline void LogEndpointAddress(const ADDRINFOW* addressInfo)
 		static_cast<uint8_t>(addressInfo->ai_addr->sa_data[3]),
 		static_cast<uint8_t>(addressInfo->ai_addr->sa_data[4]),
 		static_cast<uint8_t>(addressInfo->ai_addr->sa_data[5]),
-		static_cast<uint16_t>(addressInfo->ai_addr->sa_data[0]) * 256 + addressInfo->ai_addr->sa_data[0]);
+		static_cast<uint16_t>(addressInfo->ai_addr->sa_data[0]) * 256 + addressInfo->ai_addr->sa_data[1]);
 
 	Utilities::Logging::Log(msgBuffer);
 }
@@ -51,7 +51,7 @@ inline void TcpClient::Connect(const std::wstring& hostName, int port, Connectio
 	Logging::LogErrorIfFailed(result != ERROR_SUCCESS, L"Failed to connect to the end point: ");
 	if (result != ERROR_SUCCESS) goto cleanup;
 
-	connectionHandler(connectionSocket);
+	connectionHandler(connectionSocket, Utilities::Encoding::Utf16ToUtf8(hostName));
 
 cleanup:
 	closesocket(connectionSocket);

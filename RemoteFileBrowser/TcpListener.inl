@@ -1,4 +1,4 @@
-inline SOCKET TcpListener::CreateListeningSocket(int port)
+inline SOCKET TcpListener::CreateListeningSocket(int address, uint16_t port)
 {
 	using namespace Utilities;
 
@@ -13,15 +13,19 @@ inline SOCKET TcpListener::CreateListeningSocket(int port)
 	auto result = setsockopt(listeningSocket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&trueValue), sizeof(trueValue));
 	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to set the listening socket to reuse its address: ");
 
+	u_long nonBlocking = TRUE;
+	result = ioctlsocket(listeningSocket, FIONBIO, &nonBlocking);
+	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to set the listening socket to async mode: ");
+
 	// Bind it to port
 
 	sockaddr_in inAddress;
 	ZeroMemory(&inAddress, sizeof(sockaddr_in));
 
 	inAddress.sin_family = AF_INET;
-	inAddress.sin_addr.s_addr = INADDR_ANY;
-	inAddress.sin_port = htons(port);
-
+	inAddress.sin_addr.s_addr = address;
+	inAddress.sin_port = port;
+	
 	result = bind(listeningSocket, reinterpret_cast<sockaddr*>(&inAddress), sizeof(inAddress));
 	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to bind the listening socket: ");
 
@@ -66,9 +70,9 @@ inline bool TcpListener::IsIpWhitelisted(ULONG ip)
 }
 
 template <typename Callback>
-void TcpListener::Run(int port, Callback callback)
+void TcpListener::Run(int address, uint16_t port, Callback callback)
 {
-	auto listeningSocket = CreateListeningSocket(port);
+	auto listeningSocket = CreateListeningSocket(address, port);
 
 	while (m_Running)
 	{
@@ -87,9 +91,13 @@ void TcpListener::Run(int port, Callback callback)
 				closesocket(acceptedSocket);
 			}
 		}
-		else
+		else if (WSAGetLastError() != WSAEWOULDBLOCK)
 		{
 			Logging::LogErrorIfFailed(true, L"Failed to accept connection: ");
+		}
+		else
+		{
+			Sleep(16);
 		}
 	}
 
@@ -99,13 +107,13 @@ void TcpListener::Run(int port, Callback callback)
 }
 
 template <typename Callback>
-void TcpListener::RunAsync(int port, Callback callback)
+void TcpListener::RunAsync(int address, uint16_t port, Callback callback)
 {
 	Assert(!m_Running);
 
 	m_Running = true;
-	m_ListeningThread = std::thread([this, port, callback]()
+	m_ListeningThread = std::thread([this, address, port, callback]()
 	{
-		Run(port, callback);
+		Run(address, port, callback);
 	});
 }

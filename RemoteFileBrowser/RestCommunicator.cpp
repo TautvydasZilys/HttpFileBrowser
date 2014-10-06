@@ -4,9 +4,9 @@
 
 using namespace std;
 
-static void SendPostRequest(SOCKET s, const string& path, const string& httpBody)
+static void SendPostRequest(SOCKET s, const string& hostname, const string& path, const string& httpBody)
 {
-	auto header = HttpHeaderBuilder::BuildPostHeader(path, "application/json", httpBody.length());
+	auto header = HttpHeaderBuilder::BuildPostHeader(hostname, path, "application/json", httpBody.length());
 
 	auto result = send(s, header.c_str(), header.length(), 0);
 	if (result != header.length()) goto fail;
@@ -21,7 +21,7 @@ fail:
 	Utilities::Logging::LogErrorIfFailed(true, L"Failed to send post request: ");
 }
 
-void RestCommunicator::Post(SOCKET s, const string& path, const string& key, const string& value)
+void RestCommunicator::Post(SOCKET s, const string& hostname, const string& path, const string& key, const string& value)
 {
 	// Body format:
 	// {"<KEY>":"<VALUE>"}
@@ -45,7 +45,31 @@ void RestCommunicator::Post(SOCKET s, const string& path, const string& key, con
 	httpBody[length++] = '\"';
 	httpBody[length++] = '}';
 
-	SendPostRequest(s, path, httpBody);
+	SendPostRequest(s, hostname, path, httpBody);
+}
+
+bool RestCommunicator::ReceiveResponse(SOCKET s)
+{
+	const int kBufferLength = 256;
+	char buffer[kBufferLength];
+
+	auto bytesReceived = recv(s, buffer, kBufferLength, 0);
+
+	if (bytesReceived < 1)
+	{
+		return false;
+	}
+
+	auto bufferEnd = buffer + kBufferLength;
+	auto newLine = std::find(buffer, bufferEnd, '\n');
+
+	if (newLine == bufferEnd)
+	{
+		return false;
+	}
+
+	*newLine = '\0';
+	return strcmp(buffer, "HTTP/1.1 200 OK") == 0;
 }
 
 bool RestCommunicator::Receive(SOCKET s, unordered_map<string, string>& results)
@@ -54,5 +78,14 @@ bool RestCommunicator::Receive(SOCKET s, unordered_map<string, string>& results)
 
 	results.clear();
 
-	return false;
+	const int kBufferLength = 2560;
+	char buffer[kBufferLength];
+	auto bytesReceived = recv(s, buffer, kBufferLength, 0);
+
+	if (bytesReceived < 1)
+	{
+		return false;
+	}
+
+	return true;
 }

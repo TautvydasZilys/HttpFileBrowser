@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Web;
 using System.Web.Mvc;
 
@@ -10,8 +11,6 @@ namespace BackendServer.Controllers
 {
     public class HomeController : Controller
     {
-        public ApplicationDatabase database = new ApplicationDatabase();
-
         public ActionResult Index()
         {
             return View(new FileHostModel());
@@ -26,27 +25,15 @@ namespace BackendServer.Controllers
                 return View(model);
             }
 
-            var host = database.Hosts.Where(x => x.HostCode == model.FileHostCode).SingleOrDefault();
+            /*var host = database.Hosts.Where(x => x.HostUniqueId == model.FileHostCode).SingleOrDefault();
 
-            if (host != null && host.Ip != null)
+            if (host != null && host.Ip != 0)
             {
-                return Redirect(host.Ip);
+                return Redirect(new IPEndPoint(host.Ip, host.Port).ToString());
             }
-
+            */
             ModelState.AddModelError("errorSummary", "The specified file host doesn't exist.");
             return View(model);
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        public ActionResult RegisterConnection(UserIdentityModel userIdentity)
-        {
-            if (Debugger.IsAttached)
-            {
-                Debugger.Break();
-            }
-
-            return null;
         }
     }    
 }

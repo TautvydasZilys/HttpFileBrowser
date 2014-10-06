@@ -2,6 +2,6 @@
 
 namespace ClientServerConnection
 {
-	void Create(SOCKET connectionSocket);
+	void Create(SOCKET connectionSocket, const std::string& hostname);
 };
 

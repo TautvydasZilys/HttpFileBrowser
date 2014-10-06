@@ -12,15 +12,19 @@ using namespace Utilities;
 // Receive my ID in the server
 // Listen for incoming clients
 // Receive client IPs and whitelist them
-void ClientServerConnection::Create(SOCKET connectionSocket)
+void ClientServerConnection::Create(SOCKET connectionSocket, const string& hostname)
 {
-	static const string postUrl = "/registerConnection";
+	static const string postUrl = "/api/RegisterConnection";
 	static const string systemUniqueIdKey = "SystemUniqueId";
 	const auto& systemUniqueIdValue = System::GetUniqueSystemId();
 
 	// Send REST request
 
-	RestCommunicator::Post(connectionSocket, postUrl, systemUniqueIdKey, systemUniqueIdValue);
+	RestCommunicator::Post(connectionSocket, hostname, postUrl, systemUniqueIdKey, systemUniqueIdValue);
+	if (!RestCommunicator::ReceiveResponse(connectionSocket))
+	{
+		return;
+	}
 
 	// Find my port out
 
@@ -29,13 +33,11 @@ void ClientServerConnection::Create(SOCKET connectionSocket)
 
 	auto result = getsockname(connectionSocket, reinterpret_cast<sockaddr*>(&socketAddress), &socketAddressLength);
 	Assert(result == ERROR_SUCCESS);
-
-	auto port = htons(socketAddress.sin_port);
-
+	
 	// Start listening for connection
 
 	TcpListener listener;
-	listener.RunAsync(port, [](SOCKET incomingSocket, sockaddr_in clientAddress)
+	listener.RunAsync(socketAddress.sin_addr.S_un.S_addr, socketAddress.sin_port, [](SOCKET incomingSocket, sockaddr_in clientAddress)
 	{
 		HttpServer::StartServiceClient(incomingSocket, clientAddress, &FileBrowserResponseHandler::ExecuteRequest);
 	});

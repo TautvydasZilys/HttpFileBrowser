@@ -11,10 +11,10 @@ int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 {
 	WSAInitializer winSockContext;
 	AssetDatabase::Initialize();
-	MessageBoxW(nullptr, L"Attach a debugger", L"", 0);
+
 	for (;;)
 	{
-		TcpClient::Connect(L"localhost", 2891, &ClientServerConnection::Create);
+		TcpClient::Connect(L"localhost", 1335, &ClientServerConnection::Create);
 		Sleep(2000);	// If connection drops, wait 2 seconds and try again
 	}
 
