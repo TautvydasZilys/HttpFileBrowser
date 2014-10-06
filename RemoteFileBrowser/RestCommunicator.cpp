@@ -40,7 +40,7 @@ void RestCommunicator::Post(SOCKET s, const string& path, const string& key, con
 	httpBody[length++] = '\"';
 
 	memcpy(&httpBody[length], value.data(), value.length());
-	length += key.length();
+	length += value.length();
 
 	httpBody[length++] = '\"';
 	httpBody[length++] = '}';

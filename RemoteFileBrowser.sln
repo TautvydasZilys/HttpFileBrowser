@@ -14,11 +14,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{CB46FBF7-D788-4775-BB83-C7C1B55BC669}.Debug|Win32.ActiveCfg = Debug|Win32
-		{CB46FBF7-D788-4775-BB83-C7C1B55BC669}.Debug|Win32.Build.0 = Debug|Win32
 		{CB46FBF7-D788-4775-BB83-C7C1B55BC669}.Release|Win32.ActiveCfg = Release|Win32
 		{CB46FBF7-D788-4775-BB83-C7C1B55BC669}.Release|Win32.Build.0 = Release|Win32
 		{95742DAD-0FEC-43DE-8381-E8729C02B69E}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{95742DAD-0FEC-43DE-8381-E8729C02B69E}.Debug|Win32.Build.0 = Debug|Any CPU
 		{95742DAD-0FEC-43DE-8381-E8729C02B69E}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution

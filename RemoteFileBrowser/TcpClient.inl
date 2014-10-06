@@ -7,17 +7,18 @@ inline void LogEndpointAddress(const ADDRINFOW* addressInfo)
 	const int bufferSize = 256;
 	wchar_t msgBuffer[bufferSize];
 
-	swprintf_s(msgBuffer, bufferSize, L"Endpoint address: %d.%d.%d.%d.",
-		static_cast<uint8_t>(addressInfo->ai_addr->sa_data[1]),
+	swprintf_s(msgBuffer, bufferSize, L"Endpoint address: %d.%d.%d.%d:%d.",
 		static_cast<uint8_t>(addressInfo->ai_addr->sa_data[2]),
 		static_cast<uint8_t>(addressInfo->ai_addr->sa_data[3]),
-		static_cast<uint8_t>(addressInfo->ai_addr->sa_data[4]));
+		static_cast<uint8_t>(addressInfo->ai_addr->sa_data[4]),
+		static_cast<uint8_t>(addressInfo->ai_addr->sa_data[5]),
+		static_cast<uint16_t>(addressInfo->ai_addr->sa_data[0]) * 256 + addressInfo->ai_addr->sa_data[0]);
 
 	Utilities::Logging::Log(msgBuffer);
 }
 
 template <typename ConnectionHandler>
-inline void TcpClient::Connect(const std::wstring& hostName, ConnectionHandler connectionHandler)
+inline void TcpClient::Connect(const std::wstring& hostName, int port, ConnectionHandler connectionHandler)
 {
 	using namespace Utilities;
 
@@ -39,10 +40,11 @@ inline void TcpClient::Connect(const std::wstring& hostName, ConnectionHandler c
 	addressInfoHint.ai_socktype = SOCK_STREAM;
 	addressInfoHint.ai_protocol = IPPROTO_TCP;
 
-	auto result = GetAddrInfoW(hostName.c_str(), L"http", &addressInfoHint, &addressInfo);
+	auto result = GetAddrInfoW(hostName.c_str(), nullptr, &addressInfoHint, &addressInfo);
 	Logging::LogErrorIfFailed(result != ERROR_SUCCESS, L"Failed to get address info: ");
 	if (result != ERROR_SUCCESS) goto cleanup;
-	
+
+	*reinterpret_cast<uint16_t*>(addressInfo->ai_addr->sa_data) = htons(port);
 	LogEndpointAddress(addressInfo);
 
 	result = connect(connectionSocket, addressInfo->ai_addr, addressInfo->ai_addrlen);
