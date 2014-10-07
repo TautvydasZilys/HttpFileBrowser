@@ -87,6 +87,7 @@
     <ClCompile Include="AssetDatabase.cpp" />
     <ClCompile Include="ClientServerConnection.cpp" />
     <ClCompile Include="FileBrowserResponseHandler.cpp" />
+    <ClCompile Include="HttpRequest.cpp" />
     <ClCompile Include="HttpHeaderBuilder.cpp" />
     <ClCompile Include="HttpServer.cpp" />
     <ClCompile Include="RestCommunicator.cpp" />
@@ -95,6 +96,7 @@
     <ClCompile Include="WSAInitializer.cpp" />
     <ClInclude Include="ClientServerConnection.h" />
     <ClInclude Include="CriticalSection.h" />
+    <ClInclude Include="HttpRequest.h" />
     <ClInclude Include="HttpHeaderBuilder.h" />
     <ClInclude Include="RestCommunicator.h" />
     <ClInclude Include="TcpClient.inl">

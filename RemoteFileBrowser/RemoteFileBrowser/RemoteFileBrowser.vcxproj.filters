@@ -51,6 +51,9 @@
     <ClCompile Include="TcpListener.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HttpRequest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PrecompiledHeader.h">
@@ -103,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="TcpListener.inl">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HttpRequest.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

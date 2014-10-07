@@ -48,7 +48,7 @@ void ClientServerConnection::Create(SOCKET connectionSocket, const string& hostn
 	{
 		unordered_map<string, string> clientInfo;
 
-		if (!RestCommunicator::Receive(connectionSocket, clientInfo))	// Connection dropped
+		if (!RestCommunicator::ReceivePost(connectionSocket, clientInfo))	// Connection dropped
 		{
 			return;
 		}

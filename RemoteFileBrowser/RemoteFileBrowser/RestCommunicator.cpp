@@ -1,5 +1,6 @@
 #include "PrecompiledHeader.h"
 #include "HttpHeaderBuilder.h"
+#include "HttpRequest.h"
 #include "RestCommunicator.h"
 
 using namespace std;
@@ -72,20 +73,49 @@ bool RestCommunicator::ReceiveResponse(SOCKET s)
 	return strcmp(buffer, "HTTP/1.1 200 OK") == 0;
 }
 
-bool RestCommunicator::Receive(SOCKET s, unordered_map<string, string>& results)
+bool RestCommunicator::ReceivePost(SOCKET s, unordered_map<string, string>& results)
 {
-	// TODO: implement
-
 	results.clear();
 
-	const int kBufferLength = 2560;
-	char buffer[kBufferLength];
-	auto bytesReceived = recv(s, buffer, kBufferLength, 0);
+	const Http::Request receivedRequest(s);
 
-	if (bytesReceived < 1)
+	if (receivedRequest.requestVerb != Http::RequestVerb::POST || receivedRequest.contentType != Http::ContentType::JSON)
 	{
 		return false;
 	}
 
-	return true;
+	const auto& content = receivedRequest.content;
+
+	// Make sure it really has a JSON body
+	if (content.length() < 2 || content[0] != '{' ||
+		content[content.length() - 1] != '}')
+	{
+		return false;
+	}
+
+	auto position = 1;
+	while (position < content.length() - 1)
+	{
+		auto parenthesis = content.find('\"', position);
+		if (parenthesis == string::npos) return false;
+
+		auto closingParenthesis = content.find('\"', parenthesis + 1);
+		if (closingParenthesis == string::npos) return false;
+
+		auto key = content.substr(parenthesis + 1, closingParenthesis - parenthesis - 1);
+
+		position = closingParenthesis + 1;
+		if (position + 1 >= content.length() || content[position] != ':') return false;
+
+		parenthesis = content.find('\"', position + 2);
+		if (parenthesis == string::npos) return false;
+
+		closingParenthesis = content.find('\"', parenthesis + 1);
+		if (closingParenthesis == string::npos) return false;
+
+		auto value = content.substr(parenthesis + 1, closingParenthesis - parenthesis - 1);
+
+		results.emplace(std::move(key), std::move(value));
+		position = closingParenthesis + 1;
+	}
 }
