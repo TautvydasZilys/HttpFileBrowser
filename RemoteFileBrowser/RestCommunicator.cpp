@@ -50,7 +50,7 @@ void RestCommunicator::Post(SOCKET s, const string& hostname, const string& path
 
 bool RestCommunicator::ReceiveResponse(SOCKET s)
 {
-	const int kBufferLength = 256;
+	const int kBufferLength = 1024;
 	char buffer[kBufferLength];
 
 	auto bytesReceived = recv(s, buffer, kBufferLength, 0);
