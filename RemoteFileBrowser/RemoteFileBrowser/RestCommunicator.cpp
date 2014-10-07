@@ -118,4 +118,6 @@ bool RestCommunicator::ReceivePost(SOCKET s, unordered_map<string, string>& resu
 		results.emplace(std::move(key), std::move(value));
 		position = closingParenthesis + 1;
 	}
+
+	return true;
 }
