@@ -66,16 +66,8 @@ bool Http::RestCommunicator::ReceiveResponse(SOCKET s)
 		return false;
 	}
 
-	auto bufferEnd = buffer + kBufferLength;
-	auto newLine = std::find(buffer, bufferEnd, '\n');
-
-	if (newLine == bufferEnd)
-	{
-		return false;
-	}
-
-	*newLine = '\0';
-	return strcmp(buffer, "HTTP/1.1 200 OK") == 0;
+	static const char okResponse[] = "HTTP/1.1 200 OK";
+	return strncmp(buffer, okResponse, sizeof(okResponse) - 1) == 0;	// Don't compare null terminator
 }
 
 bool Http::RestCommunicator::ReceivePost(SOCKET s, unordered_map<string, string>& results)

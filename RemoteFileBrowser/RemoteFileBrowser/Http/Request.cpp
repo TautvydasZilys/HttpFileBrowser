@@ -244,7 +244,7 @@ std::string Request::BuildHeaderString() const
 
 	header << endl;
 	header << "content-length: " << content.length() << endl;
-	header << "hostname: " << hostname << endl << endl;
+	header << "host: " << hostname << endl << endl;
 
 	return header.str();
 }
