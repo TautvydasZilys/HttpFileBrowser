@@ -35,6 +35,38 @@ namespace BackendServer.Controllers
 
         public static RegisterConnectionController Instance { get { return instance; } }
         
+        public HostIdentityModel this[string hostId]
+        {
+            get
+            {
+                HostIdentityModel model;
+
+                lock (hostIdentities)
+                {
+                    if (hostIdentities.TryGetValue(hostId, out model))
+                    {
+                        return model;
+                    }
+                }
+
+                return null;
+            }
+        }
+
+        public void DropConnection(string hostId)
+        {
+            lock (hostIdentities)
+            {
+                if (!hostIdentities.ContainsKey(hostId))
+                {
+                    return;
+                }
+                
+                hostIdentities[hostId].HostSocket.Dispose();
+                hostIdentities.Remove(hostId);
+            }
+        }
+
         private RegisterConnectionController(int port)
         {
             instance = this;
@@ -76,7 +108,7 @@ namespace BackendServer.Controllers
 
             if (lines.Length < 1)
             {
-                clientSocket.Dispose();
+                RefuseConnection(clientSocket);
                 return;
             }
 
@@ -85,7 +117,7 @@ namespace BackendServer.Controllers
                 firstLineContents[0] != "POST" ||
                 firstLineContents[1] != kApiRegisterPath)
             {
-                clientSocket.Dispose();
+                RefuseConnection(clientSocket);
                 return;
             }
 
@@ -98,7 +130,7 @@ namespace BackendServer.Controllers
 
                 if (lineContents.Length != 2)
                 {
-                    clientSocket.Dispose();
+                    RefuseConnection(clientSocket);
                     return;
                 }
 
@@ -106,7 +138,7 @@ namespace BackendServer.Controllers
                 {
                     if (!string.Equals(lineContents[1], "application/json", StringComparison.OrdinalIgnoreCase))
                     {
-                        clientSocket.Dispose();
+                        RefuseConnection(clientSocket);
                         return;
                     }
                 }
@@ -114,7 +146,7 @@ namespace BackendServer.Controllers
                 {
                     if (!int.TryParse(lineContents[1], out contentLength))
                     {
-                        clientSocket.Dispose();
+                        RefuseConnection(clientSocket);
                         return;
                     }
                 }
@@ -122,7 +154,7 @@ namespace BackendServer.Controllers
 
             if (index == lines.Length || contentLength < 1)
             {
-                clientSocket.Dispose();
+                RefuseConnection(clientSocket);
                 return;
             }
 
@@ -142,9 +174,41 @@ namespace BackendServer.Controllers
             }
             catch
             {
-                clientSocket.Dispose();
+                RefuseConnection(clientSocket);
                 return;
             }
+
+            model.HostSocket = clientSocket;
+
+            lock (hostIdentities)
+            {
+                hostIdentities[model.SystemUniqueId] = model;
+            }
+
+            SendResponse(clientSocket, true);
+        }
+
+        private void SendResponse(Socket socket, bool success)
+        {
+            string responseString;
+
+            if (success)
+            {
+                responseString = "HTTP/1.1 200 OK\n";
+            }
+            else
+            {
+                responseString = "HTTP/1.1 400 Bad Request\n";
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(responseString);
+            socket.Send(bytes);
+        }
+
+        private void RefuseConnection(Socket socket)
+        {
+            SendResponse(socket, false);
+            socket.Dispose();
         }
 
         private void IncomingConnection(HttpListenerContext context)
@@ -174,8 +238,8 @@ namespace BackendServer.Controllers
                 return;
             }
 
-            model.EndPoint = endPoint.ToString();
-            hostIdentities[model.SystemUniqueId] = model;
+       //     model.EndPoint = endPoint.ToString();
+       //     hostIdentities[model.SystemUniqueId] = model;
 
             context.Response.StatusCode = 200;
             context.Response.KeepAlive = true;

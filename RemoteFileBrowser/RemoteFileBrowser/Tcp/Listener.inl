@@ -48,7 +48,7 @@ inline void Listener::StartIncomingConnectionThread(Callback callback, SOCKET ac
 		clientAddress.sin_addr.S_un.S_un_b.s_b3,
 		clientAddress.sin_addr.S_un.S_un_b.s_b4);
 
-	Logging::Log(msgBuffer);
+	Utilities::Logging::Log(msgBuffer);
 
 	std::thread t(callback, acceptedSocket, clientAddress);
 	t.detach();
@@ -60,7 +60,7 @@ inline bool Listener::IsIpWhitelisted(ULONG ip)
 
 	for (const auto whitelistedIp : m_IpWhitelist)
 	{
-		if (whitelistedIp == ip)
+		if (whitelistedIp == ip || whitelistedIp == 0)
 		{
 			return true;
 		}
@@ -72,6 +72,7 @@ inline bool Listener::IsIpWhitelisted(ULONG ip)
 template <typename Callback>
 void Listener::Run(int address, uint16_t port, Callback callback)
 {
+	using namespace Utilities;
 	auto listeningSocket = CreateListeningSocket(address, port);
 
 	while (m_Running)
