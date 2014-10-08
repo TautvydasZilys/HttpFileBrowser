@@ -18,7 +18,7 @@ inline void LogEndpointAddress(const ADDRINFOW* addressInfo)
 }
 
 template <typename ConnectionHandler>
-inline void TcpClient::Connect(const std::wstring& hostName, int port, ConnectionHandler connectionHandler)
+inline void Client::Connect(const std::wstring& hostName, int port, ConnectionHandler connectionHandler)
 {
 	using namespace Utilities;
 

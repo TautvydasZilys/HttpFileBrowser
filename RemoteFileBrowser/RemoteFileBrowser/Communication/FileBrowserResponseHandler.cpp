@@ -1,8 +1,8 @@
 #include "PrecompiledHeader.h"
 #include "AssetDatabase.h"
-#include "Event.h"
 #include "FileBrowserResponseHandler.h"
-#include "StreamableFile.h"
+#include "Utilities\StreamableFile.h"
+#include "Utilities\Event.h"
 
 using namespace std;
 using namespace Utilities;

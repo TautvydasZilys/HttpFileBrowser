@@ -1,4 +1,4 @@
-inline SOCKET TcpListener::CreateListeningSocket(int address, uint16_t port)
+inline SOCKET Listener::CreateListeningSocket(int address, uint16_t port)
 {
 	using namespace Utilities;
 
@@ -38,7 +38,7 @@ inline SOCKET TcpListener::CreateListeningSocket(int address, uint16_t port)
 }
 
 template <typename Callback>
-inline void TcpListener::StartIncomingConnectionThread(Callback callback, SOCKET acceptedSocket, const sockaddr_in& clientAddress)
+inline void Listener::StartIncomingConnectionThread(Callback callback, SOCKET acceptedSocket, const sockaddr_in& clientAddress)
 {
 	const int bufferSize = 256;
 	wchar_t msgBuffer[bufferSize];
@@ -54,7 +54,7 @@ inline void TcpListener::StartIncomingConnectionThread(Callback callback, SOCKET
 	t.detach();
 }
 
-inline bool TcpListener::IsIpWhitelisted(ULONG ip)
+inline bool Listener::IsIpWhitelisted(ULONG ip)
 {
 	CriticalSection::Lock lock(m_IpWhitelistCriticalSection);
 
@@ -70,7 +70,7 @@ inline bool TcpListener::IsIpWhitelisted(ULONG ip)
 }
 
 template <typename Callback>
-void TcpListener::Run(int address, uint16_t port, Callback callback)
+void Listener::Run(int address, uint16_t port, Callback callback)
 {
 	auto listeningSocket = CreateListeningSocket(address, port);
 
@@ -107,7 +107,7 @@ void TcpListener::Run(int address, uint16_t port, Callback callback)
 }
 
 template <typename Callback>
-void TcpListener::RunAsync(int address, uint16_t port, Callback callback)
+void Listener::RunAsync(int address, uint16_t port, Callback callback)
 {
 	Assert(!m_Running);
 

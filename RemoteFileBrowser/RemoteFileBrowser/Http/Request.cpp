@@ -1,5 +1,5 @@
 #include "PrecompiledHeader.h"
-#include "HttpRequest.h"
+#include "Request.h"
 
 using namespace Http;
 

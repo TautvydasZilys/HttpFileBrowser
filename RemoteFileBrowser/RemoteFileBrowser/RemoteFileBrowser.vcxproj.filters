@@ -1,116 +1,127 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter Include="Source">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
+    <Filter Include="Resources">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source\Http">
+      <UniqueIdentifier>{08656d12-7561-4cb8-806e-0ec77efcec88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tcp">
+      <UniqueIdentifier>{7d67d9bf-d625-4515-a96b-015edd41f34a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utilities">
+      <UniqueIdentifier>{9d8cdde1-88a4-4446-a512-c84a60baa619}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Communication">
+      <UniqueIdentifier>{a1d15528-1c8d-4139-a5c7-9df93e3fea38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Core">
+      <UniqueIdentifier>{0620c681-6ee8-463c-81b3-5f1110d0987e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="PrecompiledHeader.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Core\PrecompiledHeader.cpp">
+      <Filter>Source\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Core\Main.cpp">
+      <Filter>Source\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Utilities\Utilities.cpp">
+      <Filter>Source\Utilities</Filter>
     </ClCompile>
-    <ClCompile Include="HttpServer.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Utilities\StreamableFile.cpp">
+      <Filter>Source\Utilities</Filter>
     </ClCompile>
-    <ClCompile Include="FileBrowserResponseHandler.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Communication\ClientServerConnection.cpp">
+      <Filter>Source\Communication</Filter>
     </ClCompile>
-    <ClCompile Include="AssetDatabase.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Communication\FileBrowserResponseHandler.cpp">
+      <Filter>Source\Communication</Filter>
     </ClCompile>
-    <ClCompile Include="StreamableFile.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Http\RestCommunicator.cpp">
+      <Filter>Source\Http</Filter>
     </ClCompile>
-    <ClCompile Include="WSAInitializer.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Utilities\WSAInitializer.cpp">
+      <Filter>Source\Utilities</Filter>
     </ClCompile>
-    <ClCompile Include="ClientServerConnection.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Communication\AssetDatabase.cpp">
+      <Filter>Source\Communication</Filter>
     </ClCompile>
-    <ClCompile Include="RestCommunicator.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Http\Request.cpp">
+      <Filter>Source\Http</Filter>
     </ClCompile>
-    <ClCompile Include="TcpListener.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Http\Server.cpp">
+      <Filter>Source\Http</Filter>
     </ClCompile>
-    <ClCompile Include="HttpRequest.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Tcp\Listener.cpp">
+      <Filter>Source\Tcp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Utilities\Utilities.inl">
+      <Filter>Source\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Utilities.h">
+      <Filter>Source\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\StreamableFile.h">
+      <Filter>Source\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\CriticalSection.h">
+      <Filter>Source\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Event.h">
+      <Filter>Source\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Communication\FileBrowserResponseHandler.h">
+      <Filter>Source\Communication</Filter>
+    </ClInclude>
+    <ClInclude Include="Communication\ClientServerConnection.h">
+      <Filter>Source\Communication</Filter>
+    </ClInclude>
+    <ClInclude Include="Http\RestCommunicator.h">
+      <Filter>Source\Http</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\WSAInitializer.h">
+      <Filter>Source\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Communication\AssetDatabase.h">
+      <Filter>Source\Communication</Filter>
+    </ClInclude>
+    <ClInclude Include="Http\Request.h">
+      <Filter>Source\Http</Filter>
+    </ClInclude>
+    <ClInclude Include="Http\Server.h">
+      <Filter>Source\Http</Filter>
+    </ClInclude>
+    <ClInclude Include="Tcp\Client.inl">
+      <Filter>Source\Tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="Tcp\Client.h">
+      <Filter>Source\Tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="Tcp\Listener.h">
+      <Filter>Source\Tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="Tcp\Listener.inl">
+      <Filter>Source\Tcp</Filter>
+    </ClInclude>
     <ClInclude Include="PrecompiledHeader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Utilities.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TcpListener.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HttpServer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FileBrowserResponseHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AssetDatabase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StreamableFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Event.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TcpClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TcpClient.inl">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Utilities.inl">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WSAInitializer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CriticalSection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ClientServerConnection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RestCommunicator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TcpListener.inl">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HttpRequest.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="scripts.js">
-      <Filter>Resource Files</Filter>
+    <None Include="Resources\scripts.js">
+      <Filter>Resources</Filter>
     </None>
-    <None Include="style.css">
-      <Filter>Resource Files</Filter>
+    <None Include="Resources\style.css">
+      <Filter>Resources</Filter>
     </None>
   </ItemGroup>
 </Project>

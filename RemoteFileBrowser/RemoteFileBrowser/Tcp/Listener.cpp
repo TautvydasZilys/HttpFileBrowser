@@ -1,13 +1,14 @@
 #include "PrecompiledHeader.h"
-#include "TcpListener.h"
+#include "Listener.h"
 
+using namespace Tcp;
 
-TcpListener::TcpListener() :
+Listener::Listener() :
 	m_Running(false)
 {
 }
 
-TcpListener::~TcpListener()
+Listener::~Listener()
 {
 	if (m_Running)
 	{
@@ -15,14 +16,14 @@ TcpListener::~TcpListener()
 	}
 }
 
-void TcpListener::Stop()
+void Listener::Stop()
 {
 	Assert(m_Running);
 	m_Running = false;
 	m_ListeningThread.join();
 }
 
-void TcpListener::WhitelistIP(ULONG ip)
+void Listener::WhitelistIP(ULONG ip)
 {
 	CriticalSection::Lock lock(m_IpWhitelistCriticalSection);
 	m_IpWhitelist.push_back(ip);

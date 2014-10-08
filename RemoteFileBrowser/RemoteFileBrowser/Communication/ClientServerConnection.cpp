@@ -1,9 +1,9 @@
 #include "PrecompiledHeader.h"
 #include "ClientServerConnection.h"
 #include "FileBrowserResponseHandler.h"
-#include "HttpServer.h"
-#include "RestCommunicator.h"
-#include "TcpListener.h"
+#include "Http\Server.h"
+#include "Http\RestCommunicator.h"
+#include "Tcp\Listener.h"
 
 using namespace std;
 using namespace Utilities;
@@ -19,8 +19,8 @@ void ClientServerConnection::Create(SOCKET connectionSocket, string&& hostname)
 
 	// Send REST request
 
-	RestCommunicator::Post(connectionSocket, std::move(hostname), "/api/RegisterConnection", systemUniqueIdKey, systemUniqueIdValue);
-	if (!RestCommunicator::ReceiveResponse(connectionSocket))
+	Http::RestCommunicator::Post(connectionSocket, std::move(hostname), "/api/RegisterConnection", systemUniqueIdKey, systemUniqueIdValue);
+	if (!Http::RestCommunicator::ReceiveResponse(connectionSocket))
 	{
 		return;
 	}
@@ -35,10 +35,10 @@ void ClientServerConnection::Create(SOCKET connectionSocket, string&& hostname)
 	
 	// Start listening for connection
 
-	TcpListener listener;
+	Tcp::Listener listener;
 	listener.RunAsync(socketAddress.sin_addr.S_un.S_addr, socketAddress.sin_port, [](SOCKET incomingSocket, sockaddr_in clientAddress)
 	{
-		HttpServer::StartServiceClient(incomingSocket, clientAddress, &FileBrowserResponseHandler::ExecuteRequest);
+		Http::Server::StartServiceClient(incomingSocket, clientAddress, &FileBrowserResponseHandler::ExecuteRequest);
 	});
 
 	// Receive client IPs
@@ -47,7 +47,7 @@ void ClientServerConnection::Create(SOCKET connectionSocket, string&& hostname)
 	{
 		unordered_map<string, string> clientInfo;
 
-		if (!RestCommunicator::ReceivePost(connectionSocket, clientInfo))	// Connection dropped
+		if (!Http::RestCommunicator::ReceivePost(connectionSocket, clientInfo))	// Connection dropped
 		{
 			return;
 		}

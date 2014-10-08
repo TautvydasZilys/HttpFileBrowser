@@ -1,23 +1,24 @@
 #include "PrecompiledHeader.h"
-#include "HttpServer.h"
+#include "Server.h"
 
 using namespace std;
+using namespace Http;
 using namespace Utilities;
 
 static const int kDataBufferSize = 4096;
 
-void HttpServer::StartServiceClient(SOCKET incomingSocket, sockaddr_in clientAddress, HttpRequestExecutionHandler executionHandler)
+void Server::StartServiceClient(SOCKET incomingSocket, sockaddr_in clientAddress, HttpRequestExecutionHandler executionHandler)
 {
-	HttpServer serverInstance(incomingSocket, clientAddress, executionHandler);
+	Server serverInstance(incomingSocket, clientAddress, executionHandler);
 	serverInstance.Run();
 }
 
-HttpServer::HttpServer(SOCKET incomingSocket, sockaddr_in clientAddress, HttpRequestExecutionHandler executionHandler) :
+Server::Server(SOCKET incomingSocket, sockaddr_in clientAddress, HttpRequestExecutionHandler executionHandler) :
 	m_ConnectionSocket(incomingSocket), m_ClientAddress(clientAddress), m_ReceivedData(nullptr), m_HasReportedUserAgent(false), m_ExecutionHandler(executionHandler)
 {
 }
 
-void HttpServer::Run()
+void Server::Run()
 {
 	char buffer[kDataBufferSize];	// Store on the stack, no need to use heap for such small buffer
 
@@ -41,7 +42,7 @@ void HttpServer::Run()
 	closesocket(m_ConnectionSocket);
 }
 
-void HttpServer::HandleRequest()
+void Server::HandleRequest()
 {
 	auto requestType = ParseRequest();
 
@@ -71,7 +72,7 @@ void HttpServer::HandleRequest()
 	m_ExecutionHandler(m_ConnectionSocket, requestedPath, httpVersion);
 }
 
-std::string HttpServer::ParseRequest()
+std::string Server::ParseRequest()
 {
 	int position = 0;
 
@@ -91,7 +92,7 @@ std::string HttpServer::ParseRequest()
 	return requestType;
 }
 
-void HttpServer::SendResponse(const string& response)
+void Server::SendResponse(const string& response)
 {
 	auto sendResult = send(m_ConnectionSocket, response.c_str(), response.length(), 0);
 	Assert(sendResult != SOCKET_ERROR);
@@ -102,7 +103,7 @@ void HttpServer::SendResponse(const string& response)
 	}
 }
 
-int HttpServer::FindNextCharacter(int position, char character)
+int Server::FindNextCharacter(int position, char character)
 {
 	while (position < m_BytesReceived - 1)
 	{
@@ -117,7 +118,7 @@ int HttpServer::FindNextCharacter(int position, char character)
 	return position;
 }
 
-void HttpServer::ReportUserAgent(int dataOffset)
+void Server::ReportUserAgent(int dataOffset)
 {
 	map<string, string> httpHeader;
 
@@ -142,7 +143,7 @@ void HttpServer::ReportUserAgent(int dataOffset)
 	Logging::Log(L"Client user agent: ", Utilities::Encoding::Utf8ToUtf16(httpHeader["User-Agent"]));
 }
 
-void HttpServer::ReportConnectionDroppedError()
+void Server::ReportConnectionDroppedError()
 {
 	const int bufferSize = 256;
 	wchar_t msgBuffer[bufferSize];

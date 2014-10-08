@@ -1,5 +1,5 @@
 #include "PrecompiledHeader.h"
-#include "HttpRequest.h"
+#include "Request.h"
 #include "RestCommunicator.h"
 
 using namespace std;
@@ -21,7 +21,7 @@ fail:
 	Utilities::Logging::LogErrorIfFailed(true, L"Failed to send post request: ");
 }
 
-void RestCommunicator::Post(SOCKET s, string&& hostname, string&& path, const string& key, const string& value)
+void Http::RestCommunicator::Post(SOCKET s, string&& hostname, string&& path, const string& key, const string& value)
 {
 	Http::Request request;
 
@@ -54,7 +54,7 @@ void RestCommunicator::Post(SOCKET s, string&& hostname, string&& path, const st
 	SendPostRequest(s, request);
 }
 
-bool RestCommunicator::ReceiveResponse(SOCKET s)
+bool Http::RestCommunicator::ReceiveResponse(SOCKET s)
 {
 	const int kBufferLength = 1024;
 	char buffer[kBufferLength];
@@ -78,7 +78,7 @@ bool RestCommunicator::ReceiveResponse(SOCKET s)
 	return strcmp(buffer, "HTTP/1.1 200 OK") == 0;
 }
 
-bool RestCommunicator::ReceivePost(SOCKET s, unordered_map<string, string>& results)
+bool Http::RestCommunicator::ReceivePost(SOCKET s, unordered_map<string, string>& results)
 {
 	results.clear();
 

@@ -57,6 +57,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeaderFile>PrecompiledHeader.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -74,6 +75,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeaderFile>PrecompiledHeader.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -84,56 +86,56 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AssetDatabase.cpp" />
-    <ClCompile Include="ClientServerConnection.cpp" />
-    <ClCompile Include="FileBrowserResponseHandler.cpp" />
-    <ClCompile Include="HttpRequest.cpp" />
-    <ClCompile Include="HttpServer.cpp" />
-    <ClCompile Include="RestCommunicator.cpp" />
-    <ClCompile Include="StreamableFile.cpp" />
-    <ClCompile Include="TcpListener.cpp" />
-    <ClCompile Include="WSAInitializer.cpp" />
-    <ClInclude Include="ClientServerConnection.h" />
-    <ClInclude Include="CriticalSection.h" />
-    <ClInclude Include="HttpRequest.h" />
-    <ClInclude Include="RestCommunicator.h" />
-    <ClInclude Include="TcpClient.inl">
+    <ClCompile Include="Communication\AssetDatabase.cpp" />
+    <ClCompile Include="Communication\ClientServerConnection.cpp" />
+    <ClCompile Include="Communication\FileBrowserResponseHandler.cpp" />
+    <ClCompile Include="Http\Request.cpp" />
+    <ClCompile Include="Http\Server.cpp" />
+    <ClCompile Include="Http\RestCommunicator.cpp" />
+    <ClCompile Include="Utilities\StreamableFile.cpp" />
+    <ClCompile Include="Tcp\Listener.cpp" />
+    <ClCompile Include="Utilities\WSAInitializer.cpp" />
+    <ClInclude Include="Communication\ClientServerConnection.h" />
+    <ClInclude Include="Utilities\CriticalSection.h" />
+    <ClInclude Include="Http\Request.h" />
+    <ClInclude Include="Http\RestCommunicator.h" />
+    <ClInclude Include="Tcp\Client.inl">
       <FileType>CppCode</FileType>
     </ClInclude>
-    <ClInclude Include="TcpListener.inl">
+    <ClInclude Include="Tcp\Listener.inl">
       <FileType>CppCode</FileType>
     </ClInclude>
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="PrecompiledHeader.cpp">
+    <ClCompile Include="Core\Main.cpp" />
+    <ClCompile Include="Core\PrecompiledHeader.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Utilities.cpp" />
-    <ClInclude Include="WSAInitializer.h" />
+    <ClCompile Include="Utilities\Utilities.cpp" />
+    <ClInclude Include="Utilities\WSAInitializer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AssetDatabase.h" />
-    <ClInclude Include="Event.h" />
-    <ClInclude Include="FileBrowserResponseHandler.h" />
-    <ClInclude Include="HttpServer.h" />
-    <ClInclude Include="StreamableFile.h" />
-    <ClInclude Include="TcpClient.h" />
-    <ClInclude Include="TcpListener.h" />
+    <ClInclude Include="Communication\AssetDatabase.h" />
+    <ClInclude Include="Utilities\Event.h" />
+    <ClInclude Include="Communication\FileBrowserResponseHandler.h" />
+    <ClInclude Include="Http\Server.h" />
+    <ClInclude Include="Utilities\StreamableFile.h" />
+    <ClInclude Include="Tcp\Client.h" />
+    <ClInclude Include="Tcp\Listener.h" />
     <ClInclude Include="PrecompiledHeader.h" />
-    <ClInclude Include="Utilities.h" />
+    <ClInclude Include="Utilities\Utilities.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="scripts.js" />
-    <None Include="style.css" />
-    <ClInclude Include="Utilities.inl">
+    <None Include="Resources\scripts.js" />
+    <None Include="Resources\style.css" />
+    <ClInclude Include="Utilities\Utilities.inl">
       <FileType>CppCode</FileType>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="scripts.js">
+    <Content Include="Resources\scripts.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="style.css">
+    <Content Include="Resources\style.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
