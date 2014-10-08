@@ -12,15 +12,14 @@ using namespace Utilities;
 // Receive my ID in the server
 // Listen for incoming clients
 // Receive client IPs and whitelist them
-void ClientServerConnection::Create(SOCKET connectionSocket, const string& hostname)
+void ClientServerConnection::Create(SOCKET connectionSocket, string&& hostname)
 {
-	static const string postUrl = "/api/RegisterConnection";
 	static const string systemUniqueIdKey = "SystemUniqueId";
 	const auto& systemUniqueIdValue = System::GetUniqueSystemId();
 
 	// Send REST request
 
-	RestCommunicator::Post(connectionSocket, hostname, postUrl, systemUniqueIdKey, systemUniqueIdValue);
+	RestCommunicator::Post(connectionSocket, std::move(hostname), "/api/RegisterConnection", systemUniqueIdKey, systemUniqueIdValue);
 	if (!RestCommunicator::ReceiveResponse(connectionSocket))
 	{
 		return;
@@ -61,18 +60,9 @@ void ClientServerConnection::Create(SOCKET connectionSocket, const string& hostn
 			return;
 		}
 
-		int ipNumeric = 0;
+		UINT ipNumeric = inet_addr(clientIp->second.c_str());
 
-		try
-		{
-			ipNumeric = stoi(clientIp->second);
-		}
-		catch (...)	// Invalid IP
-		{
-			return;
-		}
-
-		if (ipNumeric == 0)	// IP can't be 0
+		if (ipNumeric == 0 || ipNumeric == INADDR_NONE)	// IP can't be 0
 		{
 			return;
 		}

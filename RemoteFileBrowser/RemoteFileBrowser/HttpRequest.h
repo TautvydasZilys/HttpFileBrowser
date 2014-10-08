@@ -22,6 +22,7 @@ namespace Http
 		RequestVerb requestVerb;
 		ContentType contentType;
 		std::string requestPath;
+		std::string hostname;
 		std::string content;
 
 		Request();
@@ -34,6 +35,6 @@ namespace Http
 		Request(const Request&) = delete;
 		Request& operator=(const Request&) = delete;
 
-		std::string BuildHeaderString();
+		std::string BuildHeaderString() const;
 	};
 }

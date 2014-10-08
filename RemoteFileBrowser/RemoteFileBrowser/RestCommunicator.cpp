@@ -1,19 +1,18 @@
 #include "PrecompiledHeader.h"
-#include "HttpHeaderBuilder.h"
 #include "HttpRequest.h"
 #include "RestCommunicator.h"
 
 using namespace std;
 
-static void SendPostRequest(SOCKET s, const string& hostname, const string& path, const string& httpBody)
+static void SendPostRequest(SOCKET s, const Http::Request& httpRequest)
 {
-	auto header = HttpHeaderBuilder::BuildPostHeader(hostname, path, "application/json", httpBody.length());
+	auto header = httpRequest.BuildHeaderString();
 
 	auto result = send(s, header.c_str(), header.length(), 0);
 	if (result != header.length()) goto fail;
 
-	result = send(s, httpBody.c_str(), httpBody.length(), 0);
-	if (result != httpBody.length()) goto fail;
+	result = send(s, httpRequest.content.c_str(), httpRequest.content.length(), 0);
+	if (result != httpRequest.content.length()) goto fail;
 
 	return;
 
@@ -22,31 +21,37 @@ fail:
 	Utilities::Logging::LogErrorIfFailed(true, L"Failed to send post request: ");
 }
 
-void RestCommunicator::Post(SOCKET s, const string& hostname, const string& path, const string& key, const string& value)
+void RestCommunicator::Post(SOCKET s, string&& hostname, string&& path, const string& key, const string& value)
 {
+	Http::Request request;
+
+	request.requestVerb = Http::RequestVerb::POST;
+	request.contentType = Http::ContentType::JSON;
+	request.hostname = std::move(hostname);
+	request.requestPath = std::move(path);
+
 	// Body format:
 	// {"<KEY>":"<VALUE>"}
-	string httpBody;
 	auto length = 0;
-	httpBody.resize(7 + key.length() + value.length());
+	request.content.resize(7 + key.length() + value.length());
 
-	httpBody[length++] = '{';
-	httpBody[length++] = '\"';
+	request.content[length++] = '{';
+	request.content[length++] = '\"';
 
-	memcpy(&httpBody[length], key.data(), key.length());
+	memcpy(&request.content[length], key.data(), key.length());
 	length += key.length();
 
-	httpBody[length++] = '\"';
-	httpBody[length++] = ':';
-	httpBody[length++] = '\"';
+	request.content[length++] = '\"';
+	request.content[length++] = ':';
+	request.content[length++] = '\"';
 
-	memcpy(&httpBody[length], value.data(), value.length());
+	memcpy(&request.content[length], value.data(), value.length());
 	length += value.length();
 
-	httpBody[length++] = '\"';
-	httpBody[length++] = '}';
-
-	SendPostRequest(s, hostname, path, httpBody);
+	request.content[length++] = '\"';
+	request.content[length++] = '}';
+	
+	SendPostRequest(s, request);
 }
 
 bool RestCommunicator::ReceiveResponse(SOCKET s)

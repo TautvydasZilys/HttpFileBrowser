@@ -81,7 +81,7 @@ private:
 
 		if (strncmp(m_Buffer + m_BufferPosition, "content-length", semicolonPosition - m_BufferPosition) == 0)
 		{
-			m_ContentLength = atoi(m_Buffer + semicolonPosition + 1);
+			m_ContentLength = atoi(m_Buffer + semicolonPosition + 2);
 			if (m_ContentLength < 1)
 				return false;
 		}
@@ -101,6 +101,10 @@ private:
 				Utilities::Logging::Log(L"[ERROR] Unknown http request content type: ", Utilities::Encoding::Utf8ToUtf16(m_Buffer + semicolonPosition + 2));
 				return false;
 			}
+		}
+		else if (strncmp(m_Buffer + m_BufferPosition, "hostname", semicolonPosition - m_BufferPosition) == 0)
+		{
+			m_Request.hostname.assign(m_Buffer + semicolonPosition + 2, m_Buffer + newLinePosition);
 		}
 
 		m_BufferPosition = newLinePosition + 1;
@@ -199,7 +203,7 @@ Request& Request::operator= (Request&& other)
 	return *this;
 }
 
-std::string Request::BuildHeaderString()
+std::string Request::BuildHeaderString() const
 {
 	using namespace std;
 
@@ -240,6 +244,7 @@ std::string Request::BuildHeaderString()
 
 	header << endl;
 	header << "content-length: " << content.length() << endl;
+	header << "hostname: " << hostname << endl << endl;
 
 	return header.str();
 }

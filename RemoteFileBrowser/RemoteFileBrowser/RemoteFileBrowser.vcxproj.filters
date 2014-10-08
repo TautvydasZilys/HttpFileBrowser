@@ -45,9 +45,6 @@
     <ClCompile Include="RestCommunicator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HttpHeaderBuilder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TcpListener.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -99,9 +96,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RestCommunicator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HttpHeaderBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TcpListener.inl">
