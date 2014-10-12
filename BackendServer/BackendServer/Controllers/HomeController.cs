@@ -1,4 +1,5 @@
 ﻿using BackendServer.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -31,7 +32,14 @@ namespace BackendServer.Controllers
 
             if (host != null && SendClientIP(host, this.Request.UserHostAddress))
             {
-                return Redirect(host.HostSocket.RemoteEndPoint.ToString());
+                var remoteEndpoint = host.HostSocket.RemoteEndPoint as IPEndPoint;
+
+                if (remoteEndpoint != null && remoteEndpoint.Address.IsIPv4MappedToIPv6)
+                {
+                    remoteEndpoint = new IPEndPoint(remoteEndpoint.Address.MapToIPv4(), remoteEndpoint.Port);
+                }
+
+                return Redirect("http://" + remoteEndpoint.ToString());
             }
             
             ModelState.AddModelError("errorSummary", "The specified file host doesn't exist.");
@@ -49,10 +57,10 @@ namespace BackendServer.Controllers
             var requestBuilder = new StringBuilder();
 
             requestBuilder.Append("POST api/clientip/ HTTP/1.1\n");
-            requestBuilder.Append("content-type: applicaton/json\n");
+            requestBuilder.Append("content-type: application/json\n");
 
             var clientIdentityModel = new ClientIdentityModel() { IpAddress = ip };
-            var content = Json(clientIdentityModel).ToString();
+            var content = JsonConvert.SerializeObject(clientIdentityModel);
 
             requestBuilder.Append("content-length: ");
             requestBuilder.Append(content.Length.ToString());
@@ -63,7 +71,7 @@ namespace BackendServer.Controllers
 
             try
             {
-                host.HostSocket.Send(Encoding.UTF8.GetBytes(content));
+                host.HostSocket.Send(Encoding.UTF8.GetBytes(requestBuilder.ToString()));
 
                 var buffer = new byte[256];
                 var bytesReceived = host.HostSocket.Receive(buffer);

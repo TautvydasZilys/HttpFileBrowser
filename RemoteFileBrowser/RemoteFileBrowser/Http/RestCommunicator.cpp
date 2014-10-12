@@ -4,6 +4,9 @@
 
 using namespace std;
 
+static const char kOkResponse[] = "HTTP/1.1 200 OK";
+static const char kBadRequestResponse[] = "HTTP/1.1 400 Bad Request";
+
 static void SendPostRequest(SOCKET s, const Http::Request& httpRequest)
 {
 	auto header = httpRequest.BuildHeaderString();
@@ -66,8 +69,7 @@ bool Http::RestCommunicator::ReceiveResponse(SOCKET s)
 		return false;
 	}
 
-	static const char okResponse[] = "HTTP/1.1 200 OK";
-	return strncmp(buffer, okResponse, sizeof(okResponse) - 1) == 0;	// Don't compare null terminator
+	return strncmp(buffer, kOkResponse, sizeof(kOkResponse) - 1) == 0;	// Don't compare null terminator
 }
 
 bool Http::RestCommunicator::ReceivePost(SOCKET s, unordered_map<string, string>& results)
@@ -90,31 +92,43 @@ bool Http::RestCommunicator::ReceivePost(SOCKET s, unordered_map<string, string>
 		return false;
 	}
 
-	auto position = 1;
+	size_t position = 1;
 	while (position < content.length() - 1)
 	{
-		auto parenthesis = content.find('\"', position);
-		if (parenthesis == string::npos) return false;
+		auto quote = content.find('\"', position);
+		if (quote == string::npos) return false;
 
-		auto closingParenthesis = content.find('\"', parenthesis + 1);
-		if (closingParenthesis == string::npos) return false;
+		auto closingQuote = content.find('\"', quote + 1);
+		if (closingQuote == string::npos) return false;
 
-		auto key = content.substr(parenthesis + 1, closingParenthesis - parenthesis - 1);
+		auto key = content.substr(quote + 1, closingQuote - quote - 1);
 
-		position = closingParenthesis + 1;
+		position = closingQuote + 1;
 		if (position + 1 >= content.length() || content[position] != ':') return false;
 
-		parenthesis = content.find('\"', position + 2);
-		if (parenthesis == string::npos) return false;
+		quote = content.find('\"', position + 1);
+		if (quote == string::npos) return false;
 
-		closingParenthesis = content.find('\"', parenthesis + 1);
-		if (closingParenthesis == string::npos) return false;
+		closingQuote = content.find('\"', quote + 1);
+		if (closingQuote == string::npos) return false;
 
-		auto value = content.substr(parenthesis + 1, closingParenthesis - parenthesis - 1);
+		auto value = content.substr(quote + 1, closingQuote - quote - 1);
 
 		results.emplace(std::move(key), std::move(value));
-		position = closingParenthesis + 1;
+		position = closingQuote + 1;
 	}
 
 	return true;
+}
+
+void Http::RestCommunicator::SendResponse(SOCKET s, bool success)
+{
+	if (success)
+	{
+		send(s, kOkResponse, sizeof(kOkResponse) - 1, 0);
+	}
+	else
+	{
+		send(s, kBadRequestResponse, sizeof(kBadRequestResponse) - 1, 0);
+	}
 }

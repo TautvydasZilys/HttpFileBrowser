@@ -23,7 +23,7 @@ void Listener::Stop()
 	m_ListeningThread.join();
 }
 
-void Listener::WhitelistIP(ULONG ip)
+void Listener::WhitelistIP(const IN6_ADDR& ip)
 {
 	CriticalSection::Lock lock(m_IpWhitelistCriticalSection);
 	m_IpWhitelist.push_back(ip);

@@ -1,17 +1,21 @@
-inline SOCKET Listener::CreateListeningSocket(int address, uint16_t port)
+inline SOCKET Listener::CreateListeningSocket(const in6_addr& address, uint16_t port)
 {
 	using namespace Utilities;
 
 	// Open listening socket
 
-	auto listeningSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	auto listeningSocket = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
 	Logging::LogFatalErrorIfFailed(listeningSocket == INVALID_SOCKET, L"Failed to open a TCP socket: ");
 
-	// Make it able reuse the address
+	// Make it able reuse the address, make it dual mode and non blocking
 
 	BOOL trueValue = TRUE;
 	auto result = setsockopt(listeningSocket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&trueValue), sizeof(trueValue));
 	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to set the listening socket to reuse its address: ");
+
+	BOOL falseValue = FALSE;
+	result = setsockopt(listeningSocket, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<const char*>(&falseValue), sizeof(falseValue));
+	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to set the listening socket to accept IPv4 connections: ");
 
 	u_long nonBlocking = TRUE;
 	result = ioctlsocket(listeningSocket, FIONBIO, &nonBlocking);
@@ -19,14 +23,14 @@ inline SOCKET Listener::CreateListeningSocket(int address, uint16_t port)
 
 	// Bind it to port
 
-	sockaddr_in inAddress;
-	ZeroMemory(&inAddress, sizeof(sockaddr_in));
+	sockaddr_in6 inAddress;
+	ZeroMemory(&inAddress, sizeof(inAddress));
 
-	inAddress.sin_family = AF_INET;
-	inAddress.sin_addr.s_addr = address;
-	inAddress.sin_port = port;
+	inAddress.sin6_family = AF_INET6;
+	inAddress.sin6_addr = address;
+	inAddress.sin6_port = port;
 	
-	result = bind(listeningSocket, reinterpret_cast<sockaddr*>(&inAddress), sizeof(inAddress));
+	result = ::bind(listeningSocket, reinterpret_cast<sockaddr*>(&inAddress), sizeof(inAddress));
 	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to bind the listening socket: ");
 
 	// Listen on the socket
@@ -38,29 +42,33 @@ inline SOCKET Listener::CreateListeningSocket(int address, uint16_t port)
 }
 
 template <typename Callback>
-inline void Listener::StartIncomingConnectionThread(Callback callback, SOCKET acceptedSocket, const sockaddr_in& clientAddress)
+inline void Listener::StartIncomingConnectionThread(Callback callback, SOCKET acceptedSocket, sockaddr_in6& clientAddress)
 {
-	const int bufferSize = 256;
+	const int bufferSize = 64;
 	wchar_t msgBuffer[bufferSize];
-	swprintf_s(msgBuffer, bufferSize, L"Accepted connection from %d.%d.%d.%d.",
-		clientAddress.sin_addr.S_un.S_un_b.s_b1,
-		clientAddress.sin_addr.S_un.S_un_b.s_b2,
-		clientAddress.sin_addr.S_un.S_un_b.s_b3,
-		clientAddress.sin_addr.S_un.S_un_b.s_b4);
 
-	Utilities::Logging::Log(msgBuffer);
+	auto msgPtr = InetNtop(AF_INET6, &clientAddress.sin6_addr, msgBuffer, bufferSize);
+	Assert(msgPtr != nullptr);
+
+	Utilities::Logging::Log(L"Accepted connection from ", msgBuffer, L".");
+
+	u_long nonBlocking = FALSE;
+	auto result = ioctlsocket(acceptedSocket, FIONBIO, &nonBlocking);
+	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to set the listening socket to blocking mode: ");
 
 	std::thread t(callback, acceptedSocket, clientAddress);
 	t.detach();
 }
 
-inline bool Listener::IsIpWhitelisted(ULONG ip)
+inline bool Listener::IsIpWhitelisted(const IN6_ADDR& ip)
 {
 	CriticalSection::Lock lock(m_IpWhitelistCriticalSection);
 
 	for (const auto whitelistedIp : m_IpWhitelist)
 	{
-		if (whitelistedIp == ip || whitelistedIp == 0)
+		if (memcmp(&whitelistedIp, &ip, sizeof(IN6_ADDR)) == 0 ||
+			(whitelistedIp.u.Word[0] == 0 && whitelistedIp.u.Word[1] == 0 && whitelistedIp.u.Word[2] == 0 && whitelistedIp.u.Word[3] == 0 &&
+			whitelistedIp.u.Word[4] == 0 && whitelistedIp.u.Word[5] == 0 && whitelistedIp.u.Word[6] == 0 && whitelistedIp.u.Word[7] == 0))
 		{
 			return true;
 		}
@@ -70,20 +78,20 @@ inline bool Listener::IsIpWhitelisted(ULONG ip)
 }
 
 template <typename Callback>
-void Listener::Run(int address, uint16_t port, Callback callback)
+void Listener::Run(const in6_addr& address, uint16_t port, Callback callback)
 {
 	using namespace Utilities;
 	auto listeningSocket = CreateListeningSocket(address, port);
 
 	while (m_Running)
 	{
-		sockaddr_in clientAddress;
+		sockaddr_in6 clientAddress;
 		int clientAddressSize = sizeof(clientAddress);
 		auto acceptedSocket = accept(listeningSocket, reinterpret_cast<sockaddr*>(&clientAddress), &clientAddressSize);
 			
 		if (acceptedSocket != INVALID_SOCKET)
 		{
-			if (IsIpWhitelisted(clientAddress.sin_addr.S_un.S_addr))
+			if (IsIpWhitelisted(clientAddress.sin6_addr))
 			{
 				StartIncomingConnectionThread(callback, acceptedSocket, clientAddress);
 			}
@@ -108,7 +116,7 @@ void Listener::Run(int address, uint16_t port, Callback callback)
 }
 
 template <typename Callback>
-void Listener::RunAsync(int address, uint16_t port, Callback callback)
+void Listener::RunAsync(const in6_addr& address, uint16_t port, Callback callback)
 {
 	Assert(!m_Running);
 

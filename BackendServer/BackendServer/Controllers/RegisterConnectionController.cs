@@ -75,19 +75,8 @@ namespace BackendServer.Controllers
         }
 
         private void Listen()
-        {/*
-            var listener = new HttpListener();
-            listener.Prefixes.Add("http://localhost:" + port.ToString() + "/api/RegisterConnection/");
-
-            listener.Start();
-
-            while (listener.IsListening)
-            {
-                var context = listener.GetContext();
-                ThreadPool.QueueUserWorkItem((o) => IncomingConnection(context));
-            }*/
-
-            var listener = new TcpListener(IPAddress.Any, port);
+        {
+            var listener = TcpListener.Create(port);
             listener.Start();
 
             for (;;)
@@ -100,7 +89,17 @@ namespace BackendServer.Controllers
         private void IncomingConnection(Socket clientSocket)
         {
             byte[] buffer = new byte[2560];
-            var bytesReceived = clientSocket.Receive(buffer);
+            int bytesReceived = 0;
+
+            try
+            {
+                bytesReceived = clientSocket.Receive(buffer);
+            }
+            catch
+            {
+                RefuseConnection(clientSocket);
+                return;
+            }
 
             var text = Encoding.UTF8.GetString(buffer, 0, bytesReceived);
             var lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.None);
@@ -142,7 +141,7 @@ namespace BackendServer.Controllers
                         return;
                     }
                 }
-                else if (string.Equals(lineContents[1], "content-length", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(lineContents[0], "content-length", StringComparison.OrdinalIgnoreCase))
                 {
                     if (!int.TryParse(lineContents[1], out contentLength))
                     {
@@ -162,7 +161,15 @@ namespace BackendServer.Controllers
 
             while (body.Length < contentLength)
             {
-                bytesReceived = clientSocket.Receive(buffer, Math.Min(contentLength - body.Length, buffer.Length), SocketFlags.None);
+                try
+                {
+                    bytesReceived = clientSocket.Receive(buffer, Math.Min(contentLength - body.Length, buffer.Length), SocketFlags.None);
+                }
+                catch
+                {
+                    RefuseConnection(clientSocket);
+                    return;
+                }
                 body.Append(Encoding.UTF8.GetString(buffer, 0, bytesReceived));
             }
 
@@ -185,10 +192,13 @@ namespace BackendServer.Controllers
                 hostIdentities[model.SystemUniqueId] = model;
             }
 
-            SendResponse(clientSocket, true);
+            if (!SendResponse(clientSocket, true))
+            {
+                DropConnection(model.SystemUniqueId);
+            }
         }
 
-        private void SendResponse(Socket socket, bool success)
+        private bool SendResponse(Socket socket, bool success)
         {
             string responseString;
 
@@ -202,7 +212,17 @@ namespace BackendServer.Controllers
             }
 
             var bytes = Encoding.UTF8.GetBytes(responseString);
-            socket.Send(bytes);
+
+            try
+            {
+                socket.Send(bytes);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private void RefuseConnection(Socket socket)

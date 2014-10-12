@@ -11,14 +11,14 @@ namespace Http
 	{
 	private:
 		SOCKET m_ConnectionSocket;
-		sockaddr_in m_ClientAddress;
+		sockaddr_in6 m_ClientAddress;
 		int m_BytesReceived;
 		const char* m_ReceivedData;
 		bool m_HasReportedUserAgent;
 		HttpRequestExecutionHandler m_ExecutionHandler;
 
 	private:
-		Server(SOCKET incomingSocket, sockaddr_in clientAddress, HttpRequestExecutionHandler executionHandler);
+		Server(SOCKET incomingSocket, sockaddr_in6 clientAddress, HttpRequestExecutionHandler executionHandler);
 		void Run();
 
 		void HandleRequest();
@@ -32,6 +32,6 @@ namespace Http
 		void ReportConnectionDroppedError();
 
 	public:
-		static void StartServiceClient(SOCKET incomingSocket, sockaddr_in clientAddress, HttpRequestExecutionHandler executionHandler);
+		static void StartServiceClient(SOCKET incomingSocket, sockaddr_in6 clientAddress, HttpRequestExecutionHandler executionHandler);
 	};
 }

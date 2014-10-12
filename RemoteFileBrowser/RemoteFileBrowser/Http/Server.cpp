@@ -7,13 +7,13 @@ using namespace Utilities;
 
 static const int kDataBufferSize = 4096;
 
-void Server::StartServiceClient(SOCKET incomingSocket, sockaddr_in clientAddress, HttpRequestExecutionHandler executionHandler)
+void Server::StartServiceClient(SOCKET incomingSocket, sockaddr_in6 clientAddress, HttpRequestExecutionHandler executionHandler)
 {
 	Server serverInstance(incomingSocket, clientAddress, executionHandler);
 	serverInstance.Run();
 }
 
-Server::Server(SOCKET incomingSocket, sockaddr_in clientAddress, HttpRequestExecutionHandler executionHandler) :
+Server::Server(SOCKET incomingSocket, sockaddr_in6 clientAddress, HttpRequestExecutionHandler executionHandler) :
 	m_ConnectionSocket(incomingSocket), m_ClientAddress(clientAddress), m_ReceivedData(nullptr), m_HasReportedUserAgent(false), m_ExecutionHandler(executionHandler)
 {
 }
@@ -145,14 +145,11 @@ void Server::ReportUserAgent(int dataOffset)
 
 void Server::ReportConnectionDroppedError()
 {
-	const int bufferSize = 256;
+	const int bufferSize = 64;
 	wchar_t msgBuffer[bufferSize];
 
-	swprintf_s(msgBuffer, bufferSize, L"Connection from %d.%d.%d.%d dropped: ",
-		m_ClientAddress.sin_addr.S_un.S_un_b.s_b1,
-		m_ClientAddress.sin_addr.S_un.S_un_b.s_b2,
-		m_ClientAddress.sin_addr.S_un.S_un_b.s_b3,
-		m_ClientAddress.sin_addr.S_un.S_un_b.s_b4);
+	auto msgPtr = InetNtop(AF_INET6, &m_ClientAddress.sin6_addr, msgBuffer, bufferSize);
+	Assert(msgPtr != nullptr);
 
-	Logging::Error(WSAGetLastError(), msgBuffer);
+	Logging::Error(WSAGetLastError(), L"Connection from ", msgBuffer, L" dropped: ");
 }

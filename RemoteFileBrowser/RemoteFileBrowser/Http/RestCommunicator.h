@@ -8,6 +8,7 @@ namespace Http
 		bool ReceiveResponse(SOCKET s);
 
 		bool ReceivePost(SOCKET s, std::unordered_map<std::string, std::string>& results);
+		void SendResponse(SOCKET s, bool success);
 	}
 }
 

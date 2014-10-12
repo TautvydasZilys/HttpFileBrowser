@@ -1,20 +1,25 @@
 // TcpClient inline implementation file
 
-inline void LogEndpointAddress(const ADDRINFOW* addressInfo)
+inline void LogEndpointAddress(sockaddr_in6* addressInfo)
 {
-	Assert(addressInfo->ai_addr->sa_family == AF_INET);
-
-	const int bufferSize = 256;
+	const int bufferSize = 64;
 	wchar_t msgBuffer[bufferSize];
 
-	swprintf_s(msgBuffer, bufferSize, L"Endpoint address: %d.%d.%d.%d:%d.",
-		static_cast<uint8_t>(addressInfo->ai_addr->sa_data[2]),
-		static_cast<uint8_t>(addressInfo->ai_addr->sa_data[3]),
-		static_cast<uint8_t>(addressInfo->ai_addr->sa_data[4]),
-		static_cast<uint8_t>(addressInfo->ai_addr->sa_data[5]),
-		static_cast<uint16_t>(addressInfo->ai_addr->sa_data[0]) * 256 + addressInfo->ai_addr->sa_data[1]);
+	auto msgPtr = InetNtop(AF_INET6, &addressInfo->sin6_addr, msgBuffer, bufferSize);
+	Assert(msgPtr != nullptr);
 
-	Utilities::Logging::Log(msgBuffer);
+	Utilities::Logging::Log(L"Endpoint address: ", msgBuffer, L".");
+}
+
+inline void LogEndpointAddress(sockaddr_in* addressInfo)
+{
+	const int bufferSize = 64;
+	wchar_t msgBuffer[bufferSize];
+
+	auto msgPtr = InetNtop(AF_INET, &addressInfo->sin_addr, msgBuffer, bufferSize);
+	Assert(msgPtr != nullptr);
+
+	Utilities::Logging::Log(L"Endpoint address: ", msgBuffer, L".");
 }
 
 template <typename ConnectionHandler>
@@ -26,8 +31,12 @@ inline void Client::Connect(const std::wstring& hostName, int port, ConnectionHa
 
 	// Setup socket
 
-	auto connectionSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	auto connectionSocket = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
 	Logging::LogFatalErrorIfFailed(connectionSocket == INVALID_SOCKET, L"Failed to open a TCP socket: ");
+
+	BOOL falseValue = FALSE;
+	auto result = setsockopt(connectionSocket, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<const char*>(&falseValue), sizeof(falseValue));
+	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to set the connection socket to be able to connection via IPv4: ");
 
 	// Resolve endpoint IP
 
@@ -36,18 +45,32 @@ inline void Client::Connect(const std::wstring& hostName, int port, ConnectionHa
 
 	ZeroMemory(&addressInfoHint, sizeof(addressInfoHint));
 
-	addressInfoHint.ai_family = AF_INET;
+	addressInfoHint.ai_family = AF_UNSPEC;
 	addressInfoHint.ai_socktype = SOCK_STREAM;
-	addressInfoHint.ai_protocol = IPPROTO_TCP;
 
-	auto result = GetAddrInfoW(hostName.c_str(), nullptr, &addressInfoHint, &addressInfo);
+	result = GetAddrInfoW(hostName.c_str(), nullptr, &addressInfoHint, &addressInfo);
 	Logging::LogErrorIfFailed(result != ERROR_SUCCESS, L"Failed to get address info: ");
 	if (result != ERROR_SUCCESS) goto cleanup;
+	
+	sockaddr_in6 remoteAddress;
 
-	*reinterpret_cast<uint16_t*>(addressInfo->ai_addr->sa_data) = htons(port);
-	LogEndpointAddress(addressInfo);
+	if (addressInfo->ai_family == AF_INET)
+	{
+		auto socketAddress = reinterpret_cast<sockaddr_in*>(addressInfo->ai_addr);
+		SCOPE_ID scopeId;
+		scopeId.Value = 0;
 
-	result = connect(connectionSocket, addressInfo->ai_addr, addressInfo->ai_addrlen);
+		IN6ADDR_SETV4MAPPED(&remoteAddress, &socketAddress->sin_addr, scopeId, htons(port));
+		LogEndpointAddress(socketAddress);
+	}
+	else
+	{
+		remoteAddress = *reinterpret_cast<sockaddr_in6*>(addressInfo->ai_addr);
+		remoteAddress.sin6_port = htons(port);
+		LogEndpointAddress(&remoteAddress);
+	}
+	
+	result = connect(connectionSocket, reinterpret_cast<sockaddr*>(&remoteAddress), sizeof(remoteAddress));
 	Logging::LogErrorIfFailed(result != ERROR_SUCCESS, L"Failed to connect to the end point: ");
 	if (result != ERROR_SUCCESS) goto cleanup;
 

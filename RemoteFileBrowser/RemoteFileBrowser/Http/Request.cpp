@@ -150,6 +150,7 @@ private:
 			}
 		}
 
+		m_BufferPosition++;
 		ParseBody(s);
 		return;
 

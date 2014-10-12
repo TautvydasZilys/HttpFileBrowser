@@ -14,7 +14,7 @@ namespace BackendServer
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
-            RegisterConnectionController.StartListening(1335);
+            RegisterConnectionController.StartListening(1330);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);

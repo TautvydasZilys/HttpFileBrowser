@@ -19,7 +19,7 @@ void ClientServerConnection::Create(SOCKET connectionSocket, string&& hostname)
 
 	// Send REST request
 
-	Http::RestCommunicator::Post(connectionSocket, std::move(hostname), "/api/RegisterConnection", systemUniqueIdKey, systemUniqueIdValue);
+	Http::RestCommunicator::Post(connectionSocket, std::move(hostname), "/api/RegisterConnection/", systemUniqueIdKey, systemUniqueIdValue);
 	if (!Http::RestCommunicator::ReceiveResponse(connectionSocket))
 	{
 		Utilities::Logging::Log(L"[ERROR] Server didn't accept system unique ID.");
@@ -28,7 +28,7 @@ void ClientServerConnection::Create(SOCKET connectionSocket, string&& hostname)
 
 	// Find my port out
 
-	sockaddr_in socketAddress;
+	sockaddr_in6 socketAddress;
 	int socketAddressLength = sizeof(socketAddress);
 
 	auto result = getsockname(connectionSocket, reinterpret_cast<sockaddr*>(&socketAddress), &socketAddressLength);
@@ -37,7 +37,7 @@ void ClientServerConnection::Create(SOCKET connectionSocket, string&& hostname)
 	// Start listening for connection
 
 	Tcp::Listener listener;
-	listener.RunAsync(socketAddress.sin_addr.S_un.S_addr, socketAddress.sin_port, [](SOCKET incomingSocket, sockaddr_in clientAddress)
+	listener.RunAsync(socketAddress.sin6_addr, socketAddress.sin6_port, [](SOCKET incomingSocket, sockaddr_in6 clientAddress)
 	{
 		Http::Server::StartServiceClient(incomingSocket, clientAddress, &FileBrowserResponseHandler::ExecuteRequest);
 	});
@@ -53,7 +53,7 @@ void ClientServerConnection::Create(SOCKET connectionSocket, string&& hostname)
 			return;
 		}
 		
-		static const string ipKey("ip");
+		static const string ipKey("IpAddress");
 		auto clientIp = clientInfo.find(ipKey);
 
 		if (clientIp == clientInfo.end())	// Server sent us garbage
@@ -61,13 +61,30 @@ void ClientServerConnection::Create(SOCKET connectionSocket, string&& hostname)
 			return;
 		}
 
-		UINT ipNumeric = inet_addr(clientIp->second.c_str());
+		// Try parse as IPv6, 
+		// f it fails, try IPv4
+		IN_ADDR inAddr;
+		IN6_ADDR in6Addr;
 
-		if (ipNumeric == 0 || ipNumeric == INADDR_NONE)	// IP can't be 0
+		if (InetPtonA(AF_INET6, clientIp->second.c_str(), &in6Addr) != 1)
+		{
+			if (InetPtonA(AF_INET, clientIp->second.c_str(), &inAddr) != 1)
+			{
+				return;
+			}
+			else
+			{
+				IN6_SET_ADDR_V4MAPPED(&in6Addr, &inAddr);
+			}
+		}
+
+		if (in6Addr.u.Word[0] == 0 && in6Addr.u.Word[1] == 0 && in6Addr.u.Word[2] == 0 && in6Addr.u.Word[3] == 0 &&
+			in6Addr.u.Word[4] == 0 && in6Addr.u.Word[5] == 0 && in6Addr.u.Word[6] == 0 && in6Addr.u.Word[7] == 0)	// IP can't be 0
 		{
 			return;
 		}
 
-		listener.WhitelistIP(ipNumeric);
+		listener.WhitelistIP(in6Addr);
+		Http::RestCommunicator::SendResponse(connectionSocket, true);
 	}	
 }
