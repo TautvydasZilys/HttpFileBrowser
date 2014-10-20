@@ -10,9 +10,11 @@ CriticalSection Logging::s_LogCriticalSection;
 static HANDLE s_OutputFile;
 static const wchar_t kLogFileName[] = L"LogFile.log";
 
-void Logging::Initialize()
+void Logging::Initialize(bool forceOverwrite)
 {
-	s_OutputFile = CreateFile(kLogFileName, FILE_GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
+	auto openMode = forceOverwrite ? CREATE_ALWAYS : CREATE_NEW;
+	s_OutputFile = CreateFile(kLogFileName, FILE_GENERIC_WRITE, FILE_SHARE_READ, nullptr, openMode, FILE_ATTRIBUTE_NORMAL, nullptr);
+	Assert(s_OutputFile != INVALID_HANDLE_VALUE || !forceOverwrite);
 
 	if (s_OutputFile == INVALID_HANDLE_VALUE)
 	{
@@ -28,11 +30,18 @@ void Logging::Initialize()
 		Assert(result != FALSE);
 		Assert(bytesWritten = sizeof(threeNewLines));
 	}
+
+	SetLastError(ERROR_SUCCESS);
 }
 
 void Logging::Shutdown()
 {
 	CloseHandle(s_OutputFile);
+}
+
+std::wstring Logging::GetLogFileName()
+{
+	return kLogFileName;
 }
 
 void Logging::OutputMessage(const char* message, size_t length)
@@ -71,8 +80,8 @@ void Logging::OutputCurrentTimestamp()
 
 	char buffer[kBufferSize];
 	wchar_t wbuffer[kBufferSize];
-	SystemTimeToStringInline(wbuffer);
-	Encoding::Utf16ToUtf8Inline(wbuffer, buffer);
+	auto dateTimeLength = SystemTimeToStringInline(wbuffer);
+	Encoding::Utf16ToUtf8Inline(wbuffer, dateTimeLength, buffer, kBufferSize);
 
 	OutputMessage(buffer);
 	OutputMessage("] ");

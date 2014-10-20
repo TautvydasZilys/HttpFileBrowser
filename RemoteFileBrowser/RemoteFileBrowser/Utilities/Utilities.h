@@ -32,8 +32,9 @@ namespace Utilities
 		template <typename ...Message>
 		static inline void LogFatalErrorIfFailed(bool failed, Message&& ...message);
 
-		static void Initialize();
+		static void Initialize(bool forceOverwrite = false);
 		static void Shutdown();
+		static std::wstring GetLogFileName();
 
 		Logging() = delete;
 		Logging(const Logging&) = delete;
@@ -58,18 +59,10 @@ namespace Utilities
 	namespace Encoding
 	{
 		size_t Utf8ToUtf16Inline(const char* str, size_t strLength, wchar_t* destination, size_t destinationLength);
-
-		template <size_t SourceLength, size_t DestinationLength>
-		inline size_t Utf8ToUtf16Inline(const char (&str)[SourceLength], wchar_t (&destination)[DestinationLength]);
-
 		std::wstring Utf8ToUtf16(const char* str, size_t strLength);
 		inline std::wstring Utf8ToUtf16(const std::string& str);
 
 		size_t Utf16ToUtf8Inline(const wchar_t* wstr, size_t wstrLength, char* destination, size_t destinationLength);
-
-		template <size_t SourceLength, size_t DestinationLength>
-		inline size_t Utf16ToUtf8Inline(const wchar_t (&wstr)[SourceLength], char (&destination)[DestinationLength]);
-
 		std::string Utf16ToUtf8(const wchar_t* wstr, size_t wstrLength);
 		inline std::string Utf16ToUtf8(const std::wstring& wstr);
 

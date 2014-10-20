@@ -22,8 +22,8 @@ inline void Utilities::Logging::Win32ErrorToMessageInline(int win32ErrorCode, ch
 {
 	wchar_t wBuffer[kBufferSize];
 
-	FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, win32ErrorCode, 0, wBuffer, kBufferSize, nullptr);
-	Utilities::Encoding::Utf16ToUtf8Inline(wBuffer, buffer);
+	auto messageLength = FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, win32ErrorCode, 0, wBuffer, kBufferSize, nullptr);
+	Utilities::Encoding::Utf16ToUtf8Inline(wBuffer, messageLength, buffer, kBufferSize);
 }
 
 template <typename Message>
@@ -118,21 +118,9 @@ inline void Utilities::Logging::LogFatalErrorIfFailed(bool failed, Message&& ...
 
 // Encoding
 
-template <size_t SourceLength, size_t DestinationLength>
-inline size_t Utilities::Encoding::Utf8ToUtf16Inline(const char (&str)[SourceLength], wchar_t (&destination)[DestinationLength])
-{
-	return Utf8ToUtf16Inline(str, SourceLength, destination, DestinationLength);
-}
-
 inline std::wstring Utilities::Encoding::Utf8ToUtf16(const std::string& str)
 {
 	return Utf8ToUtf16(str.c_str(), str.length());
-}
-
-template <size_t SourceLength, size_t DestinationLength>
-inline size_t Utilities::Encoding::Utf16ToUtf8Inline(const wchar_t(&wstr)[SourceLength], char(&destination)[DestinationLength])
-{
-	return Utf16ToUtf8Inline(wstr, SourceLength, destination, DestinationLength);
 }
 
 inline std::string Utilities::Encoding::Utf16ToUtf8(const std::wstring& wstr)

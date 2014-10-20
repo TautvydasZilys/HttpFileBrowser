@@ -32,7 +32,7 @@ public:
 		CriticalSection& m_Section;
 
 	public:
-		inline Lock(CriticalSection criticalSection) :
+		inline Lock(CriticalSection& criticalSection) :
 			m_Section(criticalSection)
 		{
 			m_Section.Enter();
