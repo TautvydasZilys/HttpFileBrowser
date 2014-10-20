@@ -52,7 +52,7 @@ private:
 		else
 		{
 			m_Buffer[m_BufferPosition - 1] = '\0';
-			Utilities::Logging::Log(L"[ERROR] Unknown HTTP request verb: ", Utilities::Encoding::Utf8ToUtf16(m_Buffer));
+			Utilities::Logging::Log("[ERROR] Unknown HTTP request verb: ", static_cast<char*>(m_Buffer));
 			return false;
 		}
 
@@ -98,7 +98,7 @@ private:
 			else
 			{
 				m_Buffer[newLinePosition] = '\0';
-				Utilities::Logging::Log(L"[ERROR] Unknown http request content type: ", Utilities::Encoding::Utf8ToUtf16(m_Buffer + semicolonPosition + 2));
+				Utilities::Logging::Log("[ERROR] Unknown http request content type: ", m_Buffer + semicolonPosition + 2);
 				return false;
 			}
 		}
@@ -221,7 +221,7 @@ std::string Request::BuildHeaderString() const
 		break;
 
 	default:
-		Utilities::Logging::FatalError(ERROR_INVALID_DATA, L"Failed to build HTTP header string - unknown RequestVerb - ");
+		Utilities::Logging::FatalError(ERROR_INVALID_DATA, "Failed to build HTTP header string - unknown RequestVerb - ");
 		break;
 	}
 
@@ -239,7 +239,7 @@ std::string Request::BuildHeaderString() const
 		break;
 
 	default:
-		Utilities::Logging::FatalError(ERROR_INVALID_DATA, L"Failed to build HTTP header string - unknown contentType - ");
+		Utilities::Logging::FatalError(ERROR_INVALID_DATA, "Failed to build HTTP header string - unknown contentType - ");
 		break;
 	}
 

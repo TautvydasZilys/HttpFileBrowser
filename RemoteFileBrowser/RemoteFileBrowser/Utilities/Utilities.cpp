@@ -7,29 +7,55 @@ using namespace Utilities;
 
 CriticalSection Logging::s_LogCriticalSection;
 
-static wofstream s_OutputFile;
+static HANDLE s_OutputFile;
 static const wchar_t kLogFileName[] = L"LogFile.log";
 
-void Logging::OutputMessage(const wchar_t* message)
+void Logging::Initialize()
+{
+	s_OutputFile = CreateFile(kLogFileName, FILE_GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
+
+	if (s_OutputFile == INVALID_HANDLE_VALUE)
+	{
+		Assert(GetLastError() == ERROR_FILE_EXISTS);
+
+		s_OutputFile = CreateFile(kLogFileName, FILE_GENERIC_WRITE, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+		Assert(s_OutputFile != INVALID_HANDLE_VALUE);
+
+		const char threeNewLines[] = "\r\n\r\n\r\n";
+		DWORD bytesWritten;
+
+		auto result = WriteFile(s_OutputFile, threeNewLines, sizeof(threeNewLines), &bytesWritten, nullptr);
+		Assert(result != FALSE);
+		Assert(bytesWritten = sizeof(threeNewLines));
+	}
+}
+
+void Logging::Shutdown()
+{
+	CloseHandle(s_OutputFile);
+}
+
+void Logging::OutputMessage(const char* message, size_t length)
 {
 	if (IsDebuggerPresent())
 	{
-		OutputDebugStringW(message);
+		OutputDebugStringA(message);
 	}
 
-	if (!s_OutputFile.is_open())
-	{
-		s_OutputFile.open(kLogFileName);
-	}
+	DWORD bytesWritten;
 
-	s_OutputFile << message;
+	auto result = WriteFile(s_OutputFile, message, static_cast<DWORD>(length), &bytesWritten, nullptr);
+	Assert(result != FALSE);
+	Assert(bytesWritten == length);
 }
 
-static inline void SystemTimeToStringInline(wchar_t (&buffer)[Logging::kBufferSize], SYSTEMTIME* systemTime = nullptr)
+static inline size_t SystemTimeToStringInline(wchar_t (&buffer)[Logging::kBufferSize], SYSTEMTIME* systemTime = nullptr)
 {
 	auto dateLength = GetDateFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, DATE_SHORTDATE, systemTime, nullptr, buffer, Logging::kBufferSize, nullptr);
 	buffer[dateLength - 1] = ' ';
 	auto timeLength = GetTimeFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, 0, systemTime, nullptr, buffer + dateLength, Logging::kBufferSize - dateLength);
+
+	return dateLength + timeLength;
 }
 
 static wstring SystemTimeToString(SYSTEMTIME* systemTime = nullptr)
@@ -41,13 +67,15 @@ static wstring SystemTimeToString(SYSTEMTIME* systemTime = nullptr)
 
 void Logging::OutputCurrentTimestamp()
 {
-	OutputMessage(L"[");
+	OutputMessage("[");
 
-	wchar_t buffer[kBufferSize];
-	SystemTimeToStringInline(buffer);
+	char buffer[kBufferSize];
+	wchar_t wbuffer[kBufferSize];
+	SystemTimeToStringInline(wbuffer);
+	Encoding::Utf16ToUtf8Inline(wbuffer, buffer);
+
 	OutputMessage(buffer);
-
-	OutputMessage(L"] ");
+	OutputMessage("] ");
 }
 
 wstring Logging::Win32ErrorToMessage(int win32ErrorCode)
@@ -59,15 +87,21 @@ wstring Logging::Win32ErrorToMessage(int win32ErrorCode)
 
 void Logging::Terminate(int errorCode)
 {
-	if (s_OutputFile.is_open())
-	{
-		s_OutputFile.close();
-	}
-
+	Logging::Shutdown();
 	__fastfail(errorCode); // Just crash™ - let user know we crashed by bringing up WER dialog
 }
 
 // Encoding
+
+size_t Encoding::Utf8ToUtf16Inline(const char* str, size_t strLength, wchar_t* destination, size_t destinationLength)
+{
+	Assert(destinationLength >= strLength);
+
+	auto length = MultiByteToWideChar(CP_UTF8, 0, str, strLength, destination, destinationLength);
+	Assert(length > 0);
+
+	return length;
+}
 
 wstring Encoding::Utf8ToUtf16(const char* str, size_t strLength)
 {
@@ -80,6 +114,16 @@ wstring Encoding::Utf8ToUtf16(const char* str, size_t strLength)
 	Assert(length > 0);
 
 	return wstring(buffer.get(), length);
+}
+
+size_t Encoding::Utf16ToUtf8Inline(const wchar_t* wstr, size_t wstrLength, char* destination, size_t destinationLength)
+{
+	Assert(destinationLength >= wstrLength);
+
+	auto length = WideCharToMultiByte(CP_UTF8, 0, wstr, wstrLength, destination, destinationLength, nullptr, nullptr);
+	Assert(length > 0);
+
+	return length;
 }
 
 string Encoding::Utf16ToUtf8(const wchar_t* wstr, size_t wstrLength)
@@ -516,18 +560,18 @@ vector<uint8_t> FileSystem::ReadFileToVector(const std::wstring& path)
 
 	if (fileHandle == INVALID_HANDLE_VALUE)
 	{
-		Logging::FatalError(GetLastError(), L"Failed to open \"", path, L"\": ");
+		Logging::FatalError(GetLastError(), "Failed to open \"", Encoding::Utf16ToUtf8(path), "\": ");
 	}
 
 	LARGE_INTEGER fileSize;
 	if (GetFileSizeEx(fileHandle, &fileSize) == FALSE)
 	{
-		Logging::FatalError(GetLastError(), L"Failed to get size of \"", path, L"\": ");
+		Logging::FatalError(GetLastError(), "Failed to get size of \"", Encoding::Utf16ToUtf8(path), "\": ");
 	}
 
 	if (fileSize.QuadPart > 64 * 1024 * 1024)
 	{
-		Logging::FatalError(ERROR_FILE_TOO_LARGE, L"\"", path, L"\": ");
+		Logging::FatalError(ERROR_FILE_TOO_LARGE, "\"", Encoding::Utf16ToUtf8(path), "\": ");
 	}
 
 	vector<uint8_t> fileBytes(static_cast<size_t>(fileSize.QuadPart));
@@ -538,7 +582,7 @@ vector<uint8_t> FileSystem::ReadFileToVector(const std::wstring& path)
 		if (ReadFile(fileHandle, &fileBytes[0], static_cast<DWORD>(fileSize.QuadPart), &numberOfBytesRead, nullptr) == FALSE ||
 			numberOfBytesRead != fileSize.QuadPart)
 		{
-			Logging::FatalError(GetLastError(), L"Failed to read \"", path, L"\": ");
+			Logging::FatalError(GetLastError(), "Failed to read \"", Encoding::Utf16ToUtf8(path), "\": ");
 		}
 	}
 
@@ -554,13 +598,13 @@ static string GetMacAddress()
 	ULONG infoSize = 0;
 
 	auto result = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_SKIP_FRIENDLY_NAME, nullptr, nullptr, &infoSize);
-	Logging::LogFatalErrorIfFailed(result != ERROR_BUFFER_OVERFLOW, L"Failed to get memory size needed for adapters addresses: ");
+	Logging::LogFatalErrorIfFailed(result != ERROR_BUFFER_OVERFLOW, "Failed to get memory size needed for adapters addresses: ");
 
 	unique_ptr<uint8_t[]> adapterAddressBuffer(new uint8_t[infoSize]);
 	auto adapterAddresses = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(adapterAddressBuffer.get());
 
 	result = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_SKIP_FRIENDLY_NAME, nullptr, adapterAddresses, &infoSize);
-	Logging::LogFatalErrorIfFailed(result != ERROR_SUCCESS, L"Failed to get adapters addresses: ");
+	Logging::LogFatalErrorIfFailed(result != ERROR_SUCCESS, "Failed to get adapters addresses: ");
 
 	auto macLength = adapterAddresses->PhysicalAddressLength;
 	string macAddress;

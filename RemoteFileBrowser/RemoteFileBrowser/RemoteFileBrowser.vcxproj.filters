@@ -24,6 +24,9 @@
     <Filter Include="Source\Core">
       <UniqueIdentifier>{0620c681-6ee8-463c-81b3-5f1110d0987e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Tests">
+      <UniqueIdentifier>{289fe555-2d4d-4fa8-9f22-8c561b695fdc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\PrecompiledHeader.cpp">
@@ -47,9 +50,6 @@
     <ClCompile Include="Http\RestCommunicator.cpp">
       <Filter>Source\Http</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities\WSAInitializer.cpp">
-      <Filter>Source\Utilities</Filter>
-    </ClCompile>
     <ClCompile Include="Communication\AssetDatabase.cpp">
       <Filter>Source\Communication</Filter>
     </ClCompile>
@@ -61,6 +61,12 @@
     </ClCompile>
     <ClCompile Include="Tcp\Listener.cpp">
       <Filter>Source\Tcp</Filter>
+    </ClCompile>
+    <ClCompile Include="LoggingTests.cpp">
+      <Filter>Source\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\Initializer.cpp">
+      <Filter>Source\Utilities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -88,9 +94,6 @@
     <ClInclude Include="Http\RestCommunicator.h">
       <Filter>Source\Http</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities\WSAInitializer.h">
-      <Filter>Source\Utilities</Filter>
-    </ClInclude>
     <ClInclude Include="Communication\AssetDatabase.h">
       <Filter>Source\Communication</Filter>
     </ClInclude>
@@ -114,6 +117,9 @@
     </ClInclude>
     <ClInclude Include="PrecompiledHeader.h">
       <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Initializer.h">
+      <Filter>Source\Utilities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

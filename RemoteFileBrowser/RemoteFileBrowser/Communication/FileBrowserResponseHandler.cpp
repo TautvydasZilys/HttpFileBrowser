@@ -21,7 +21,7 @@ FileBrowserResponseHandler::FileBrowserResponseHandler(SOCKET clientSocket, cons
 	m_FileStatus(FileSystem::QueryFileStatus(m_WidePath)),
 	m_ErrorCode(ERROR_SUCCESS)
 {
-	Logging::Log(L"Requested path: \"", m_WidePath, L"\".");
+	Logging::Log("Requested path: \"", requestedPath, "\".");
 }
 
 void FileBrowserResponseHandler::Execute()
@@ -42,7 +42,7 @@ void FileBrowserResponseHandler::SendData(const char* data, int length) const
 
 	if (sendResult == SOCKET_ERROR)
 	{
-		Logging::Error(WSAGetLastError(), L"Failed to send response: ");
+		Logging::Error(WSAGetLastError(), "Failed to send response: ");
 	}
 }
 
@@ -69,7 +69,7 @@ void FileBrowserResponseHandler::SendFileResponse() const
 	{
 		// StreamFile will throw exception on failure
 
-		Logging::Error(GetLastError(), L"Failed to send file \"", m_WidePath, L"\": ");
+		Logging::Error(GetLastError(), "Failed to send file \"", m_RequestedPath, "\": ");
 		closesocket(m_ClientSocket);
 
 		SetLastError(ERROR_SUCCESS);
@@ -279,7 +279,7 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContent(stringstream& html) con
 			break;
 
 		default:
-			Logging::Log(L"ERROR: unexpected file status in FileBrowserResponseHandler::GenerateHtmlBodyContent (", to_wstring(static_cast<int>(m_FileStatus)), L").");
+			Logging::Log("ERROR: unexpected file status in FileBrowserResponseHandler::GenerateHtmlBodyContent (", to_string(static_cast<int>(m_FileStatus)), ").");
 		}
 	}
 }

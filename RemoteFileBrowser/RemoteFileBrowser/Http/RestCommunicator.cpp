@@ -21,7 +21,7 @@ static void SendPostRequest(SOCKET s, const Http::Request& httpRequest)
 
 fail:
 	Assert(false);	
-	Utilities::Logging::LogErrorIfFailed(true, L"Failed to send post request: ");
+	Utilities::Logging::LogErrorIfFailed(true, "Failed to send post request: ");
 }
 
 void Http::RestCommunicator::Post(SOCKET s, string&& hostname, string&& path, const string& key, const string& value)

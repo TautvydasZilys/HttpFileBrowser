@@ -6,11 +6,11 @@
 #include "Tcp\Client.h"
 #include "Tcp\Listener.h"
 #include "Utilities\Event.h"
-#include "Utilities\WSAInitializer.h"
+#include "Utilities\Initializer.h"
 
 int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-	WSAInitializer winSockContext;
+	Initializer winSockContext;
 	AssetDatabase::Initialize();
 	/*
 	Tcp::Listener listener;

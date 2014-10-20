@@ -10,10 +10,14 @@ namespace Utilities
 		static const int kBufferSize = 256;
 
 		static inline void Win32ErrorToMessageInline(int win32ErrorCode, wchar_t (&buffer)[kBufferSize]);
+		static inline void Win32ErrorToMessageInline(int win32ErrorCode, char (&buffer)[kBufferSize]);
 		static std::wstring Win32ErrorToMessage(int win32ErrorCode);
 		
-		static inline void OutputMessage(const std::wstring& message);
-		static void OutputMessage(const wchar_t* message);
+		static inline void OutputMessage(const std::string& message);
+		static inline void OutputMessage(const char* message);
+		template <size_t Length>
+		static inline void OutputMessage(const char (&message)[Length]);
+		static void OutputMessage(const char* message, size_t length);
 		static void OutputCurrentTimestamp();
 
 		template <typename ...Message>
@@ -27,6 +31,9 @@ namespace Utilities
 		static inline void LogErrorIfFailed(bool failed, Message&& ...message);
 		template <typename ...Message>
 		static inline void LogFatalErrorIfFailed(bool failed, Message&& ...message);
+
+		static void Initialize();
+		static void Shutdown();
 
 		Logging() = delete;
 		Logging(const Logging&) = delete;
@@ -50,8 +57,18 @@ namespace Utilities
 
 	namespace Encoding
 	{
+		size_t Utf8ToUtf16Inline(const char* str, size_t strLength, wchar_t* destination, size_t destinationLength);
+
+		template <size_t SourceLength, size_t DestinationLength>
+		inline size_t Utf8ToUtf16Inline(const char (&str)[SourceLength], wchar_t (&destination)[DestinationLength]);
+
 		std::wstring Utf8ToUtf16(const char* str, size_t strLength);
 		inline std::wstring Utf8ToUtf16(const std::string& str);
+
+		size_t Utf16ToUtf8Inline(const wchar_t* wstr, size_t wstrLength, char* destination, size_t destinationLength);
+
+		template <size_t SourceLength, size_t DestinationLength>
+		inline size_t Utf16ToUtf8Inline(const wchar_t (&wstr)[SourceLength], char (&destination)[DestinationLength]);
 
 		std::string Utf16ToUtf8(const wchar_t* wstr, size_t wstrLength);
 		inline std::string Utf16ToUtf8(const std::wstring& wstr);

@@ -13,9 +13,17 @@
 
 // Logging
 
-inline void Utilities::Logging::Win32ErrorToMessageInline(int win32ErrorCode, wchar_t(&buffer)[kBufferSize])
+inline void Utilities::Logging::Win32ErrorToMessageInline(int win32ErrorCode, wchar_t (&buffer)[kBufferSize])
 {
 	FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, win32ErrorCode, 0, buffer, kBufferSize, nullptr);
+}
+
+inline void Utilities::Logging::Win32ErrorToMessageInline(int win32ErrorCode, char (&buffer)[kBufferSize])
+{
+	wchar_t wBuffer[kBufferSize];
+
+	FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, win32ErrorCode, 0, wBuffer, kBufferSize, nullptr);
+	Utilities::Encoding::Utf16ToUtf8Inline(wBuffer, buffer);
 }
 
 template <typename Message>
@@ -31,9 +39,20 @@ inline void Utilities::Logging::OutputMessages(const FirstMessage& message, Mess
 	OutputMessages(std::forward<Message>(messages)...);
 }
 
-inline void Utilities::Logging::OutputMessage(const std::wstring& message)
+inline void Utilities::Logging::OutputMessage(const std::string& message)
 {
-	OutputMessage(message.c_str());
+	OutputMessage(message.c_str(), message.length());
+}
+
+inline void Utilities::Logging::OutputMessage(const char* message)
+{
+	OutputMessage(message, strlen(message));
+}
+
+template <int Length>
+static inline void OutputMessage(const char(&message)[Length])
+{
+	OutputMessage(message, Length);
 }
 
 template <typename ...Message>
@@ -43,13 +62,13 @@ inline void Utilities::Logging::Log(Message&& ...message)
 
 	OutputCurrentTimestamp();
 	OutputMessages(std::forward<Message>(message)...);
-	OutputMessage(L"\r\n");
+	OutputMessage("\r\n");
 }
 
 template <typename ...Message>
 inline void Utilities::Logging::Error(int win32ErrorCode, Message&& ...message)
 {
-	wchar_t errorMessage[kBufferSize];
+	char errorMessage[kBufferSize];
 
 	Win32ErrorToMessageInline(win32ErrorCode, errorMessage);
 	Log(std::forward<Message>(message)..., errorMessage);
@@ -58,10 +77,10 @@ inline void Utilities::Logging::Error(int win32ErrorCode, Message&& ...message)
 template <typename ...Message>
 inline void Utilities::Logging::FatalError(int win32ErrorCode, Message&& ...message)
 {
-	wchar_t errorMessage[kBufferSize];
+	char errorMessage[kBufferSize];
 
 	Win32ErrorToMessageInline(win32ErrorCode, errorMessage);
-	Log(L"Terminating due to critical error:\r\n\t\t", std::forward<Message>(message)..., errorMessage);
+	Log("Terminating due to critical error:\r\n\t\t", std::forward<Message>(message)..., errorMessage);
 
 	Terminate(win32ErrorCode);
 }
@@ -99,9 +118,21 @@ inline void Utilities::Logging::LogFatalErrorIfFailed(bool failed, Message&& ...
 
 // Encoding
 
+template <size_t SourceLength, size_t DestinationLength>
+inline size_t Utilities::Encoding::Utf8ToUtf16Inline(const char (&str)[SourceLength], wchar_t (&destination)[DestinationLength])
+{
+	return Utf8ToUtf16Inline(str, SourceLength, destination, DestinationLength);
+}
+
 inline std::wstring Utilities::Encoding::Utf8ToUtf16(const std::string& str)
 {
 	return Utf8ToUtf16(str.c_str(), str.length());
+}
+
+template <size_t SourceLength, size_t DestinationLength>
+inline size_t Utilities::Encoding::Utf16ToUtf8Inline(const wchar_t(&wstr)[SourceLength], char(&destination)[DestinationLength])
+{
+	return Utf16ToUtf8Inline(wstr, SourceLength, destination, DestinationLength);
 }
 
 inline std::string Utilities::Encoding::Utf16ToUtf8(const std::wstring& wstr)

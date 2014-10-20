@@ -49,7 +49,7 @@ void Server::HandleRequest()
 	// Only 'GET' request is supported
 	if (requestType.length() < 3 || requestType[0] != 'G' && requestType[1] != 'E' && requestType[2] != 'T')
 	{
-		Logging::Log(L"Unknown request type: ", Encoding::Utf8ToUtf16(requestType));
+		Logging::Log("Unknown request type: ", requestType);
 		return;
 	}
 
@@ -99,7 +99,7 @@ void Server::SendResponse(const string& response)
 
 	if (sendResult == SOCKET_ERROR)
 	{
-		Logging::Error(WSAGetLastError(), L"Failed to send response: ");
+		Logging::Error(WSAGetLastError(), "Failed to send response: ");
 	}
 }
 
@@ -140,16 +140,16 @@ void Server::ReportUserAgent(int dataOffset)
 		dataOffset = lineFeedPos + 2;
 	}
 
-	Logging::Log(L"Client user agent: ", Utilities::Encoding::Utf8ToUtf16(httpHeader["User-Agent"]));
+	Logging::Log("Client user agent: ", httpHeader["User-Agent"]);
 }
 
 void Server::ReportConnectionDroppedError()
 {
 	const int bufferSize = 64;
-	wchar_t msgBuffer[bufferSize];
+	char msgBuffer[bufferSize];
 
-	auto msgPtr = InetNtop(AF_INET6, &m_ClientAddress.sin6_addr, msgBuffer, bufferSize);
+	auto msgPtr = inet_ntop(AF_INET6, &m_ClientAddress.sin6_addr, msgBuffer, bufferSize);
 	Assert(msgPtr != nullptr);
 
-	Logging::Error(WSAGetLastError(), L"Connection from ", msgBuffer, L" dropped: ");
+	Logging::Error(WSAGetLastError(), "Connection from ", msgBuffer, " dropped: ");
 }

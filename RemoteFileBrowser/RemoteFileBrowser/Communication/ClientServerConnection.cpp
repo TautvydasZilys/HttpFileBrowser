@@ -22,7 +22,7 @@ void ClientServerConnection::Create(SOCKET connectionSocket, string&& hostname)
 	Http::RestCommunicator::Post(connectionSocket, std::move(hostname), "/api/RegisterConnection/", systemUniqueIdKey, systemUniqueIdValue);
 	if (!Http::RestCommunicator::ReceiveResponse(connectionSocket))
 	{
-		Utilities::Logging::Log(L"[ERROR] Server didn't accept system unique ID.");
+		Utilities::Logging::Log("[ERROR] Server didn't accept system unique ID.");
 		return;
 	}
 

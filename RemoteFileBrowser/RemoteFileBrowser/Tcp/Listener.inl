@@ -5,21 +5,21 @@ inline SOCKET Listener::CreateListeningSocket(const in6_addr& address, uint16_t 
 	// Open listening socket
 
 	auto listeningSocket = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
-	Logging::LogFatalErrorIfFailed(listeningSocket == INVALID_SOCKET, L"Failed to open a TCP socket: ");
+	Logging::LogFatalErrorIfFailed(listeningSocket == INVALID_SOCKET, "Failed to open a TCP socket: ");
 
 	// Make it able reuse the address, make it dual mode and non blocking
 
 	BOOL trueValue = TRUE;
 	auto result = setsockopt(listeningSocket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&trueValue), sizeof(trueValue));
-	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to set the listening socket to reuse its address: ");
+	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, "Failed to set the listening socket to reuse its address: ");
 
 	BOOL falseValue = FALSE;
 	result = setsockopt(listeningSocket, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<const char*>(&falseValue), sizeof(falseValue));
-	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to set the listening socket to accept IPv4 connections: ");
+	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, "Failed to set the listening socket to accept IPv4 connections: ");
 
 	u_long nonBlocking = TRUE;
 	result = ioctlsocket(listeningSocket, FIONBIO, &nonBlocking);
-	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to set the listening socket to async mode: ");
+	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, "Failed to set the listening socket to async mode: ");
 
 	// Bind it to port
 
@@ -31,12 +31,12 @@ inline SOCKET Listener::CreateListeningSocket(const in6_addr& address, uint16_t 
 	inAddress.sin6_port = port;
 	
 	result = ::bind(listeningSocket, reinterpret_cast<sockaddr*>(&inAddress), sizeof(inAddress));
-	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to bind the listening socket: ");
+	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, "Failed to bind the listening socket: ");
 
 	// Listen on the socket
 
 	result = listen(listeningSocket, SOMAXCONN);
-	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to listen on the listening socket: ");
+	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, "Failed to listen on the listening socket: ");
 
 	return listeningSocket;
 }
@@ -45,16 +45,16 @@ template <typename Callback>
 inline void Listener::StartIncomingConnectionThread(Callback callback, SOCKET acceptedSocket, sockaddr_in6& clientAddress)
 {
 	const int bufferSize = 64;
-	wchar_t msgBuffer[bufferSize];
+	char msgBuffer[bufferSize];
 
-	auto msgPtr = InetNtop(AF_INET6, &clientAddress.sin6_addr, msgBuffer, bufferSize);
+	auto msgPtr = inet_ntop(AF_INET6, &clientAddress.sin6_addr, msgBuffer, bufferSize);
 	Assert(msgPtr != nullptr);
 
-	Utilities::Logging::Log(L"Accepted connection from ", msgBuffer, L".");
+	Utilities::Logging::Log("Accepted connection from ", msgBuffer, ".");
 
 	u_long nonBlocking = FALSE;
 	auto result = ioctlsocket(acceptedSocket, FIONBIO, &nonBlocking);
-	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to set the listening socket to blocking mode: ");
+	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, "Failed to set the listening socket to blocking mode: ");
 
 	std::thread t(callback, acceptedSocket, clientAddress);
 	t.detach();
@@ -102,7 +102,7 @@ void Listener::Run(const in6_addr& address, uint16_t port, Callback callback)
 		}
 		else if (WSAGetLastError() != WSAEWOULDBLOCK)
 		{
-			Logging::LogErrorIfFailed(true, L"Failed to accept connection: ");
+			Logging::LogErrorIfFailed(true, "Failed to accept connection: ");
 		}
 		else
 		{
@@ -110,9 +110,9 @@ void Listener::Run(const in6_addr& address, uint16_t port, Callback callback)
 		}
 	}
 
-	Logging::Log(L"Closing listening socket.");
+	Logging::Log("Closing listening socket.");
 	auto closeResult = closesocket(listeningSocket);
-	Logging::LogErrorIfFailed(closeResult == SOCKET_ERROR, L"Failed to close listening socket: ");
+	Logging::LogErrorIfFailed(closeResult == SOCKET_ERROR, "Failed to close listening socket: ");
 }
 
 template <typename Callback>

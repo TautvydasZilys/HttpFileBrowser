@@ -3,23 +3,23 @@
 inline void LogEndpointAddress(sockaddr_in6* addressInfo)
 {
 	const int bufferSize = 64;
-	wchar_t msgBuffer[bufferSize];
+	char msgBuffer[bufferSize];
 
-	auto msgPtr = InetNtop(AF_INET6, &addressInfo->sin6_addr, msgBuffer, bufferSize);
+	auto msgPtr = inet_ntop(AF_INET6, &addressInfo->sin6_addr, msgBuffer, bufferSize);
 	Assert(msgPtr != nullptr);
 
-	Utilities::Logging::Log(L"Endpoint address: ", msgBuffer, L".");
+	Utilities::Logging::Log("Endpoint address: ", msgBuffer, ".");
 }
 
 inline void LogEndpointAddress(sockaddr_in* addressInfo)
 {
 	const int bufferSize = 64;
-	wchar_t msgBuffer[bufferSize];
+	char msgBuffer[bufferSize];
 
-	auto msgPtr = InetNtop(AF_INET, &addressInfo->sin_addr, msgBuffer, bufferSize);
+	auto msgPtr = inet_ntop(AF_INET, &addressInfo->sin_addr, msgBuffer, bufferSize);
 	Assert(msgPtr != nullptr);
 
-	Utilities::Logging::Log(L"Endpoint address: ", msgBuffer, L".");
+	Utilities::Logging::Log("Endpoint address: ", msgBuffer, ".");
 }
 
 template <typename ConnectionHandler>
@@ -27,16 +27,17 @@ inline void Client::Connect(const std::wstring& hostName, int port, ConnectionHa
 {
 	using namespace Utilities;
 
-	Logging::Log(L"Attempting to connect to \"", hostName, L"\".");
+	auto utf8HostName = Encoding::Utf16ToUtf8(hostName);
+	Logging::Log("Attempting to connect to \"", utf8HostName, "\".");
 
 	// Setup socket
 
 	auto connectionSocket = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
-	Logging::LogFatalErrorIfFailed(connectionSocket == INVALID_SOCKET, L"Failed to open a TCP socket: ");
+	Logging::LogFatalErrorIfFailed(connectionSocket == INVALID_SOCKET, "Failed to open a TCP socket: ");
 
 	BOOL falseValue = FALSE;
 	auto result = setsockopt(connectionSocket, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<const char*>(&falseValue), sizeof(falseValue));
-	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, L"Failed to set the connection socket to be able to connection via IPv4: ");
+	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, "Failed to set the connection socket to be able to connection via IPv4: ");
 
 	// Resolve endpoint IP
 
@@ -49,7 +50,7 @@ inline void Client::Connect(const std::wstring& hostName, int port, ConnectionHa
 	addressInfoHint.ai_socktype = SOCK_STREAM;
 
 	result = GetAddrInfoW(hostName.c_str(), nullptr, &addressInfoHint, &addressInfo);
-	Logging::LogErrorIfFailed(result != ERROR_SUCCESS, L"Failed to get address info: ");
+	Logging::LogErrorIfFailed(result != ERROR_SUCCESS, "Failed to get address info: ");
 	if (result != ERROR_SUCCESS) goto cleanup;
 	
 	sockaddr_in6 remoteAddress;
@@ -71,10 +72,10 @@ inline void Client::Connect(const std::wstring& hostName, int port, ConnectionHa
 	}
 	
 	result = connect(connectionSocket, reinterpret_cast<sockaddr*>(&remoteAddress), sizeof(remoteAddress));
-	Logging::LogErrorIfFailed(result != ERROR_SUCCESS, L"Failed to connect to the end point: ");
+	Logging::LogErrorIfFailed(result != ERROR_SUCCESS, "Failed to connect to the end point: ");
 	if (result != ERROR_SUCCESS) goto cleanup;
 
-	connectionHandler(connectionSocket, Utilities::Encoding::Utf16ToUtf8(hostName));
+	connectionHandler(connectionSocket, std::move(utf8HostName));
 
 cleanup:
 	closesocket(connectionSocket);
