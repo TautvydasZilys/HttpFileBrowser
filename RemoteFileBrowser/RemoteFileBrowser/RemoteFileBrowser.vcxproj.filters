@@ -68,6 +68,9 @@
     <ClCompile Include="Utilities\Initializer.cpp">
       <Filter>Source\Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="Tests\EncodingTests.cpp">
+      <Filter>Source\Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utilities\Utilities.inl">

@@ -8,6 +8,7 @@
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace std;
 using namespace Utilities;
+#include <codecvt>
 
 TEST_CLASS(LoggingTests)
 {
@@ -35,6 +36,13 @@ public:
 		wifstream in(m_LogFileName);
 		vector<wstring> input;
 		wstring line;
+
+		locale oldLocale;
+		locale utf8locale(oldLocale, new codecvt_utf8_utf16<wchar_t>);
+		in.imbue(utf8locale);
+
+		if (in.peek() == 65279)	// Skip UTF8 BOM if it's the first character
+			in.get();
 
 		while (!in.eof())
 		{
@@ -74,7 +82,11 @@ public:
 
 			[this]()
 			{
-				Assert::AreEqual(L"Hello, world!", GetLogFileContents()[0].c_str());
+				auto expected = L"Hello, world!";
+				auto actualStr = GetLogFileContents()[0];
+				auto actual = actualStr.c_str();
+
+				Assert::AreEqual(expected, actual);
 			}
 		);
 	}
@@ -167,6 +179,24 @@ public:
 				}
 
 				AssertEndsWith(expected, GetLogFileContents());
+			}
+		);
+	}
+
+	TEST_METHOD(LogFileIsUtf8)
+	{
+		DoTest(
+			[]()
+			{
+			},
+
+			[this]()
+			{
+				auto logContents = Utilities::FileSystem::ReadFileToVector(m_LogFileName);
+				Assert::AreEqual(static_cast<size_t>(3), logContents.size());
+				Assert::AreEqual(static_cast<uint8_t>(0xEF), logContents[0]);
+				Assert::AreEqual(static_cast<uint8_t>(0xBB), logContents[1]);
+				Assert::AreEqual(static_cast<uint8_t>(0xBF), logContents[2]);
 			}
 		);
 	}

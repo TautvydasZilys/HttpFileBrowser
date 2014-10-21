@@ -30,6 +30,15 @@ void Logging::Initialize(bool forceOverwrite)
 		Assert(result != FALSE);
 		Assert(bytesWritten = sizeof(threeNewLines));
 	}
+	else
+	{
+		const uint8_t utf8ByteOrderMark[] = { 0xEF, 0xBB, 0xBF };
+		DWORD bytesWritten;
+
+		auto result = WriteFile(s_OutputFile, utf8ByteOrderMark, sizeof(utf8ByteOrderMark), &bytesWritten, nullptr);
+		Assert(result != FALSE);
+		Assert(bytesWritten = sizeof(utf8ByteOrderMark));
+	}
 
 	SetLastError(ERROR_SUCCESS);
 }
