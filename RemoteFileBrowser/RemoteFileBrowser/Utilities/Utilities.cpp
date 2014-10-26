@@ -176,8 +176,10 @@ static char HexCharToNumber(char c)
 	}
 }
 
-static char HexDigitToHexChar(int digit)
+static char HexDigitToHexChar(uint8_t digit)
 {
+	Assert(digit >= 0 && digit < 16);
+
 	if (digit < 10)
 	{
 		return digit + '0';
@@ -248,18 +250,12 @@ void Encoding::EncodeUrlInline(string& url)
 {
 	// First count resulting string length, then encode
 
-	string encoded;
-	int encodedLength = 0;
+	size_t encodedLength = 0;
 	bool needsEncoding = false;
 
 	for (auto& c : url)
 	{
-		if (c == ' ')
-		{
-			encodedLength++;
-			needsEncoding = true;
-		}
-		else if (!NeedsUrlEncoding(c))
+		if (!NeedsUrlEncoding(c))
 		{
 			encodedLength++;
 		}
@@ -270,35 +266,28 @@ void Encoding::EncodeUrlInline(string& url)
 		}
 	}
 
-	if (!needsEncoding)
+	if (encodedLength == url.length())
 	{
 		return;
 	}
 
-	if (encodedLength != url.length())
+	int index = static_cast<int>(url.length() - 1);
+	auto encodedIndex = encodedLength - 1;
+	url.resize(encodedLength);
+
+	for (; index > -1; index--)
 	{
-		url.reserve(encodedLength);
-	}
-
-	int encodedIndex = encodedLength - 1;
-
-	for (unsigned int i = url.length() - 1; i > -1; i--)
-	{
-		auto c = url[i];
-
-		if (c == ' ')
-		{
-			url[encodedIndex--] += '+';
-		}
-		else if (!NeedsUrlEncoding(c))
+		auto c = url[index];
+		
+		if (!NeedsUrlEncoding(c))
 		{
 			url[encodedIndex--] = c;
 		}
 		else
 		{
-			url[encodedIndex--] = HexDigitToHexChar(c & 0xf);
+			url[encodedIndex--] = HexDigitToHexChar(static_cast<uint8_t>(c) & 0xf);
+			url[encodedIndex--] = HexDigitToHexChar(static_cast<uint8_t>(c) >> 4);
 			url[encodedIndex--] = '%';
-			url[encodedIndex--] = HexDigitToHexChar(c >> 4);
 		}
 	}
 }
