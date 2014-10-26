@@ -161,7 +161,7 @@ static char HexCharToNumber(char c)
 {
 	if (c > '9')
 	{
-		if (c > 'a')
+		if (c > 'Z')
 		{
 			return c - 'a' + 10;
 		}
