@@ -427,7 +427,7 @@ string FileSystem::FormatFileSizeString(uint64_t size)
 	{
 		result << static_cast<float>(size / 1024 / 1024) / 1024 << " GB";
 	}
-	else if (size < static_cast<uint64_t>(1024 * 1024 * 1024) * 1024 * 1024)
+	else
 	{
 		result << static_cast<float>(size / 1024 / 1024 / 1024) / 1024 << " TB";
 	}

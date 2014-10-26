@@ -128,8 +128,9 @@
     <ClCompile Include="Http\Request.cpp" />
     <ClCompile Include="Http\Server.cpp" />
     <ClCompile Include="Http\RestCommunicator.cpp" />
-    <ClCompile Include="LoggingTests.cpp" />
     <ClCompile Include="Tests\EncodingTests.cpp" />
+    <ClCompile Include="Tests\FileSystemTests.cpp" />
+    <ClCompile Include="Tests\LoggingTests.cpp" />
     <ClCompile Include="Utilities\StreamableFile.cpp" />
     <ClCompile Include="Tcp\Listener.cpp" />
     <ClCompile Include="Utilities\Initializer.cpp" />

@@ -62,13 +62,16 @@
     <ClCompile Include="Tcp\Listener.cpp">
       <Filter>Source\Tcp</Filter>
     </ClCompile>
-    <ClCompile Include="LoggingTests.cpp">
-      <Filter>Source\Tests</Filter>
-    </ClCompile>
     <ClCompile Include="Utilities\Initializer.cpp">
       <Filter>Source\Utilities</Filter>
     </ClCompile>
     <ClCompile Include="Tests\EncodingTests.cpp">
+      <Filter>Source\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\FileSystemTests.cpp">
+      <Filter>Source\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\LoggingTests.cpp">
       <Filter>Source\Tests</Filter>
     </ClCompile>
   </ItemGroup>
