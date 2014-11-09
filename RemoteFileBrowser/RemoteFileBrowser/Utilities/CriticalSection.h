@@ -8,7 +8,13 @@ private:
 public:
 	inline CriticalSection()
 	{
-		InitializeCriticalSection(&m_CriticalSection);
+#if _DEBUG
+		DWORD flags = 0;
+#else
+		DWORD flags = CRITICAL_SECTION_NO_DEBUG_INFO;
+#endif
+
+		InitializeCriticalSectionEx(&m_CriticalSection, 2000, flags);
 	}
 
 	inline ~CriticalSection()

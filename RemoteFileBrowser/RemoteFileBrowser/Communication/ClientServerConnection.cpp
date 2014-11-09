@@ -62,13 +62,13 @@ void ClientServerConnection::Create(SOCKET connectionSocket, string&& hostname)
 		}
 
 		// Try parse as IPv6, 
-		// f it fails, try IPv4
+		// if it fails, try IPv4
 		IN_ADDR inAddr;
 		IN6_ADDR in6Addr;
-
-		if (InetPtonA(AF_INET6, clientIp->second.c_str(), &in6Addr) != 1)
+		
+		if (Utilities::Encoding::inet_pton(AF_INET6, clientIp->second.c_str(), &in6Addr) != 1)
 		{
-			if (InetPtonA(AF_INET, clientIp->second.c_str(), &inAddr) != 1)
+			if (Utilities::Encoding::inet_pton(AF_INET, clientIp->second.c_str(), &inAddr) != 1)
 			{
 				return;
 			}

@@ -1,7 +1,7 @@
 
 #include <WS2tcpip.h>
 #include <Windows.h>
-#include <Iphlpapi.h>
+//#include <Iphlpapi.h>
 #include <mstcpip.h>
 
 #include <algorithm>

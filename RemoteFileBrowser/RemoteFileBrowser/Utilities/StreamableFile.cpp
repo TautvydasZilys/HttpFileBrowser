@@ -7,14 +7,14 @@ StreamableFile::StreamableFile(const std::wstring& filePath) :
 	m_FilePosition(0)
 {
 	bool succeeded = false;
-	m_FileHandle = CreateFileW(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+	m_FileHandle = CreateFile2(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, nullptr);
 
 	if (m_FileHandle == INVALID_HANDLE_VALUE)
 	{
 		throw exception();
 	}
 
-	if (GetFileSizeEx(m_FileHandle, reinterpret_cast<LARGE_INTEGER*>(&m_FileSize)) == FALSE)
+	if (Utilities::FileSystem::GetFileSizeFromHandle(m_FileHandle, m_FileSize) == FALSE)
 	{
 		CloseHandle(m_FileHandle);
 		throw exception();

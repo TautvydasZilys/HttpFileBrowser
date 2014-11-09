@@ -7,7 +7,7 @@ private:
 
 public:
 	inline Event(bool manualReset) :
-		m_EventHandle(CreateEvent(nullptr, manualReset, FALSE, nullptr))
+		m_EventHandle(CreateEventEx(nullptr, nullptr, manualReset ? CREATE_EVENT_MANUAL_RESET : 0, EVENT_MODIFY_STATE))
 	{
 	}
 
@@ -31,7 +31,7 @@ public:
 
 	inline void Wait()
 	{
-		WaitForSingleObject(m_EventHandle, INFINITE);
+		WaitForSingleObjectEx(m_EventHandle, INFINITE, FALSE);
 	}
 };
 

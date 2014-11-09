@@ -8,6 +8,8 @@
 #include "Utilities\Event.h"
 #include "Utilities\Initializer.h"
 
+#if EXECUTABLE
+
 int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	Initializer winSockContext;
@@ -34,3 +36,5 @@ int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 
 	return 0;
 }
+
+#endif

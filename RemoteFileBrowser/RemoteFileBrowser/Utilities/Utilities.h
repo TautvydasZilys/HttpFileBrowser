@@ -74,6 +74,11 @@ namespace Utilities
 
 		void EncodeBase64Inline(std::string& data);
 		inline std::string EncodeBase64(const std::string& data);
+
+		template <size_t bufferLength>
+		inline size_t IpToString(int ipFamily, void* ipAddress, char (&buffer)[bufferLength]);
+
+		int inet_pton(int af, const char* src, void* dst);
 	}
 
 	namespace FileSystem
@@ -105,6 +110,7 @@ namespace Utilities
 		std::string FormatFileSizeString(uint64_t size);
 
 		FileStatus QueryFileStatus(const std::wstring& path);
+		bool GetFileSizeFromHandle(HANDLE fileHandle, uint64_t& fileSize);
 		std::vector<FileInfo> EnumerateFiles(std::wstring path);
 		std::vector<std::string> EnumerateSystemVolumes();
 
@@ -114,6 +120,7 @@ namespace Utilities
 	namespace System
 	{
 		const std::string& GetUniqueSystemId();
+		void Sleep(int milliseconds);
 	}
 };
 

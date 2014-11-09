@@ -20,7 +20,7 @@ static void InitializeWinSock()
 		if (wsaResult != 0)
 		{
 			wsaError = WSAGetLastError();
-			Sleep(100);
+			Utilities::System::Sleep(100);
 		}
 	} while (wsaError == WSASYSNOTREADY ||
 		wsaError == WSAEINPROGRESS ||

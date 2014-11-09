@@ -148,8 +148,8 @@ void Server::ReportConnectionDroppedError()
 	const int bufferSize = 64;
 	char msgBuffer[bufferSize];
 
-	auto msgPtr = inet_ntop(AF_INET6, &m_ClientAddress.sin6_addr, msgBuffer, bufferSize);
-	Assert(msgPtr != nullptr);
+	auto msgLength = Utilities::Encoding::IpToString(AF_INET6, &m_ClientAddress.sin6_addr, msgBuffer);
+	Assert(msgLength != 0);
 
 	Logging::Error(WSAGetLastError(), "Connection from ", msgBuffer, " dropped: ");
 }

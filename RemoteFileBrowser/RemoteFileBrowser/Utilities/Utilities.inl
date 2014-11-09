@@ -149,6 +149,19 @@ inline std::string Utilities::Encoding::EncodeBase64(const std::string& data)
 	return result;
 }
 
+template <size_t bufferLength>
+size_t Utilities::Encoding::IpToString(int ipFamily, void* ipAddress, char (&buffer)[bufferLength])
+{
+#if !PHONE
+	auto strPtr = inet_ntop(ipFamily, ipAddress, buffer, bufferSize);
+	return strPtr - buffer;
+#else
+	Assert(bufferLength > strlen("ImplementMePls"));
+	strcpy_s(buffer, "ImplementMePls");
+	return strlen(buffer);
+#endif
+}
+
 // File system
 
 inline std::string Utilities::FileSystem::RemoveLastPathComponent(const std::string& path)
