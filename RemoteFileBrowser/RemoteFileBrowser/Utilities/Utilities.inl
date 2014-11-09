@@ -23,7 +23,7 @@ inline void Utilities::Logging::Win32ErrorToMessageInline(int win32ErrorCode, ch
 	wchar_t wBuffer[kBufferSize];
 
 	auto messageLength = FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, win32ErrorCode, 0, wBuffer, kBufferSize, nullptr);
-	Utilities::Encoding::Utf16ToUtf8Inline(wBuffer, messageLength, buffer, kBufferSize);
+	Utilities::Encoding::Utf16ToUtf8Inline(wBuffer, messageLength + 1, buffer, kBufferSize);
 }
 
 template <typename Message>

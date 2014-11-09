@@ -11,8 +11,8 @@ namespace AssetDatabase
 
 	void Initialize()
 	{
-		s_ScriptsFile = FileSystem::ReadFileToVector(L"scripts.js");
-		s_StyleFile = FileSystem::ReadFileToVector(L"style.css");
+		s_ScriptsFile = FileSystem::ReadFileToVector(L"Resources\\scripts.js");
+		s_StyleFile = FileSystem::ReadFileToVector(L"Resources\\style.css");
 	}
 
 	const std::vector<uint8_t>& GetScriptsFile()
