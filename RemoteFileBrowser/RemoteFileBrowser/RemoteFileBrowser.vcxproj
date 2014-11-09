@@ -37,11 +37,14 @@
       <Configuration>Test</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-  </ItemGroup>
+  </ItemGroup>    
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CB46FBF7-D788-4775-BB83-C7C1B55BC669}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>RemoteFileBrowser</RootNamespace>
+    <AppContainerApplication Condition="'$(Configuration)'=='Phone Lib Debug' OR '$(Configuration)'=='Phone Lib Release'">true</AppContainerApplication>
+    <ApplicationType Condition="'$(Configuration)'=='Phone Lib Debug' OR '$(Configuration)'=='Phone Lib Release'">Windows Phone</ApplicationType>
+    <ApplicationTypeRevision Condition="'$(Configuration)'=='Phone Lib Debug' OR '$(Configuration)'=='Phone Lib Release'">8.1</ApplicationTypeRevision>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Desktop EXE Debug|Win32'" Label="Configuration">
