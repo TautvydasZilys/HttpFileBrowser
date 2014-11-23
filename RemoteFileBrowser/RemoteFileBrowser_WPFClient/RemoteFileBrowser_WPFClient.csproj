@@ -115,6 +115,32 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <Choose>
+    <When Condition="'$(Configuration)'=='Test'">
+      <ItemGroup>
+        <None Include="$(SolutionDir)bin\$(Platform)\Test\RemoteFileBrowser.dll">
+          <Link>RemoteFileBrowser.dll</Link>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="$(SolutionDir)bin\$(Platform)\Test\RemoteFileBrowser.pdb">
+          <Link>RemoteFileBrowser.pdb</Link>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <None Include="$(SolutionDir)bin\$(Platform)\Desktop DLL $(Configuration)\RemoteFileBrowser.dll">
+          <Link>RemoteFileBrowser.dll</Link>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="$(SolutionDir)bin\$(Platform)\Desktop DLL $(Configuration)\RemoteFileBrowser.pdb">
+          <Link>RemoteFileBrowser.pdb</Link>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
