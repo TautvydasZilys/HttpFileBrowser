@@ -11,10 +11,12 @@ static void SendPostRequest(SOCKET s, const Http::Request& httpRequest)
 {
 	auto header = httpRequest.BuildHeaderString();
 
-	auto result = send(s, header.c_str(), header.length(), 0);
+	Assert(header.length() < numeric_limits<int>::max());
+	auto result = send(s, header.c_str(), static_cast<int>(header.length()), 0);
 	if (result != header.length()) goto fail;
 
-	result = send(s, httpRequest.content.c_str(), httpRequest.content.length(), 0);
+	Assert(httpRequest.content.length() < numeric_limits<int>::max());
+	result = send(s, httpRequest.content.c_str(), static_cast<int>(httpRequest.content.length()), 0);
 	if (result != httpRequest.content.length()) goto fail;
 
 	return;
@@ -35,7 +37,7 @@ void Http::RestCommunicator::Post(SOCKET s, string&& hostname, string&& path, co
 
 	// Body format:
 	// {"<KEY>":"<VALUE>"}
-	auto length = 0;
+	size_t length = 0;
 	request.content.resize(7 + key.length() + value.length());
 
 	request.content[length++] = '{';

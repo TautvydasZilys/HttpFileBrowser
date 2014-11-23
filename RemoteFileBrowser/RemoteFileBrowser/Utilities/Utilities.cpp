@@ -115,8 +115,10 @@ void Logging::Terminate(int errorCode)
 size_t Encoding::Utf8ToUtf16Inline(const char* str, size_t strLength, wchar_t* destination, size_t destinationLength)
 {
 	Assert(destinationLength >= strLength);
+	Assert(strLength < std::numeric_limits<int>::max());
+	Assert(destinationLength < std::numeric_limits<int>::max());
 
-	auto length = MultiByteToWideChar(CP_UTF8, 0, str, strLength, destination, destinationLength);
+	auto length = MultiByteToWideChar(CP_UTF8, 0, str, static_cast<int>(strLength), destination, static_cast<int>(destinationLength));
 	Assert(length > 0);
 
 	return length;
@@ -129,17 +131,20 @@ wstring Encoding::Utf8ToUtf16(const char* str, size_t strLength)
 	auto bufferSize = 4 * strLength;
 	std::unique_ptr<wchar_t[]> buffer(new wchar_t[bufferSize]);
 
-	auto length = MultiByteToWideChar(CP_UTF8, 0, str, strLength, buffer.get(), bufferSize);
-	Assert(length > 0);
+	Assert(strLength < std::numeric_limits<int>::max());
+	Assert(bufferSize < std::numeric_limits<int>::max());
 
+	auto length = Utf8ToUtf16Inline(str, strLength, buffer.get(), bufferSize);
 	return wstring(buffer.get(), length);
 }
 
 size_t Encoding::Utf16ToUtf8Inline(const wchar_t* wstr, size_t wstrLength, char* destination, size_t destinationLength)
 {
 	Assert(destinationLength >= wstrLength);
+	Assert(wstrLength < std::numeric_limits<int>::max());
+	Assert(destinationLength < std::numeric_limits<int>::max());
 
-	auto length = WideCharToMultiByte(CP_UTF8, 0, wstr, wstrLength, destination, destinationLength, nullptr, nullptr);
+	auto length = WideCharToMultiByte(CP_UTF8, 0, wstr, static_cast<int>(wstrLength), destination, static_cast<int>(destinationLength), nullptr, nullptr);
 	Assert(length > 0);
 
 	return length;
@@ -152,9 +157,7 @@ string Encoding::Utf16ToUtf8(const wchar_t* wstr, size_t wstrLength)
 	auto bufferSize = 8 * wstrLength;
 	std::unique_ptr<char[]> buffer(new char[bufferSize]);
 
-	auto length = WideCharToMultiByte(CP_UTF8, 0, wstr, wstrLength, buffer.get(), bufferSize, nullptr, nullptr);
-	Assert(length > 0);
-
+	auto length = Utf16ToUtf8Inline(wstr, wstrLength, buffer.get(), bufferSize);
 	return string(buffer.get(), length);
 }
 
@@ -300,7 +303,8 @@ static const char s_Base64Table[64] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
 
 void Encoding::EncodeBase64Inline(std::string& data)
 {
-	int dataLength = data.length();
+	Assert(data.length() < std::numeric_limits<int>::max());
+	int dataLength = static_cast<int>(data.length());
 	if (dataLength == 0) return;
 
 	int remainder = dataLength % 3;
@@ -368,7 +372,8 @@ void FileSystem::RemoveLastPathComponentInline(string& path)
 		return;
 	}
 
-	int i = path.length() - 2;
+	Assert(path.length() - 2 < std::numeric_limits<int>::max());
+	int i = static_cast<int>(path.length() - 2);
 
 	while (i > -1 && (path[i] != '\\' && path[i] != '/'))
 	{
@@ -544,7 +549,7 @@ vector<string> FileSystem::EnumerateSystemVolumes()
 		while (i < pathsLength)
 		{
 			wstring volumePath(pathBuffer + i);
-			i += volumePath.length() + 1;
+			i += static_cast<DWORD>(volumePath.length()) + 1;
 
 			if (volumePath.length() > 0)
 			{
@@ -670,7 +675,6 @@ void System::Sleep(int milliseconds)
 #endif
 }
 
-
 /*
 * Copyright (c) 1996,1999 by Internet Software Consortium.
 *
@@ -707,7 +711,7 @@ static int inet_pton6(const char *src, u_char *dst);
 * author:
 *	Paul Vixie, 1996.
 */
-int inet_pton(int af, const char* src, void* dst)
+int Encoding::inet_pton(int af, const char* src, void* dst)
 {
 	switch (af) {
 	case AF_INET:
@@ -857,7 +861,7 @@ static int inet_pton6(const char *src, u_char *dst)
 		* Since some memmove()'s erroneously fail to handle
 		* overlapping regions, we'll do the shift by hand.
 		*/
-		const int n = tp - colonp;
+		auto n = tp - colonp;
 		int i;
 
 		if (tp == endp)

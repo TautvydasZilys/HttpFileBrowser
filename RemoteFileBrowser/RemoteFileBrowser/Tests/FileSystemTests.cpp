@@ -6,9 +6,6 @@
 #include "Utilities\StreamableFile.h"
 #include "Utilities\Utilities.h"
 
-#undef min
-#undef max
-
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace std;
 using namespace Utilities;

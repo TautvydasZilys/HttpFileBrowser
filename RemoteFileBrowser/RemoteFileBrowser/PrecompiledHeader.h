@@ -1,8 +1,14 @@
 
 #include <WS2tcpip.h>
 #include <Windows.h>
-//#include <Iphlpapi.h>
 #include <mstcpip.h>
+
+#if !PHONE
+#include <Iphlpapi.h>
+#endif
+
+#undef min
+#undef max
 
 #include <algorithm>
 #include <fstream>

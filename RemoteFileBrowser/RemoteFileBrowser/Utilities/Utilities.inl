@@ -153,7 +153,7 @@ template <size_t bufferLength>
 size_t Utilities::Encoding::IpToString(int ipFamily, void* ipAddress, char (&buffer)[bufferLength])
 {
 #if !PHONE
-	auto strPtr = inet_ntop(ipFamily, ipAddress, buffer, bufferSize);
+	auto strPtr = inet_ntop(ipFamily, ipAddress, buffer, bufferLength);
 	return strPtr - buffer;
 #else
 	Assert(bufferLength > strlen("ImplementMePls"));

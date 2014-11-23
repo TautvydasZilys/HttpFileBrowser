@@ -94,7 +94,8 @@ std::string Server::ParseRequest()
 
 void Server::SendResponse(const string& response)
 {
-	auto sendResult = send(m_ConnectionSocket, response.c_str(), response.length(), 0);
+	Assert(response.length() < std::numeric_limits<int>::max());
+	auto sendResult = send(m_ConnectionSocket, response.c_str(), static_cast<int>(response.length()), 0);
 	Assert(sendResult != SOCKET_ERROR);
 
 	if (sendResult == SOCKET_ERROR)
