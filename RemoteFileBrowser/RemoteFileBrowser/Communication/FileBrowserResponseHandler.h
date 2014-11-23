@@ -14,7 +14,7 @@ private:
 	FileBrowserResponseHandler(SOCKET clientSocket, const std::string& requestedPath, const std::string& httpVersion);
 	void Execute();
 
-	void SendData(const char* data, int length) const;
+	void SendData(const char* data, size_t length) const;
 	void SendNotFoundResponse() const;
 
 	void SendFileResponse() const;

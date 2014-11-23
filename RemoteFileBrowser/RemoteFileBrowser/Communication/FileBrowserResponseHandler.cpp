@@ -36,9 +36,10 @@ void FileBrowserResponseHandler::Execute()
 	}
 }
 
-void FileBrowserResponseHandler::SendData(const char* data, int length) const
+void FileBrowserResponseHandler::SendData(const char* data, size_t length) const
 {
-	auto sendResult = send(m_ClientSocket, data, length, 0);
+	Assert(length < numeric_limits<int>::max());
+	auto sendResult = send(m_ClientSocket, data, static_cast<int>(length), 0);
 
 	if (sendResult == SOCKET_ERROR)
 	{
@@ -80,7 +81,7 @@ void FileBrowserResponseHandler::SendBuiltinFile() const
 {
 	stringstream httpResponse;
 	string contentType;
-	int contentLength;
+	size_t contentLength;
 	const char* data;
 
 	if (m_RequestedPath == "scripts.js")

@@ -115,12 +115,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\RemoteFileBrowser\RemoteFileBrowser.vcxproj">
-      <Project>{cb46fbf7-d788-4775-bb83-c7c1b55bc669}</Project>
-      <Name>RemoteFileBrowser</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
