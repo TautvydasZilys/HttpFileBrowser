@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RemoteFileBrowser", "RemoteFileBrowser\RemoteFileBrowser.vcxproj", "{CB46FBF7-D788-4775-BB83-C7C1B55BC669}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteFileBrowser_WPFClient", "RemoteFileBrowser_WPFClient\RemoteFileBrowser_WPFClient.csproj", "{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -27,6 +29,18 @@ Global
 		{CB46FBF7-D788-4775-BB83-C7C1B55BC669}.Test|Win32.Build.0 = Test|Win32
 		{CB46FBF7-D788-4775-BB83-C7C1B55BC669}.Test|x64.ActiveCfg = Test|x64
 		{CB46FBF7-D788-4775-BB83-C7C1B55BC669}.Test|x64.Build.0 = Test|x64
+		{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}.Debug|Win32.ActiveCfg = Debug|x86
+		{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}.Debug|Win32.Build.0 = Debug|x86
+		{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}.Debug|x64.ActiveCfg = Debug|x64
+		{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}.Debug|x64.Build.0 = Debug|x64
+		{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}.Release|Win32.ActiveCfg = Release|x86
+		{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}.Release|Win32.Build.0 = Release|x86
+		{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}.Release|x64.ActiveCfg = Release|x64
+		{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}.Release|x64.Build.0 = Release|x64
+		{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}.Test|Win32.ActiveCfg = Release|x86
+		{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}.Test|Win32.Build.0 = Release|x86
+		{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}.Test|x64.ActiveCfg = Release|x64
+		{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}.Test|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
