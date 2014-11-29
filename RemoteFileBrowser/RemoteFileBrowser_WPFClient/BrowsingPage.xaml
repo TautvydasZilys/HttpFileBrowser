@@ -19,12 +19,18 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" Text="Host ID:" Foreground="{StaticResource TextBrush}" Margin="5,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="0" Text="Host ID:" FontSize="14" Foreground="{StaticResource TextBrush}" Margin="5,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
             <TextBox Grid.Column="1" Height="25" Margin="5,0" />
             <Button Grid.Column="2" Content="Connect" Style="{StaticResource MetroAccentButton}" Margin="5,0" Padding="20,5" />
                         
         </Grid>
         
-        
+        <Grid Grid.Row="1" Margin="10">
+            <StackPanel>
+                <TextBlock Text="Hosts in local network" FontSize="14" Foreground="{StaticResource TextBrush}" />
+                <ListView x:Name="m_LocalNetworkHosts" Margin="0,10,0,0">
+                </ListView>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Page>
