@@ -8,7 +8,7 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50" />
+            <RowDefinition Height="60" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         
@@ -17,14 +17,55 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            
-            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock FontSize="14" Text="Sharing status: " Foreground="{StaticResource TextBrush}" />
-                <TextBlock FontSize="14" Text="{Binding SharingStatusString}" Foreground="{StaticResource TextBrush}" />
-            </StackPanel>
 
-            <Button Grid.Column="1" Content="Start sharing" x:Name="m_StartSharingButton" Click="StartSharingButton_Click" Visibility="{Binding Path=IsSharing, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Style="{StaticResource MetroAccentButton}" HorizontalAlignment="Right" Margin="5,0" Padding="20,5" />
-            <Button Grid.Column="1" Content="Stop sharing" x:Name="m_StopSharingButton" Click="StopSharingButton_Click" Visibility="{Binding Path=IsSharing, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource MetroAccentButton}" HorizontalAlignment="Right" Margin="5,0" Padding="20,5" />
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />    
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Sharing status: " FontSize="14" Foreground="{StaticResource TextBrush}" />
+                    <TextBlock Text="{Binding SharingStatusString}" FontSize="14" Foreground="{StaticResource TextBrush}" />
+                </StackPanel>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Host ID: " FontSize="14" Foreground="{StaticResource TextBrush}" />
+                    <TextBlock Text="{Binding HostId}" FontSize="14" Foreground="{StaticResource TextBrush}" />
+                </StackPanel>
+            </Grid>
+
+            <Button Grid.Column="1" Content="Start sharing" x:Name="m_StartSharingButton" Click="StartSharingButton_Click" Visibility="{Binding Path=IsSharing, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Style="{StaticResource MetroAccentButton}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" Padding="20,5" />
+            <Button Grid.Column="1" Content="Stop sharing" x:Name="m_StopSharingButton" Click="StopSharingButton_Click" Visibility="{Binding Path=IsSharing, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource MetroAccentButton}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" Padding="20,5" />
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+                
+                <DockPanel Grid.Row="0" VerticalAlignment="Center" LastChildFill="True" >
+                    <TextBlock Text="Public name: " FontSize="14" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" />
+                    <TextBox Text="{Binding PublicName, Mode=TwoWay}" Height="25" VerticalAlignment="Center" Margin="5,0" />
+                </DockPanel>
+
+                <CheckBox Grid.Row="1" Content="Allow direct connections" IsChecked="{Binding AllowDirectConnections}" Style="{StaticResource CheckBoxStyle}" />
+                <CheckBox Grid.Row="2" Content="Broadcast presence to local network" IsChecked="{Binding EnableMulticast}" Style="{StaticResource CheckBoxStyle}" />
+                <CheckBox Grid.Row="3" Content="Require authentification" IsChecked="{Binding RequireAuthentification}" Style="{StaticResource CheckBoxStyle}" />
+            </Grid>
+            
+            <Grid>
+                <!-- Shared files tree view -->
+            </Grid>
         </Grid>
     </Grid>
 </Page>

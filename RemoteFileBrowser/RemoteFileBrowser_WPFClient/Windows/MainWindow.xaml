@@ -31,12 +31,12 @@
     </Metro:MetroWindow.RightWindowCommands>
 
     <Grid>
-        <Metro:MetroAnimatedSingleRowTabControl Margin="10">
+        <Metro:MetroAnimatedSingleRowTabControl Margin="10" IsTabStop="False">
             <TabItem Header="Browsing">
-                <Frame Source="..\Pages\BrowsingPage.xaml" />
+                <Frame Source="..\Pages\BrowsingPage.xaml" IsTabStop="False" />
             </TabItem>
             <TabItem Header="Sharing">
-                <Frame Source="..\Pages\SharingPage.xaml" />                
+                <Frame Source="..\Pages\SharingPage.xaml" IsTabStop="False" />                
             </TabItem>
         </Metro:MetroAnimatedSingleRowTabControl>
     </Grid>
