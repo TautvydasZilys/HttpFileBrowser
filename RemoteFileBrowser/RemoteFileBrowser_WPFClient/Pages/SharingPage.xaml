@@ -1,0 +1,30 @@
+﻿<Page x:Class="RemoteFileBrowser.Pages.SharingPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      mc:Ignorable="d" 
+      Title="SharingPage">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock FontSize="14" Text="Sharing status: " Foreground="{StaticResource TextBrush}" />
+                <TextBlock FontSize="14" Text="{Binding SharingStatusString}" Foreground="{StaticResource TextBrush}" />
+            </StackPanel>
+
+            <Button Grid.Column="1" Content="Start sharing" x:Name="m_StartSharingButton" Click="StartSharingButton_Click" Visibility="{Binding Path=IsSharing, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Style="{StaticResource MetroAccentButton}" HorizontalAlignment="Right" Margin="5,0" Padding="20,5" />
+            <Button Grid.Column="1" Content="Stop sharing" x:Name="m_StopSharingButton" Click="StopSharingButton_Click" Visibility="{Binding Path=IsSharing, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource MetroAccentButton}" HorizontalAlignment="Right" Margin="5,0" Padding="20,5" />
+        </Grid>
+    </Grid>
+</Page>

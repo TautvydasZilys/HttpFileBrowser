@@ -1,7 +1,7 @@
 ﻿using MahApps.Metro.Controls;
 using System.Windows;
 
-namespace RemoteFileBrowser
+namespace RemoteFileBrowser.Windows
 {
     public partial class MainWindow : MetroWindow
     {
