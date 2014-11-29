@@ -6,7 +6,9 @@
                    Height="400"
                    Width="640"
                    MinHeight="400"
-                   MinWidth="640">
+                   MinWidth="640"
+                   EnableDWMDropShadow="True"
+                   WindowTransitionsEnabled="True">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -15,7 +17,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
-
+    
     <Metro:MetroWindow.RightWindowCommands>
         <Metro:WindowCommands>
             <Button x:Name="m_SettingsButton" Click="SettingsButton_Click" Style="{DynamicResource MetroCircleButtonStyle}" BorderThickness="0">
@@ -26,12 +28,12 @@
                 </Rectangle>
             </Button>
         </Metro:WindowCommands>
-    </Metro:MetroWindow.RightWindowCommands>    
-    
+    </Metro:MetroWindow.RightWindowCommands>
+
     <Grid>
         <Metro:MetroAnimatedSingleRowTabControl Margin="10">
             <TabItem Header="Browsing">
-                
+                <Frame Source="BrowsingPage.xaml" />
             </TabItem>
             <TabItem Header="Sharing">
                 
