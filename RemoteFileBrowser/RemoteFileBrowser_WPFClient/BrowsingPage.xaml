@@ -45,7 +45,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="{Binding ElementName=m_NameColumn, Path=ActualWidth}"/>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="3" />
                 </Grid.ColumnDefinitions>
                 <Grid Grid.Column="1" x:Name="m_GridViewColumn1Helper"/>
             </Grid>
