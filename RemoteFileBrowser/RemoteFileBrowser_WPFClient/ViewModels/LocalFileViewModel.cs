@@ -22,8 +22,8 @@ namespace RemoteFileBrowser.ViewModels
             }
         }
 
-        public LocalFileViewModel(string name) :
-            base(name)
+        public LocalFileViewModel(string path) :
+            base(path)
         {
         }
     }

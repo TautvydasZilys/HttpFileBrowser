@@ -121,6 +121,9 @@ size_t Encoding::Utf8ToUtf16Inline(const char* str, size_t strLength, wchar_t* d
 	auto length = MultiByteToWideChar(CP_UTF8, 0, str, static_cast<int>(strLength), destination, static_cast<int>(destinationLength));
 	Assert(length > 0);
 
+	Assert(length < destinationLength);
+	destination[length] = '\0';
+
 	return length;
 }
 
@@ -146,6 +149,9 @@ size_t Encoding::Utf16ToUtf8Inline(const wchar_t* wstr, size_t wstrLength, char*
 
 	auto length = WideCharToMultiByte(CP_UTF8, 0, wstr, static_cast<int>(wstrLength), destination, static_cast<int>(destinationLength), nullptr, nullptr);
 	Assert(length > 0);
+
+	Assert(length < destinationLength);
+	destination[length] = '\0';
 
 	return length;
 }

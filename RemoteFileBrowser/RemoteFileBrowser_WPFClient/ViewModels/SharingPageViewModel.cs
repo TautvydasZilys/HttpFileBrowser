@@ -83,6 +83,14 @@ namespace RemoteFileBrowser.ViewModels
 
         public SharingPageViewModel()
         {
+            m_SharedFiles = new FolderItem[]
+            {
+                new LocalFolderViewModel("C:\\"),
+                new LocalFolderViewModel("D:\\"),
+                new LocalFolderViewModel("E:\\"),
+                new LocalFolderViewModel("F:\\"),
+                new LocalFolderViewModel("G:\\")
+            };
         }
         
         public event PropertyChangedEventHandler PropertyChanged;

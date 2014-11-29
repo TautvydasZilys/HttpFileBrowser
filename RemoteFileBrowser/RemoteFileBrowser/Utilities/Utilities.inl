@@ -123,9 +123,19 @@ inline std::wstring Utilities::Encoding::Utf8ToUtf16(const std::string& str)
 	return Utf8ToUtf16(str.c_str(), str.length());
 }
 
+inline size_t Utilities::Encoding::Utf8ToUtf16Inline(const std::string& str, wchar_t* destination, size_t destinationLength)
+{
+	return Utf8ToUtf16Inline(str.c_str(), str.length(), destination, destinationLength);
+}
+
 inline std::string Utilities::Encoding::Utf16ToUtf8(const std::wstring& wstr)
 {
 	return Utf16ToUtf8(wstr.c_str(), wstr.length());
+}
+
+inline size_t Utilities::Encoding::Utf16ToUtf8Inline(const std::wstring& wstr, char* destination, size_t destinationLength)
+{
+	return Utf16ToUtf8Inline(wstr.c_str(), wstr.length(), destination, destinationLength);
 }
 
 inline std::string Utilities::Encoding::DecodeUrl(const std::string& url)

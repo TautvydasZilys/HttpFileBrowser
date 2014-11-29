@@ -10,13 +10,21 @@ namespace RemoteFileBrowser.ViewModels
 {
     abstract class FolderItem : INotifyPropertyChanged
     {
+        private string m_Path;
         private string m_Name;
 
+        public string Path { get { return m_Path; } }
         public string Name { get { return m_Name; } }
 
-        public FolderItem(string name)
+        public object Image { get { return null; } }
+
+        public FolderItem(string path)
         {
-            m_Name = name;
+            m_Path = path;
+            m_Name = System.IO.Path.GetFileName(path);
+
+            if (string.IsNullOrEmpty(m_Name))
+                m_Name = m_Path;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

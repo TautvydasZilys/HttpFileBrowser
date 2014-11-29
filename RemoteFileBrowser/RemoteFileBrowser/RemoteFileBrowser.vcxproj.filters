@@ -74,6 +74,9 @@
     <ClCompile Include="Tests\LoggingTests.cpp">
       <Filter>Source\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="Core\ExportedFunctions.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utilities\Utilities.inl">

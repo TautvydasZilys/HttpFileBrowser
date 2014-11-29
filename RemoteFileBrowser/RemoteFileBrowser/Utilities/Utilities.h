@@ -59,10 +59,12 @@ namespace Utilities
 	namespace Encoding
 	{
 		size_t Utf8ToUtf16Inline(const char* str, size_t strLength, wchar_t* destination, size_t destinationLength);
+		inline size_t Utf8ToUtf16Inline(const std::string& str, wchar_t* destination, size_t destinationLength);
 		std::wstring Utf8ToUtf16(const char* str, size_t strLength);
 		inline std::wstring Utf8ToUtf16(const std::string& str);
 
 		size_t Utf16ToUtf8Inline(const wchar_t* wstr, size_t wstrLength, char* destination, size_t destinationLength);
+		size_t Utf16ToUtf8Inline(const std::wstring& wstr, char* destination, size_t destinationLength);
 		std::string Utf16ToUtf8(const wchar_t* wstr, size_t wstrLength);
 		inline std::string Utf16ToUtf8(const std::wstring& wstr);
 

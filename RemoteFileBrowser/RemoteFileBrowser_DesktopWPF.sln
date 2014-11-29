@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RemoteFileBrowser", "RemoteFileBrowser\RemoteFileBrowser.vcxproj", "{CB46FBF7-D788-4775-BB83-C7C1B55BC669}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteFileBrowser_WPFClient", "RemoteFileBrowser_WPFClient\RemoteFileBrowser_WPFClient.csproj", "{A2DC85C1-B4FB-40B8-A5AE-EE4B9E55DCC1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CB46FBF7-D788-4775-BB83-C7C1B55BC669} = {CB46FBF7-D788-4775-BB83-C7C1B55BC669}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -623,6 +623,7 @@
     <ClCompile Include="Communication\AssetDatabase.cpp" />
     <ClCompile Include="Communication\ClientServerConnection.cpp" />
     <ClCompile Include="Communication\FileBrowserResponseHandler.cpp" />
+    <ClCompile Include="Core\ExportedFunctions.cpp" />
     <ClCompile Include="Http\Request.cpp" />
     <ClCompile Include="Http\Server.cpp" />
     <ClCompile Include="Http\RestCommunicator.cpp" />
