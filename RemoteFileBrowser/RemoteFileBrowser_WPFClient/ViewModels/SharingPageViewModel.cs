@@ -16,6 +16,9 @@ namespace RemoteFileBrowser.ViewModels
         private bool m_AllowDirectConnections;
         private bool m_EnableMulticast;
         private bool m_RequireAuthentification = true;
+        private FolderItem[] m_SharedFiles;
+
+        #region Properties
 
         public bool IsSharing
         {
@@ -69,6 +72,17 @@ namespace RemoteFileBrowser.ViewModels
                 m_RequireAuthentification = value;
                 NotifyPropertyChanged();
             }
+        }
+
+        public IEnumerable<FolderItem> SharedFiles
+        {
+            get { return m_SharedFiles; }
+        }
+
+        #endregion
+
+        public SharingPageViewModel()
+        {
         }
         
         public event PropertyChangedEventHandler PropertyChanged;

@@ -85,6 +85,9 @@
     <Compile Include="Pages\SharingPage.xaml.cs">
       <DependentUpon>SharingPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\FolderItem.cs" />
+    <Compile Include="ViewModels\LocalFileViewModel.cs" />
+    <Compile Include="ViewModels\LocalFolderViewModel.cs" />
     <Compile Include="XamlConverters\InverseBooleanToVisibilityConverter.cs" />
     <Page Include="Pages\BrowsingPage.xaml">
       <SubType>Designer</SubType>
