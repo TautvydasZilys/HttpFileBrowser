@@ -16,7 +16,7 @@ namespace RemoteFileBrowser.ViewModels
         private bool m_AllowDirectConnections;
         private bool m_EnableMulticast;
         private bool m_RequireAuthentification = true;
-        private FolderItem[] m_SharedFiles;
+        private LocalFileViewModel[] m_SharedFiles;
 
         #region Properties
 
@@ -74,7 +74,7 @@ namespace RemoteFileBrowser.ViewModels
             }
         }
 
-        public IEnumerable<FolderItem> SharedFiles
+        public IEnumerable<LocalFileViewModel> SharedFiles
         {
             get { return m_SharedFiles; }
         }
@@ -83,13 +83,13 @@ namespace RemoteFileBrowser.ViewModels
 
         public SharingPageViewModel()
         {
-            m_SharedFiles = new FolderItem[]
+            m_SharedFiles = new LocalFileViewModel[]
             {
-                new LocalFolderViewModel("C:\\"),
-                new LocalFolderViewModel("D:\\"),
-                new LocalFolderViewModel("E:\\"),
-                new LocalFolderViewModel("F:\\"),
-                new LocalFolderViewModel("G:\\")
+                new LocalFolderViewModel("C:\\", null),
+                new LocalFolderViewModel("D:\\", null),
+                new LocalFolderViewModel("E:\\", null),
+                new LocalFolderViewModel("F:\\", null),
+                new LocalFolderViewModel("G:\\", null)
             };
         }
         

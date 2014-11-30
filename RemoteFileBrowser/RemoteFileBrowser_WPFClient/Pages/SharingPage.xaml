@@ -86,7 +86,7 @@
                             <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
                         </HierarchicalDataTemplate>
                     </Grid.Resources>
-                    <TreeView ItemsSource="{Binding SharedFiles}" />
+                    <TreeView ItemsSource="{Binding SharedFiles}" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" />
                 </Grid>
             </Grid>
         </Grid>

@@ -8,12 +8,11 @@ using System.Threading.Tasks;
 
 namespace RemoteFileBrowser.ViewModels
 {
-    class LocalFolderViewModel : FolderItem
+    class LocalFolderViewModel : LocalFileViewModel
     {
-        private FolderItem[] m_FolderItems;
-        private bool? m_IsSelected;
+        private LocalFileViewModel[] m_FolderItems;
         
-        public IEnumerable<FolderItem> FolderItems
+        public IEnumerable<LocalFileViewModel> FolderItems
         {
             get
             {
@@ -24,28 +23,45 @@ namespace RemoteFileBrowser.ViewModels
             }
         }
 
-        public bool? IsSelected
+        public LocalFolderViewModel(string path, LocalFolderViewModel parent) :
+            base(path, parent)
         {
-            get { return m_IsSelected; }
-            set
+        }
+
+        protected override void OnSelectedChanged()
+        {
+            SetSelectionToChildren();
+            SetSelectionToParent();
+        }
+
+        private void SetSelectionToChildren()
+        {
+            if (m_FolderItems == null)
+                return;
+
+            foreach (var file in m_FolderItems)
             {
-                if (value == null)
+                if (IsSelected != file.IsSelected)
                 {
-                    m_IsSelected = (m_IsSelected != null) ? !m_IsSelected : true;
+                    file.SetSelectionNoValidate(IsSelected);
+
+                    var folder = file as LocalFolderViewModel;
+                    if (folder != null)
+                        folder.SetSelectionToChildren();
                 }
-                else
-                {
-                    m_IsSelected = value;
-                }
-                
-                NotifyPropertyChanged();
             }
         }
 
-        public LocalFolderViewModel(string path) :
-            base(path)
+        private void SetSelectionToParent()
         {
-            m_IsSelected = false;
+            if (Parent == null)
+                return;
+
+            if (Parent.IsSelected != null && IsSelected != Parent.IsSelected)
+            {
+                Parent.SetSelectionNoValidate(null);
+                Parent.SetSelectionToParent();
+            }
         }
 
         private unsafe void EnumerateFiles()
@@ -58,7 +74,7 @@ namespace RemoteFileBrowser.ViewModels
                 NativeFunctions.GetFilesInDirectory(path, out files, out fileCount);
             }
 
-            var folderItems = new List<FolderItem>(fileCount);
+            var folderItems = new List<LocalFileViewModel>(fileCount);
 
             for (int i = 0; i < fileCount; i++)
             {
@@ -68,15 +84,15 @@ namespace RemoteFileBrowser.ViewModels
                     continue;
 
                 var filePath = System.IO.Path.Combine(Path, fileName);
-                FolderItem item;
+                LocalFileViewModel item;
 
                 if (files[i].fileType == NativeFunctions.FileType.File)
                 {
-                    item = new LocalFileViewModel(filePath);
+                    item = new LocalFileViewModel(filePath, this);
                 }
                 else
                 {
-                    item = new LocalFolderViewModel(filePath);
+                    item = new LocalFolderViewModel(filePath, this);
                 }
 
                 folderItems.Add(item);
