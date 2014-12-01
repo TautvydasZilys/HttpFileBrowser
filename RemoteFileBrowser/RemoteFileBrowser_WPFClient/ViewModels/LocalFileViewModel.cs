@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RemoteFileBrowser.ViewModels
@@ -14,6 +15,7 @@ namespace RemoteFileBrowser.ViewModels
     class LocalFileViewModel : INotifyPropertyChanged
     {
         private static readonly LocalFileViewModel[] s_EmptyChildren = new LocalFileViewModel[0];
+        private static readonly LocalFileViewModel[] s_ChildrenLoading = new LocalFileViewModel[] { new LocalFileViewModel("Loading...", false, null) };
 
         private readonly string m_Path;
         private readonly string m_Name;
@@ -52,7 +54,12 @@ namespace RemoteFileBrowser.ViewModels
             get
             {
                 if (m_Children == null)
-                    EnumerateFiles();
+                {
+                    m_Children = s_ChildrenLoading;
+                    EnumerateFilesAsync();
+
+                    return s_ChildrenLoading;
+                }
 
                 return m_Children;
             }
@@ -126,7 +133,14 @@ namespace RemoteFileBrowser.ViewModels
             NotifyPropertyChanged("IsSelected");
         }
 
-        private unsafe void EnumerateFiles()
+        private async void EnumerateFilesAsync()
+        {
+            Func<LocalFileViewModel[]> enumerateFilesFunc = EnumerateFiles;
+            m_Children = await Task.Run<LocalFileViewModel[]>(enumerateFilesFunc);
+            NotifyPropertyChanged("Children");
+        }
+
+        private unsafe LocalFileViewModel[] EnumerateFiles()
         {
             NativeFunctions.SimpleFileInfo* files;
             int fileCount;
@@ -149,8 +163,33 @@ namespace RemoteFileBrowser.ViewModels
                 folderItems.Add(item);
             }
 
-            m_Children = folderItems.ToArray();
             NativeFunctions.FreeFileData(files, fileCount);
+            GiveWPFTimeToLoad();
+
+            return folderItems.ToArray();
+        }
+
+        static readonly TimeSpan kMinFolderEnumerationInterval = TimeSpan.FromMilliseconds(200);
+        static DateTime s_LastLoaded = DateTime.Now;
+
+        private static void GiveWPFTimeToLoad()
+        {
+            var chillTime = TimeSpan.Zero;
+
+            lock (s_EmptyChildren)
+            {
+                var now = DateTime.Now;
+                var delta = now - s_LastLoaded;
+
+                if (delta < kMinFolderEnumerationInterval)
+                {
+                    chillTime = kMinFolderEnumerationInterval - delta;
+                }
+
+                s_LastLoaded = now + chillTime;
+            }
+
+            Thread.Sleep(chillTime);
         }
 
         #region INotifyPropertyChanged

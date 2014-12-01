@@ -59,6 +59,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Test|x64'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -179,7 +180,7 @@
               <Link>RemoteFileBrowser.pdb</Link>
               <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             </None>
-          </ItemGroup>          
+          </ItemGroup>
         </When>
         <Otherwise>
           <ItemGroup>
@@ -191,7 +192,7 @@
               <Link>RemoteFileBrowser.pdb</Link>
               <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             </None>
-          </ItemGroup>          
+          </ItemGroup>
         </Otherwise>
       </Choose>
     </When>

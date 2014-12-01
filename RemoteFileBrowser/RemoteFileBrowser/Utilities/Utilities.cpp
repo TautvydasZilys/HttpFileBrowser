@@ -115,13 +115,13 @@ void Logging::Terminate(int errorCode)
 size_t Encoding::Utf8ToUtf16Inline(const char* str, size_t strLength, wchar_t* destination, size_t destinationLength)
 {
 	Assert(destinationLength >= strLength);
-	Assert(strLength < std::numeric_limits<int>::max());
-	Assert(destinationLength < std::numeric_limits<int>::max());
+	Assert(strLength < static_cast<size_t>(std::numeric_limits<int>::max()));
+	Assert(destinationLength < static_cast<size_t>(std::numeric_limits<int>::max()));
 
 	auto length = MultiByteToWideChar(CP_UTF8, 0, str, static_cast<int>(strLength), destination, static_cast<int>(destinationLength));
 	Assert(length > 0);
 
-	Assert(length < destinationLength);
+	Assert(static_cast<size_t>(length) < destinationLength);
 	destination[length] = '\0';
 
 	return length;
@@ -134,8 +134,8 @@ wstring Encoding::Utf8ToUtf16(const char* str, size_t strLength)
 	auto bufferSize = 4 * strLength;
 	std::unique_ptr<wchar_t[]> buffer(new wchar_t[bufferSize]);
 
-	Assert(strLength < std::numeric_limits<int>::max());
-	Assert(bufferSize < std::numeric_limits<int>::max());
+	Assert(strLength < static_cast<size_t>(std::numeric_limits<int>::max()));
+	Assert(bufferSize < static_cast<size_t>(std::numeric_limits<int>::max()));
 
 	auto length = Utf8ToUtf16Inline(str, strLength, buffer.get(), bufferSize);
 	return wstring(buffer.get(), length);
@@ -144,13 +144,13 @@ wstring Encoding::Utf8ToUtf16(const char* str, size_t strLength)
 size_t Encoding::Utf16ToUtf8Inline(const wchar_t* wstr, size_t wstrLength, char* destination, size_t destinationLength)
 {
 	Assert(destinationLength >= wstrLength);
-	Assert(wstrLength < std::numeric_limits<int>::max());
-	Assert(destinationLength < std::numeric_limits<int>::max());
+	Assert(wstrLength < static_cast<size_t>(std::numeric_limits<int>::max()));
+	Assert(destinationLength < static_cast<size_t>(std::numeric_limits<int>::max()));
 
 	auto length = WideCharToMultiByte(CP_UTF8, 0, wstr, static_cast<int>(wstrLength), destination, static_cast<int>(destinationLength), nullptr, nullptr);
 	Assert(length > 0);
 
-	Assert(length < destinationLength);
+	Assert(static_cast<size_t>(length) < destinationLength);
 	destination[length] = '\0';
 
 	return length;
@@ -309,7 +309,7 @@ static const char s_Base64Table[64] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
 
 void Encoding::EncodeBase64Inline(std::string& data)
 {
-	Assert(data.length() < std::numeric_limits<int>::max());
+	Assert(data.length() < static_cast<size_t>(std::numeric_limits<int>::max()));
 	int dataLength = static_cast<int>(data.length());
 	if (dataLength == 0) return;
 
@@ -378,7 +378,7 @@ void FileSystem::RemoveLastPathComponentInline(string& path)
 		return;
 	}
 
-	Assert(path.length() - 2 < std::numeric_limits<int>::max());
+	Assert(path.length() - 2 < static_cast<size_t>(std::numeric_limits<int>::max()));
 	int i = static_cast<int>(path.length() - 2);
 
 	while (i > -1 && (path[i] != '\\' && path[i] != '/'))
@@ -521,7 +521,7 @@ vector<FileSystem::FileInfo> FileSystem::EnumerateFiles(wstring path)
 	{
 		if (left.fileStatus == right.fileStatus)
 		{
-			return left.fileName < right.fileName;
+			return _stricmp(left.fileName.c_str(), right.fileName.c_str()) < 0;
 		}
 
 		return left.fileStatus == FileStatus::Directory;
