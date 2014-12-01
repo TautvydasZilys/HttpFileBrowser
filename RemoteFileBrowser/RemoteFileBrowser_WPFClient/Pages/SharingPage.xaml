@@ -70,23 +70,23 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="Shared files" FontSize="14" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" />
+                <TextBlock Grid.Row="0" Text="Shared files" FontSize="14" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" Margin="0,0,0,5" />
                 
                 <Grid Grid.Row="1">
                     <Grid.Resources>
-                        <HierarchicalDataTemplate DataType="{x:Type ViewModels:LocalFolderViewModel}" ItemsSource="{Binding FolderItems}">
-                            <CheckBox IsThreeState="True" IsChecked="{Binding IsSelected}">
-                                <StackPanel Orientation="Horizontal">
-                                    <Image Source="{Binding Image}" Width="20" Height="20" />
-                                    <TextBlock Text="{Binding Name}"/>
-                                </StackPanel>
-                            </CheckBox>
-                        </HierarchicalDataTemplate>
-                        <HierarchicalDataTemplate DataType="{x:Type ViewModels:LocalFileViewModel}">
-                            <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
-                        </HierarchicalDataTemplate>
                     </Grid.Resources>
-                    <TreeView ItemsSource="{Binding SharedFiles}" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" />
+                    <TreeView ItemsSource="{Binding SharedFiles}" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Standard">
+                        <TreeView.ItemTemplate>
+                            <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                <CheckBox IsThreeState="True" IsChecked="{Binding IsSelected}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="{Binding Image}" Width="20" Height="20" />
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </StackPanel>
+                                </CheckBox>
+                            </HierarchicalDataTemplate>
+                        </TreeView.ItemTemplate>
+                    </TreeView>
                 </Grid>
             </Grid>
         </Grid>

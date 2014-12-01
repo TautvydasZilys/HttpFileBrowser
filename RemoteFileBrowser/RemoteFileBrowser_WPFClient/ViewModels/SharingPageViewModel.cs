@@ -85,11 +85,11 @@ namespace RemoteFileBrowser.ViewModels
         {
             m_SharedFiles = new LocalFileViewModel[]
             {
-                new LocalFolderViewModel("C:\\", null),
-                new LocalFolderViewModel("D:\\", null),
-                new LocalFolderViewModel("E:\\", null),
-                new LocalFolderViewModel("F:\\", null),
-                new LocalFolderViewModel("G:\\", null)
+                new LocalFileViewModel("C:\\", true, null),
+                new LocalFileViewModel("D:\\", true, null),
+                new LocalFileViewModel("E:\\", true, null),
+                new LocalFileViewModel("F:\\", true, null),
+                new LocalFileViewModel("G:\\", true, null)
             };
         }
         

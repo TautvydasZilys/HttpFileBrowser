@@ -92,12 +92,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="NativeFunctions.cs" />
+    <Compile Include="Interop\NativeFunctions.cs" />
     <Compile Include="Pages\SharingPage.xaml.cs">
       <DependentUpon>SharingPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Resources\IconRepository.cs" />
     <Compile Include="ViewModels\LocalFileViewModel.cs" />
-    <Compile Include="ViewModels\LocalFolderViewModel.cs" />
     <Compile Include="XamlConverters\InverseBooleanToVisibilityConverter.cs" />
     <Page Include="Pages\BrowsingPage.xaml">
       <SubType>Designer</SubType>
@@ -168,28 +168,60 @@
   <ItemGroup />
   <Choose>
     <When Condition="'$(Configuration)'=='Test'">
-      <ItemGroup>
-        <None Include="$(SolutionDir)bin\$(Platform)\Test\RemoteFileBrowser.dll">
-          <Link>RemoteFileBrowser.dll</Link>
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Include="$(SolutionDir)bin\$(Platform)\Test\RemoteFileBrowser.pdb">
-          <Link>RemoteFileBrowser.pdb</Link>
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-      </ItemGroup>
+      <Choose>
+        <When Condition="'$(Platform)'=='x86'">
+          <ItemGroup>
+            <None Include="$(SolutionDir)bin\Win32\Test\RemoteFileBrowser.dll">
+              <Link>RemoteFileBrowser.dll</Link>
+              <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            </None>
+            <None Include="$(SolutionDir)bin\Win32\Test\RemoteFileBrowser.pdb">
+              <Link>RemoteFileBrowser.pdb</Link>
+              <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            </None>
+          </ItemGroup>          
+        </When>
+        <Otherwise>
+          <ItemGroup>
+            <None Include="$(SolutionDir)bin\$(Platform)\Test\RemoteFileBrowser.dll">
+              <Link>RemoteFileBrowser.dll</Link>
+              <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            </None>
+            <None Include="$(SolutionDir)bin\$(Platform)\Test\RemoteFileBrowser.pdb">
+              <Link>RemoteFileBrowser.pdb</Link>
+              <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            </None>
+          </ItemGroup>          
+        </Otherwise>
+      </Choose>
     </When>
     <Otherwise>
-      <ItemGroup>
-        <Content Include="$(SolutionDir)bin\$(Platform)\Desktop DLL $(Configuration)\RemoteFileBrowser.dll">
-          <Link>RemoteFileBrowser.dll</Link>
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
-        <Content Include="$(SolutionDir)bin\$(Platform)\Desktop DLL $(Configuration)\RemoteFileBrowser.pdb">
-          <Link>RemoteFileBrowser.pdb</Link>
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
-      </ItemGroup>
+      <Choose>
+        <When Condition="'$(Platform)'=='x86'">
+          <ItemGroup>
+            <Content Include="$(SolutionDir)bin\Win32\Desktop DLL $(Configuration)\RemoteFileBrowser.dll">
+              <Link>RemoteFileBrowser.dll</Link>
+              <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            </Content>
+            <Content Include="$(SolutionDir)bin\Win32\Desktop DLL $(Configuration)\RemoteFileBrowser.pdb">
+              <Link>RemoteFileBrowser.pdb</Link>
+              <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            </Content>
+          </ItemGroup>
+        </When>
+        <Otherwise>
+          <ItemGroup>
+            <Content Include="$(SolutionDir)bin\$(Platform)\Desktop DLL $(Configuration)\RemoteFileBrowser.dll">
+              <Link>RemoteFileBrowser.dll</Link>
+              <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            </Content>
+            <Content Include="$(SolutionDir)bin\$(Platform)\Desktop DLL $(Configuration)\RemoteFileBrowser.pdb">
+              <Link>RemoteFileBrowser.pdb</Link>
+              <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            </Content>
+          </ItemGroup>
+        </Otherwise>
+      </Choose>
     </Otherwise>
   </Choose>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -44,3 +44,45 @@ EXPORT void __stdcall FreeFileData(SimpleFileInfo* files, int fileCount)
 
 	delete[] files;
 }
+
+struct IconInfo
+{
+	HICON icon;
+	int width;
+	int height;
+};
+
+EXPORT void __stdcall GetIcon(const wchar_t* path, IconInfo& iconData)
+{
+	SHFILEINFOW fileInfo;
+
+	auto getFileInfoResult = SHGetFileInfoW(path, 0, &fileInfo, sizeof(fileInfo), SHGFI_ICON | SHGFI_SHELLICONSIZE);
+	Assert(getFileInfoResult != 0);
+
+	ICONINFO iconInfo;
+	auto getIconInfoResult = GetIconInfo(fileInfo.hIcon, &iconInfo);
+	Assert(getIconInfoResult != FALSE);
+
+	BITMAP bitmap = { 0 };
+
+	if (iconInfo.hbmColor != nullptr)
+	{
+		auto result = GetObject(iconInfo.hbmColor, sizeof(bitmap), &bitmap);
+		Assert(result > 0);
+		DeleteObject(iconInfo.hbmColor);
+	}
+	else if (iconInfo.hbmMask != nullptr)
+	{
+		auto result = GetObject(iconInfo.hbmMask, sizeof(bitmap), &bitmap);
+		Assert(result > 0);
+	}
+
+	if (iconInfo.hbmMask != nullptr)
+	{
+		DeleteObject(iconInfo.hbmMask);
+	}
+
+	iconData.icon = fileInfo.hIcon;
+	iconData.width = bitmap.bmWidth;
+	iconData.height = bitmap.bmHeight;
+}
