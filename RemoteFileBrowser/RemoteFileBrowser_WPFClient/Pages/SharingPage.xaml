@@ -94,23 +94,6 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-    <!--                <TreeView ItemsSource="{Binding SharedFiles}" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
-                        <TreeView.ItemTemplate>
-                            <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                                <CheckBox Height="25" IsThreeState="True" IsChecked="{Binding IsSelected}">
-                                    <Grid Height="25">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="20" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        
-                                        <Image Grid.Column="0" Source="{Binding Image}" Width="20" Height="20" />
-                                        <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding Name}"/>
-                                    </Grid>
-                                </CheckBox>
-                            </HierarchicalDataTemplate>
-                        </TreeView.ItemTemplate>
-                    </TreeView>-->
                 </Grid>
             </Grid>
         </Grid>
