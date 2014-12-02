@@ -15,6 +15,11 @@ namespace RemoteFileBrowser.Resources
     {
         private static Dictionary<string, ImageSource> s_IconStorage = new Dictionary<string, ImageSource>();
 
+        static IconRepository()
+        {
+            s_IconStorage.Add("Loading...", null);
+        }
+
         public static ImageSource GetIcon(string path)
         {
             ImageSource result = null;
@@ -32,7 +37,7 @@ namespace RemoteFileBrowser.Resources
                 }
             }
 
-            if (iconInfo.icon != null)
+            if (iconInfo.icon != IntPtr.Zero)
             {
                 result = Imaging.CreateBitmapSourceFromHIcon(iconInfo.icon, new Int32Rect(0, 0, iconInfo.width, iconInfo.height), BitmapSizeOptions.FromEmptyOptions());
                 NativeFunctions.DestroyIcon(iconInfo.icon);

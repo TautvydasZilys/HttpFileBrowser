@@ -99,6 +99,7 @@
     </Compile>
     <Compile Include="Resources\IconRepository.cs" />
     <Compile Include="ViewModels\LocalFileViewModel.cs" />
+    <Compile Include="XamlConverters\BooleanToNonCollapsableVisibilityConverter.cs" />
     <Compile Include="XamlConverters\InverseBooleanToVisibilityConverter.cs" />
     <Page Include="Pages\BrowsingPage.xaml">
       <SubType>Designer</SubType>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -10,13 +11,15 @@ namespace RemoteFileBrowser.ViewModels
 {
     class SharingPageViewModel : INotifyPropertyChanged
     {
+        private static SharingPageViewModel s_Instance;
+
         private bool m_IsSharing;
         private string m_PublicName;
         private string m_HostId;
         private bool m_AllowDirectConnections;
         private bool m_EnableMulticast;
         private bool m_RequireAuthentification = true;
-        private LocalFileViewModel[] m_SharedFiles;
+        private ObservableCollection<LocalFileViewModel> m_SharedFiles;
 
         #region Properties
 
@@ -79,11 +82,17 @@ namespace RemoteFileBrowser.ViewModels
             get { return m_SharedFiles; }
         }
 
+        internal static ObservableCollection<LocalFileViewModel> SharedFilesCollection
+        {
+            get { return s_Instance.m_SharedFiles; }
+        }
+
         #endregion
 
         public SharingPageViewModel()
         {
-            m_SharedFiles = new LocalFileViewModel[]
+            s_Instance = this;
+            m_SharedFiles = new ObservableCollection<LocalFileViewModel>
             {
                 new LocalFileViewModel("C:\\", true, null),
                 new LocalFileViewModel("D:\\", true, null),

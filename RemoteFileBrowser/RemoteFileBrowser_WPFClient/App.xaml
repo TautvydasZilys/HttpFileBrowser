@@ -6,6 +6,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <Converters:BooleanToNonCollapsableVisibilityConverter x:Key="BooleanToNonCollapsableVisibilityConverter" />
             <Converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
 
             <Style x:Key="CheckBoxStyle" TargetType="CheckBox" BasedOn="{StaticResource MetroCheckBox}">

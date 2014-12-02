@@ -19,16 +19,41 @@ namespace RemoteFileBrowser.ViewModels
 
         private readonly string m_Path;
         private readonly string m_Name;
-        private bool? m_IsSelected;
         private readonly bool m_IsFolder;
-        private LocalFileViewModel[] m_Children;
+        private readonly int m_Level;
         private readonly LocalFileViewModel m_Parent;
+        private LocalFileViewModel[] m_Children;
+
+        private bool? m_IsSelected;
+        private bool m_IsExpanded;
+
+        private int m_IndexInCollection;
+        private int m_CollapsedChildrenCount;
+        private int m_ExpandedChildrenCount;
 
         #region Properties
 
         public string Name { get { return m_Name; } }
 
         public object Image { get { return IconRepository.GetIcon(m_Path); } }
+
+        public int Indentation { get { return 16 * m_Level; } }
+
+        public bool HasChildren { get { return m_Children.Length > 0; } }
+        
+        public bool IsExpanded
+        {
+            get { return m_IsExpanded; }
+            set
+            {
+                if (m_IsExpanded == value)
+                    return;
+
+                m_IsExpanded = value;
+                OnExpandedChanged();
+                NotifyPropertyChanged();
+            }
+        }
 
         public bool? IsSelected
         {
@@ -49,22 +74,6 @@ namespace RemoteFileBrowser.ViewModels
             }
         }
 
-        public IEnumerable<LocalFileViewModel> Children
-        {
-            get
-            {
-                if (m_Children == null)
-                {
-                    m_Children = s_ChildrenLoading;
-                    EnumerateFilesAsync();
-
-                    return s_ChildrenLoading;
-                }
-
-                return m_Children;
-            }
-        }
-
         #endregion
 
         public LocalFileViewModel(string path, bool isFolder, LocalFileViewModel parent)
@@ -76,11 +85,18 @@ namespace RemoteFileBrowser.ViewModels
                 m_Name = m_Path;
 
             m_IsFolder = isFolder;
-
-            if (!isFolder)
-                m_Children = s_EmptyChildren;
-
+            
             m_Parent = parent;
+            m_Level = parent != null ? parent.m_Level + 1 : 0;
+                        
+            if (!isFolder)
+            {
+                m_Children = s_EmptyChildren;
+            }
+            else if (parent == null)
+            {
+                BeginEnumeratingChildren();
+            }
 
             if (parent != null && parent.IsSelected != null)
             {
@@ -90,6 +106,97 @@ namespace RemoteFileBrowser.ViewModels
             {
                 m_IsSelected = false;
             }
+        }
+
+        private void OnExpandedChanged()
+        {
+            if (m_IsExpanded)
+            {
+                Expand();
+            }
+            else
+            {
+                Collapse();
+            }
+        }
+
+        private void DoExpand()
+        {
+            var tree = SharingPageViewModel.SharedFilesCollection;
+
+            var insertionPoint = -1;
+            for (int i = 0; i < tree.Count; i++)
+            {
+                if (tree[i] == this)
+                {
+                    insertionPoint = i;
+                    break;
+                }
+            }
+
+            insertionPoint++;
+
+            foreach (var child in m_Children)
+            {
+                child.BeginEnumeratingChildren();
+                tree.Insert(insertionPoint, child);
+                insertionPoint++;
+            }
+
+            foreach (var child in m_Children)
+            {
+                if (child.IsExpanded)
+                    child.DoExpand();
+            }
+        }
+
+        private void Expand()
+        {
+            DoExpand();
+
+            if (m_Parent != null)
+                m_Parent.IncreaseExpansion(m_ExpandedChildrenCount);
+        }
+
+        private void Collapse()
+        {
+            var tree = SharingPageViewModel.SharedFilesCollection;
+
+            var deletionPoint = -1;
+            for (int i = 0; i < tree.Count; i++)
+            {
+                if (tree[i] == this)
+                {
+                    deletionPoint = i;
+                    break;
+                }
+            }
+
+            deletionPoint++;
+
+            for (int i = 0; i < m_ExpandedChildrenCount; i++)
+            {
+                tree.RemoveAt(deletionPoint);
+            }
+
+            if (m_Parent != null)
+                m_Parent.DecreaseExpansion(m_ExpandedChildrenCount);
+        }
+
+        private void IncreaseExpansion(int count)
+        {
+            m_ExpandedChildrenCount += count;
+
+            if (m_Parent != null)
+                m_Parent.IncreaseExpansion(count);
+        }
+
+        private void DecreaseExpansion(int count)
+        {
+            m_ExpandedChildrenCount -= count;
+
+            if (m_Parent != null)
+                m_Parent.DecreaseExpansion(count);
         }
 
         private void OnSelectedChanged()
@@ -133,11 +240,23 @@ namespace RemoteFileBrowser.ViewModels
             NotifyPropertyChanged("IsSelected");
         }
 
+        private void BeginEnumeratingChildren()
+        {
+            if (m_Children == null)
+                EnumerateFilesAsync();
+        }
+
         private async void EnumerateFilesAsync()
         {
             Func<LocalFileViewModel[]> enumerateFilesFunc = EnumerateFiles;
+            m_Children = s_ChildrenLoading;
+            m_ExpandedChildrenCount = 1;
+
             m_Children = await Task.Run<LocalFileViewModel[]>(enumerateFilesFunc);
+            m_ExpandedChildrenCount += m_Children.Length - 1;
+
             NotifyPropertyChanged("Children");
+            NotifyPropertyChanged("HasChildren");
         }
 
         private unsafe LocalFileViewModel[] EnumerateFiles()
@@ -164,32 +283,8 @@ namespace RemoteFileBrowser.ViewModels
             }
 
             NativeFunctions.FreeFileData(files, fileCount);
-            GiveWPFTimeToLoad();
 
             return folderItems.ToArray();
-        }
-
-        static readonly TimeSpan kMinFolderEnumerationInterval = TimeSpan.FromMilliseconds(200);
-        static DateTime s_LastLoaded = DateTime.Now;
-
-        private static void GiveWPFTimeToLoad()
-        {
-            var chillTime = TimeSpan.Zero;
-
-            lock (s_EmptyChildren)
-            {
-                var now = DateTime.Now;
-                var delta = now - s_LastLoaded;
-
-                if (delta < kMinFolderEnumerationInterval)
-                {
-                    chillTime = kMinFolderEnumerationInterval - delta;
-                }
-
-                s_LastLoaded = now + chillTime;
-            }
-
-            Thread.Sleep(chillTime);
         }
 
         #region INotifyPropertyChanged
