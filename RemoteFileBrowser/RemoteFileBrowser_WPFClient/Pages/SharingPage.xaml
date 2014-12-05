@@ -8,29 +8,29 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="60" />
+            <RowDefinition Height="50" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         
         <Grid Grid.Row="0" Margin="10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="140" />
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />    
-                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Sharing status: " FontSize="14" Foreground="{StaticResource TextBrush}" />
-                    <TextBlock Text="{Binding SharingStatusString}" FontSize="14" Foreground="{StaticResource TextBrush}" />
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Host ID: " FontSize="14" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" Margin="0,0,5,0" />
+                    <TextBox Text="{Binding HostId, Mode=OneWay}" FontSize="14" IsReadOnly="True" Foreground="{StaticResource TextBrush}" />
                 </StackPanel>
-                <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Host ID: " FontSize="14" Foreground="{StaticResource TextBrush}" />
-                    <TextBlock Text="{Binding HostId}" FontSize="14" Foreground="{StaticResource TextBrush}" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Sharing status: " FontSize="14" Foreground="{StaticResource TextBrush}" Margin="0,0,5,0" />
+                    <TextBlock Text="{Binding SharingStatusString}" FontSize="14" Foreground="{StaticResource TextBrush}" />
                 </StackPanel>
             </Grid>
 

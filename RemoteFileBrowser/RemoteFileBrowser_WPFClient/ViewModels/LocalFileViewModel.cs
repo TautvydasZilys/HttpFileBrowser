@@ -306,7 +306,6 @@ namespace RemoteFileBrowser.ViewModels
             m_Children = s_ChildrenLoading;
             m_ExpandedChildrenCount = 1;
 
-            await Task.Delay(5000);
             m_Children = await Task.Run<LocalFileViewModel[]>(enumerateFilesFunc);
 
             if (IsExpanded)

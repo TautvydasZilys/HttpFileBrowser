@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RemoteFileBrowser.Interop;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -100,6 +101,11 @@ namespace RemoteFileBrowser.ViewModels
                 new LocalFileViewModel("F:\\", true, null),
                 new LocalFileViewModel("G:\\", true, null)
             };
+
+            IntPtr uniqueSystemIdPtr;
+            int length;
+            NativeFunctions.GetUniqueSystemId(out uniqueSystemIdPtr, out length);
+            m_HostId = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(uniqueSystemIdPtr, length);
         }
         
         public event PropertyChangedEventHandler PropertyChanged;

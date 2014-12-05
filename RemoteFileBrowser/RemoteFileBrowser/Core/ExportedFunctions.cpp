@@ -17,7 +17,7 @@ struct SimpleFileInfo
 EXPORT void __stdcall GetFilesInDirectory(const wchar_t* directoryName, SimpleFileInfo*& results, int& resultCount)
 {
 	auto files = Utilities::FileSystem::EnumerateFiles(directoryName);
-	Assert(files.size() < std::numeric_limits<int>::max() && static_cast<int>(files.size()) > -1);
+	Assert(files.size() < static_cast<size_t>(std::numeric_limits<int>::max()) && static_cast<int>(files.size()) > -1);
 
 	resultCount = static_cast<int>(files.size());
 	results = new SimpleFileInfo[resultCount];
@@ -85,4 +85,12 @@ EXPORT void __stdcall GetIcon(const wchar_t* path, IconInfo& iconData)
 	iconData.icon = fileInfo.hIcon;
 	iconData.width = bitmap.bmWidth;
 	iconData.height = bitmap.bmHeight;
+}
+
+EXPORT void __stdcall GetUniqueSystemId(const char*& uniqueSystemIdPtr, int& length)
+{
+	const auto& uniqueSystemId = Utilities::System::GetUniqueSystemId();
+
+	uniqueSystemIdPtr = uniqueSystemId.c_str();
+	length = uniqueSystemId.length();
 }

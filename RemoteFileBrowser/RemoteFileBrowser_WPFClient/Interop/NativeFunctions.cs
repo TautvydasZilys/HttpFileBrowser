@@ -29,15 +29,18 @@ namespace RemoteFileBrowser.Interop
         }
 
         [DllImport("RemoteFileBrowser.dll")]
-        extern public static unsafe void GetFilesInDirectory(char* directoryName, out SimpleFileInfo* files, out int fileCount);
+        extern internal static unsafe void GetFilesInDirectory(char* directoryName, out SimpleFileInfo* files, out int fileCount);
         
         [DllImport("RemoteFileBrowser.dll")]
-        extern public static unsafe void FreeFileData(SimpleFileInfo* files, int fileCount);
+        extern internal static unsafe void FreeFileData(SimpleFileInfo* files, int fileCount);
 
         [DllImport("RemoteFileBrowser.dll")]
-        extern public static unsafe void GetIcon(char* path, out IconInfo iconInfo);
+        extern internal static unsafe void GetIcon(char* path, out IconInfo iconInfo);
 
         [DllImport("User32.dll")]
-        extern public static void DestroyIcon(IntPtr icon);
+        extern internal static void DestroyIcon(IntPtr icon);
+
+        [DllImport("RemoteFileBrowser.dll")]
+        extern internal static void GetUniqueSystemId(out IntPtr uniqueSystemIdPtr, out int length);
     }
 }
