@@ -75,11 +75,18 @@
                     <ListBox ItemsSource="{Binding SharedFiles}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Border Width="{Binding Indentation}" />
-                                    <ToggleButton x:Name="expandCollapseButton" ClickMode="Press" IsChecked="{Binding IsExpanded}" Visibility="{Binding Path=HasChildren, Converter={StaticResource BooleanToNonCollapsableVisibilityConverter}}" Style="{StaticResource ExpandCollapseToggleStyle}"/>
-
-                                    <CheckBox IsThreeState="True" IsChecked="{Binding IsSelected}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="25" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="{Binding Indentation}" />
+                                        <ColumnDefinition Width="16" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <ToggleButton Grid.Column="1" x:Name="expandCollapseButton" ClickMode="Press" IsChecked="{Binding IsExpanded}" Visibility="{Binding Path=HasChildren, Converter={StaticResource BooleanToNonCollapsableVisibilityConverter}}" Style="{StaticResource ExpandCollapseToggleStyle}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                    <CheckBox Grid.Column="2" IsThreeState="True" IsChecked="{Binding IsSelected}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="20" />
@@ -90,7 +97,7 @@
                                             <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding Name}"/>
                                         </Grid>
                                     </CheckBox>
-                                </StackPanel>
+                                </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
