@@ -16,7 +16,7 @@ namespace RemoteFileBrowser.ViewModels
     {
         internal static string s_LoadingString = "Loading...";
         private static readonly LocalFileViewModel[] s_EmptyChildren = new LocalFileViewModel[0];
-        private static readonly LocalFileViewModel[] s_ChildrenLoading = new LocalFileViewModel[] { new LocalFileViewModel(s_LoadingString, false, null) };
+        internal static readonly LocalFileViewModel[] s_ChildrenLoading = new LocalFileViewModel[] { new LocalFileViewModel(s_LoadingString, false, null) };
 
         private readonly string m_Path;
         private readonly string m_Name;
@@ -260,25 +260,23 @@ namespace RemoteFileBrowser.ViewModels
                 if (m_TotalChildrenCount == m_TotalSelectedChildrenCount)
                 {
                     if (IsSelected != true)
-                    {
-                        SetSelectionNoValidate(true);
                         count++;
-                    }
+
+                    SetSelectionNoValidate(true);
                 }
                 else if (m_TotalSelectedChildrenCount == 0)
                 {
-                    if (IsSelected != false)
-                    {
-                        SetSelectionNoValidate(false);
+                    if (IsSelected == true)
                         count--;
-                    }
+
+                    SetSelectionNoValidate(false);
                 }
                 else if (IsSelected != null)
                 {
-                    SetSelectionNoValidate(null);
-
                     if (IsSelected == true)
                         count--;
+
+                    SetSelectionNoValidate(null);
                 }
             }
 

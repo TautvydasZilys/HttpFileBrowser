@@ -9,19 +9,19 @@ namespace RemoteFileBrowser.Interop
 {
     static class NativeFunctions
     {
-        public enum FileType
+        internal enum FileType
         {
 	        File,
 	        Directory
         }
 
-        public unsafe struct SimpleFileInfo
+        internal unsafe struct SimpleFileInfo
         {
 	        public FileType fileType;
 	        public char* fileName;
         }
 
-        public struct IconInfo
+        internal struct IconInfo
         {
             public IntPtr icon;
             public int width;
@@ -33,6 +33,12 @@ namespace RemoteFileBrowser.Interop
         
         [DllImport("RemoteFileBrowser.dll")]
         extern internal static unsafe void FreeFileData(SimpleFileInfo* files, int fileCount);
+
+        [DllImport("RemoteFileBrowser.dll")]
+        extern internal static unsafe void GetVolumes(out char** volumes, out int volumeCount);
+
+        [DllImport("RemoteFileBrowser.dll")]
+        extern internal static unsafe void FreeVolumes(char** volumes, int volumeCount);
 
         [DllImport("RemoteFileBrowser.dll")]
         extern internal static unsafe void GetIcon(char* path, out IconInfo iconInfo);

@@ -21,7 +21,7 @@ namespace RemoteFileBrowser.ViewModels
         private bool m_AllowDirectConnections;
         private bool m_EnableMulticast;
         private bool m_RequireAuthentification = true;
-        private readonly ObservableCollection<LocalFileViewModel> m_SharedFiles;
+        private ObservableCollection<LocalFileViewModel> m_SharedFiles;
 
         #region Properties
 
@@ -117,19 +117,37 @@ namespace RemoteFileBrowser.ViewModels
         public SharingPageViewModel()
         {
             s_Instance = this;
-            m_SharedFiles = new ObservableCollection<LocalFileViewModel>
-            {
-                new LocalFileViewModel("C:\\", true, null),
-                new LocalFileViewModel("D:\\", true, null),
-                new LocalFileViewModel("E:\\", true, null),
-                new LocalFileViewModel("F:\\", true, null),
-                new LocalFileViewModel("G:\\", true, null)
-            };
+            LoadVolumesAsync();
 
             IntPtr uniqueSystemIdPtr;
             int length;
             NativeFunctions.GetUniqueSystemId(out uniqueSystemIdPtr, out length);
             m_HostId = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(uniqueSystemIdPtr, length);
+        }
+
+        private async void LoadVolumesAsync()
+        {
+            m_SharedFiles = new ObservableCollection<LocalFileViewModel>() { LocalFileViewModel.s_ChildrenLoading[0] };
+            m_SharedFiles = await Task.Run(() => LoadVolumes());
+            NotifyPropertyChanged("SharedFiles");
+        }
+
+        private static unsafe ObservableCollection<LocalFileViewModel> LoadVolumes()
+        {
+            var results = new ObservableCollection<LocalFileViewModel>();
+            char** volumes;
+            int volumeCount;
+
+            NativeFunctions.GetVolumes(out volumes, out volumeCount);
+
+            for (int i = 0; i < volumeCount; i++)
+            {
+                results.Add(new LocalFileViewModel(new string(volumes[i]), true, null));
+            }
+
+            NativeFunctions.FreeVolumes(volumes, volumeCount);
+
+            return results;
         }
 
         public async Task StartSharing()

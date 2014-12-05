@@ -45,6 +45,29 @@ EXPORT void __stdcall FreeFileData(SimpleFileInfo* files, int fileCount)
 	delete[] files;
 }
 
+EXPORT void __stdcall GetVolumes(wchar_t**& results, int& resultCount)
+{
+	auto volumes = Utilities::FileSystem::EnumerateSystemVolumes();
+	resultCount = static_cast<int>(volumes.size());
+	results = new wchar_t*[resultCount];
+
+	for (int i = 0; i < resultCount; i++)
+	{
+		results[i] = new wchar_t[volumes[i].length() + 1];
+		Utilities::Encoding::Utf8ToUtf16Inline(volumes[i], results[i], volumes[i].length() + 1);
+	}
+}
+
+EXPORT void __stdcall FreeVolumes(wchar_t** volumes, int volumeCount)
+{
+	for (int i = 0; i < volumeCount; i++)
+	{
+		delete[] volumes[i];
+	}
+
+	delete[] volumes;
+}
+
 struct IconInfo
 {
 	HICON icon;
