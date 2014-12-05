@@ -86,7 +86,16 @@
                                     </Grid.ColumnDefinitions>
                                     
                                     <ToggleButton Grid.Column="1" x:Name="expandCollapseButton" ClickMode="Press" IsChecked="{Binding IsExpanded}" Visibility="{Binding Path=HasChildren, Converter={StaticResource BooleanToNonCollapsableVisibilityConverter}}" Style="{StaticResource ExpandCollapseToggleStyle}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                    <CheckBox Grid.Column="2" IsThreeState="True" IsChecked="{Binding IsSelected}">
+                                    <CheckBox Grid.Column="2" IsThreeState="True" IsChecked="{Binding IsSelected}" IsEnabled="{Binding Path=HasCheckBox}">
+                                        <CheckBox.Style>
+                                            <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource MetroCheckBox}">
+                                                <Style.Resources>
+                                                    <Style TargetType="Rectangle">
+                                                        <Setter Property="Visibility" Value="{Binding Path=HasCheckBox, Converter={StaticResource BooleanToNonCollapsableVisibilityConverter}}" />
+                                                    </Style>
+                                                </Style.Resources>
+                                            </Style>
+                                        </CheckBox.Style>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="20" />

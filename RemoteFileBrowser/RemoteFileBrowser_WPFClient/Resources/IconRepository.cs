@@ -1,4 +1,5 @@
 ﻿using RemoteFileBrowser.Interop;
+using RemoteFileBrowser.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace RemoteFileBrowser.Resources
 
         static IconRepository()
         {
-            s_IconStorage.Add("Loading...", null);
+            s_IconStorage.Add(LocalFileViewModel.s_LoadingString, null);
         }
 
         public static ImageSource GetIcon(string path)

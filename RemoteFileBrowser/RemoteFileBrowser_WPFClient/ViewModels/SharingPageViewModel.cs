@@ -19,7 +19,7 @@ namespace RemoteFileBrowser.ViewModels
         private bool m_AllowDirectConnections;
         private bool m_EnableMulticast;
         private bool m_RequireAuthentification = true;
-        private ObservableCollection<LocalFileViewModel> m_SharedFiles;
+        private readonly ObservableCollection<LocalFileViewModel> m_SharedFiles;
 
         #region Properties
 

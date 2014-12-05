@@ -14,8 +14,9 @@ namespace RemoteFileBrowser.ViewModels
 {
     class LocalFileViewModel : INotifyPropertyChanged
     {
+        internal static string s_LoadingString = "Loading...";
         private static readonly LocalFileViewModel[] s_EmptyChildren = new LocalFileViewModel[0];
-        private static readonly LocalFileViewModel[] s_ChildrenLoading = new LocalFileViewModel[] { new LocalFileViewModel("Loading...", false, null) };
+        private static readonly LocalFileViewModel[] s_ChildrenLoading = new LocalFileViewModel[] { new LocalFileViewModel(s_LoadingString, false, null) };
 
         private readonly string m_Path;
         private readonly string m_Name;
@@ -27,8 +28,8 @@ namespace RemoteFileBrowser.ViewModels
         private bool? m_IsSelected;
         private bool m_IsExpanded;
 
-        private int m_IndexInCollection;
-        private int m_CollapsedChildrenCount;
+        private int m_TotalChildrenCount;
+        private int m_TotalSelectedChildrenCount;
         private int m_ExpandedChildrenCount;
 
         #region Properties
@@ -60,19 +61,36 @@ namespace RemoteFileBrowser.ViewModels
             get { return m_IsSelected; }
             set
             {
+                if (m_IsSelected == value)
+                    return;
+
                 if (value == null)
                 {
-                    m_IsSelected = (m_IsSelected != null) ? !m_IsSelected : true;
+                    value = !m_IsSelected;
                 }
-                else
+                
+                if (m_Parent != null)
                 {
-                    m_IsSelected = value;
+                    int selectionDelta;
+
+                    if (value.Value)
+                    {
+                        selectionDelta = m_TotalChildrenCount - m_TotalSelectedChildrenCount + 1;
+                    }
+                    else
+                    {
+                        selectionDelta = -m_TotalSelectedChildrenCount - 1;
+                    }
+
+                    m_Parent.AddToSelectedChildrenCount(selectionDelta);
                 }
 
-                OnSelectedChanged();
-                NotifyPropertyChanged();
+                SetSelectionAndValidateChildrenCount(value.Value);
+                SetSelectionToChildren();
             }
         }
+
+        public bool HasCheckBox { get { return this != s_ChildrenLoading[0]; } }
 
         #endregion
 
@@ -155,7 +173,7 @@ namespace RemoteFileBrowser.ViewModels
             DoExpand();
 
             if (m_Parent != null)
-                m_Parent.IncreaseExpansion(m_ExpandedChildrenCount);
+                m_Parent.AddToExpandedChildrenCount(m_ExpandedChildrenCount);
         }
 
         private void Collapse()
@@ -180,31 +198,9 @@ namespace RemoteFileBrowser.ViewModels
             }
 
             if (m_Parent != null)
-                m_Parent.DecreaseExpansion(m_ExpandedChildrenCount);
+                m_Parent.AddToExpandedChildrenCount(-m_ExpandedChildrenCount);
         }
-
-        private void IncreaseExpansion(int count)
-        {
-            m_ExpandedChildrenCount += count;
-
-            if (m_Parent != null)
-                m_Parent.IncreaseExpansion(count);
-        }
-
-        private void DecreaseExpansion(int count)
-        {
-            m_ExpandedChildrenCount -= count;
-
-            if (m_Parent != null)
-                m_Parent.DecreaseExpansion(count);
-        }
-
-        private void OnSelectedChanged()
-        {
-            SetSelectionToChildren();
-            SetSelectionToParent();
-        }
-        
+                
         private void SetSelectionToChildren()
         {
             if (m_Children == null)
@@ -214,7 +210,7 @@ namespace RemoteFileBrowser.ViewModels
             {
                 if (IsSelected != file.IsSelected)
                 {
-                    file.SetSelectionNoValidate(IsSelected);
+                    file.SetSelectionAndValidateChildrenCount(IsSelected.Value);
 
                     if (file.m_IsFolder)
                         file.SetSelectionToChildren();
@@ -222,22 +218,80 @@ namespace RemoteFileBrowser.ViewModels
             }
         }
 
-        private void SetSelectionToParent()
+        private void SetSelectionAndValidateChildrenCount(bool isSelected)
         {
-            if (m_Parent == null)
-                return;
-
-            if (m_Parent.IsSelected != null && IsSelected != m_Parent.IsSelected)
+            if (isSelected)
             {
-                m_Parent.SetSelectionNoValidate(null);
-                m_Parent.SetSelectionToParent();
+                m_TotalSelectedChildrenCount = m_TotalChildrenCount;
             }
+            else
+            {
+                m_TotalSelectedChildrenCount = 0;
+            }
+
+            SetSelectionNoValidate(isSelected);
         }
 
-        internal void SetSelectionNoValidate(bool? isSelected)
+        private void SetSelectionNoValidate(bool? isSelected)
         {
             m_IsSelected = isSelected;
             NotifyPropertyChanged("IsSelected");
+        }
+        
+        private void AddToChildrenCount(int count)
+        {
+            m_TotalChildrenCount += count;
+
+            if (IsSelected == true)
+            {
+                m_TotalSelectedChildrenCount = m_TotalChildrenCount;
+            }
+
+            if (m_Parent != null)
+                m_Parent.AddToChildrenCount(count);
+        }
+
+        private void AddToSelectedChildrenCount(int count)
+        {
+            m_TotalSelectedChildrenCount += count;
+
+            if (m_TotalChildrenCount > 0)
+            {
+                if (m_TotalChildrenCount == m_TotalSelectedChildrenCount)
+                {
+                    if (IsSelected != true)
+                    {
+                        SetSelectionNoValidate(true);
+                        count++;
+                    }
+                }
+                else if (m_TotalSelectedChildrenCount == 0)
+                {
+                    if (IsSelected != false)
+                    {
+                        SetSelectionNoValidate(false);
+                        count--;
+                    }
+                }
+                else if (IsSelected != null)
+                {
+                    SetSelectionNoValidate(null);
+
+                    if (IsSelected == true)
+                        count--;
+                }
+            }
+
+            if (m_Parent != null)
+                m_Parent.AddToSelectedChildrenCount(count);
+        }
+
+        private void AddToExpandedChildrenCount(int count)
+        {
+            m_ExpandedChildrenCount += count;
+
+            if (m_Parent != null)
+                m_Parent.AddToExpandedChildrenCount(count);
         }
 
         private void BeginEnumeratingChildren()
@@ -252,10 +306,21 @@ namespace RemoteFileBrowser.ViewModels
             m_Children = s_ChildrenLoading;
             m_ExpandedChildrenCount = 1;
 
+            await Task.Delay(5000);
             m_Children = await Task.Run<LocalFileViewModel[]>(enumerateFilesFunc);
-            m_ExpandedChildrenCount += m_Children.Length - 1;
 
-            NotifyPropertyChanged("Children");
+            if (IsExpanded)
+            {
+                Collapse();
+                AddToExpandedChildrenCount(m_Children.Length - m_ExpandedChildrenCount);
+                Expand();
+            }
+            else
+            {
+                m_ExpandedChildrenCount = m_Children.Length;
+            }
+
+            AddToChildrenCount(m_Children.Length);
             NotifyPropertyChanged("HasChildren");
         }
 
