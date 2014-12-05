@@ -15,6 +15,7 @@ namespace RemoteFileBrowser.ViewModels
         private static SharingPageViewModel s_Instance;
 
         private bool m_IsSharing;
+        private bool m_CanChangeShareStatus = true;
         private string m_PublicName;
         private string m_HostId;
         private bool m_AllowDirectConnections;
@@ -27,7 +28,7 @@ namespace RemoteFileBrowser.ViewModels
         public bool IsSharing
         {
             get { return m_IsSharing; }
-            set
+            private set
             {
                 m_IsSharing = value;
                 NotifyPropertyChanged();
@@ -35,7 +36,30 @@ namespace RemoteFileBrowser.ViewModels
             }
         }
 
-        public string SharingStatusString { get { return IsSharing ? "Running" : "Stopped"; } }
+        public bool CanChangeShareStatus
+        {
+            get { return m_CanChangeShareStatus; }
+            private set
+            {
+                m_CanChangeShareStatus = value;
+                NotifyPropertyChanged();
+                NotifyPropertyChanged("SharingStatusString");
+            }
+        }
+
+        public string SharingStatusString
+        { 
+            get
+            {
+                if (CanChangeShareStatus)
+                {
+                    return IsSharing ? "Running" : "Stopped"; 
+                }
+
+                return IsSharing ? "Stopping" : "Starting";
+            }
+        }
+
         public string HostId { get { return m_HostId; } }
 
         public string PublicName
@@ -107,7 +131,45 @@ namespace RemoteFileBrowser.ViewModels
             NativeFunctions.GetUniqueSystemId(out uniqueSystemIdPtr, out length);
             m_HostId = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(uniqueSystemIdPtr, length);
         }
-        
+
+        public async Task StartSharing()
+        {
+            if (IsSharing || !CanChangeShareStatus)
+                throw new InvalidOperationException();
+
+            CanChangeShareStatus = false;
+
+            await StartSharingImpl();
+
+            CanChangeShareStatus = true;
+            IsSharing = true;
+        }
+
+        public async Task StopSharing()
+        {
+            if (!IsSharing || !CanChangeShareStatus)
+                throw new InvalidOperationException();
+
+            CanChangeShareStatus = false;
+
+            await StopSharingImpl();
+
+            CanChangeShareStatus = true;
+            IsSharing = false;
+        }
+
+        private async Task StartSharingImpl()
+        {
+            await Task.Delay(2000);
+        }
+
+        private async Task StopSharingImpl()
+        {
+            await Task.Delay(2000);
+        }
+
+        #region INotifyPropertyChanged
+
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged([CallerMemberName]string propertyName = "")
         {
@@ -116,5 +178,7 @@ namespace RemoteFileBrowser.ViewModels
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
+        #endregion
     }
 }

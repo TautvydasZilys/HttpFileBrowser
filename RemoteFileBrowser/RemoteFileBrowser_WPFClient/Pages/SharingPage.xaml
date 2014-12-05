@@ -34,8 +34,8 @@
                 </StackPanel>
             </Grid>
 
-            <Button Grid.Column="1" Content="Start sharing" x:Name="m_StartSharingButton" Click="StartSharingButton_Click" Visibility="{Binding Path=IsSharing, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Style="{StaticResource MetroAccentButton}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" Padding="20,5" />
-            <Button Grid.Column="1" Content="Stop sharing" x:Name="m_StopSharingButton" Click="StopSharingButton_Click" Visibility="{Binding Path=IsSharing, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource MetroAccentButton}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" Padding="20,5" />
+            <Button Grid.Column="1" Content="Start sharing" x:Name="m_StartSharingButton" Click="StartSharingButton_Click" IsEnabled="{Binding CanChangeShareStatus}" Visibility="{Binding Path=IsSharing, Converter={StaticResource InverseBooleanToVisibilityConverter}}" Style="{StaticResource MetroAccentButton}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" Padding="20,5" />
+            <Button Grid.Column="1" Content="Stop sharing" x:Name="m_StopSharingButton" Click="StopSharingButton_Click" IsEnabled="{Binding CanChangeShareStatus}" Visibility="{Binding Path=IsSharing, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource MetroAccentButton}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" Padding="20,5" />
         </Grid>
 
         <Grid Grid.Row="1" Margin="10">

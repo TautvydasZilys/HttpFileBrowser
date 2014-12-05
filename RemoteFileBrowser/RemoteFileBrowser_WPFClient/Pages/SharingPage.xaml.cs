@@ -15,20 +15,14 @@ namespace RemoteFileBrowser.Pages
             DataContext = m_ViewModel = new SharingPageViewModel();
         }
 
-        private void StartSharingButton_Click(object sender, RoutedEventArgs e)
+        private async void StartSharingButton_Click(object sender, RoutedEventArgs e)
         {
-            if (m_ViewModel.IsSharing)
-                throw new InvalidOperationException();
-
-            m_ViewModel.IsSharing = true;
+            await m_ViewModel.StartSharing();
         }
 
-        private void StopSharingButton_Click(object sender, RoutedEventArgs e)
+        private async void StopSharingButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!m_ViewModel.IsSharing)
-                throw new InvalidOperationException();
-
-            m_ViewModel.IsSharing = false;
+            await m_ViewModel.StopSharing();
         }
     }
 }
