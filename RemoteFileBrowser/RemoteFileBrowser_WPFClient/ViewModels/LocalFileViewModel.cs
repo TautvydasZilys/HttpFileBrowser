@@ -87,6 +87,8 @@ namespace RemoteFileBrowser.ViewModels
 
                 SetSelectionAndValidateChildrenCount(value.Value);
                 SetSelectionToChildren();
+
+                SharingPageViewModel.NotifySharedFileChanged();
             }
         }
 

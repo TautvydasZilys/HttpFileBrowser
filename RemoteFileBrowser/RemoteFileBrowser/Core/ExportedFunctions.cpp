@@ -183,3 +183,9 @@ EXPORT Tcp::Listener* __stdcall StartSharingFiles(const SharedFilesInterop& shar
 
 	return listener;
 }
+
+EXPORT void __stdcall StopSharingFiles(Tcp::Listener*& listener)
+{
+	delete listener;
+	listener = nullptr;
+}

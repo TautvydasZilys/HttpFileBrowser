@@ -24,6 +24,7 @@ namespace RemoteFileBrowser.ViewModels
         private bool m_RequireAuthentification = true;
         private ObservableCollection<LocalFileViewModel> m_FileTree;
         private LocalFileViewModel[] m_RootFiles;
+        private IntPtr m_SharingContext;
 
         #region Properties
 
@@ -153,6 +154,28 @@ namespace RemoteFileBrowser.ViewModels
             return results;
         }
 
+        public static void NotifySharedFileChanged()
+        {
+            if (!s_Instance.IsSharing)
+                return;
+
+            s_Instance.HandleSharedFilesChanged();
+        }
+
+        private async void HandleSharedFilesChanged()
+        {
+            List<string> fullySharedFolders, partiallySharedFolders, files;
+            CollectSharedFiles(out fullySharedFolders, out partiallySharedFolders, out files);
+
+            await Task.Run(() =>
+            {
+                DoActionWithMarshalledFiles(fullySharedFolders, partiallySharedFolders, files, (sharedFiles) =>
+                {
+                    NativeFunctions.SetSharedFiles(ref sharedFiles);
+                });
+            });
+        }
+
         public async Task StartSharing()
         {
             if (IsSharing || !CanChangeShareStatus)
@@ -186,31 +209,39 @@ namespace RemoteFileBrowser.ViewModels
 
             await Task.Run(() =>
             {
-                var sharedFiles = default(NativeFunctions.SharedFiles);
-
-                unsafe
+                DoActionWithMarshalledFiles(fullySharedFolders, partiallySharedFolders, files, (sharedFiles) =>
                 {
-                    sharedFiles.fullySharedFolders = MarshalStringList(fullySharedFolders);
-                    sharedFiles.fullySharedFolderCount = fullySharedFolders.Count;
-
-                    sharedFiles.partiallySharedFolders = MarshalStringList(partiallySharedFolders);
-                    sharedFiles.partiallySharedFolderCount = partiallySharedFolders.Count;
-
-                    sharedFiles.sharedFiles = MarshalStringList(files);
-                    sharedFiles.sharedFileCount = files.Count;
-
-                    NativeFunctions.StartSharingFiles(ref sharedFiles);
-
-                    MarshalStringListCleanup(sharedFiles.fullySharedFolders, sharedFiles.fullySharedFolderCount);
-                    MarshalStringListCleanup(sharedFiles.partiallySharedFolders, sharedFiles.partiallySharedFolderCount);
-                    MarshalStringListCleanup(sharedFiles.sharedFiles, sharedFiles.sharedFileCount);
-                }
+                    m_SharingContext = NativeFunctions.StartSharingFiles(ref sharedFiles);   
+                });
             });
         }
 
         private async Task StopSharingImpl()
         {
-            await Task.Delay(2000);
+            await Task.Run(() =>
+            {
+                NativeFunctions.StopSharingFiles(ref m_SharingContext);
+            });
+        }
+
+        private unsafe void DoActionWithMarshalledFiles(List<string> fullySharedFolders, List<string> partiallySharedFolders, List<string> files, Action<NativeFunctions.SharedFiles> callback)
+        {
+            var sharedFiles = default(NativeFunctions.SharedFiles);
+
+            sharedFiles.fullySharedFolders = MarshalStringList(fullySharedFolders);
+            sharedFiles.fullySharedFolderCount = fullySharedFolders.Count;
+
+            sharedFiles.partiallySharedFolders = MarshalStringList(partiallySharedFolders);
+            sharedFiles.partiallySharedFolderCount = partiallySharedFolders.Count;
+
+            sharedFiles.sharedFiles = MarshalStringList(files);
+            sharedFiles.sharedFileCount = files.Count;
+
+            callback(sharedFiles);
+
+            MarshalStringListCleanup(sharedFiles.fullySharedFolders, sharedFiles.fullySharedFolderCount);
+            MarshalStringListCleanup(sharedFiles.partiallySharedFolders, sharedFiles.partiallySharedFolderCount);
+            MarshalStringListCleanup(sharedFiles.sharedFiles, sharedFiles.sharedFileCount);
         }
 
         private unsafe char** MarshalStringList(List<string> strings)

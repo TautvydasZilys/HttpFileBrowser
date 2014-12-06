@@ -60,8 +60,14 @@ namespace RemoteFileBrowser.Interop
 
         [DllImport("RemoteFileBrowser.dll")]
         extern internal static void GetUniqueSystemId(out IntPtr uniqueSystemIdPtr, out int length);
+        
+        [DllImport("RemoteFileBrowser.dll")]
+        extern internal static void SetSharedFiles(ref SharedFiles sharedFiles);
 
         [DllImport("RemoteFileBrowser.dll")]
         extern internal static IntPtr StartSharingFiles(ref SharedFiles sharedFiles);
+
+        [DllImport("RemoteFileBrowser.dll")]
+        extern internal static void StopSharingFiles(ref IntPtr sharingContext);
     }
 }
