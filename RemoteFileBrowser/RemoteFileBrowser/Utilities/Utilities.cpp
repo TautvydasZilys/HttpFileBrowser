@@ -22,6 +22,9 @@ void Logging::Initialize(bool forceOverwrite)
 		Assert(GetLastError() == ERROR_FILE_EXISTS);
 
 		s_OutputFile = FileSystem::CreateFilePortable(kLogFileName, FILE_GENERIC_WRITE, FILE_SHARE_READ, OPEN_EXISTING);
+		Assert(s_OutputFile != INVALID_HANDLE_VALUE);
+		
+		SetFilePointer(s_OutputFile, 0, NULL, FILE_END);
 
 		const char threeNewLines[] = "\r\n\r\n\r\n";
 		DWORD bytesWritten;

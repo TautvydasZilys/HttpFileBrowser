@@ -47,15 +47,17 @@ public:
 #endif
 	}
 
-	inline void Wait()
+	inline bool Wait(DWORD timeout = INFINITE)
 	{
-		auto result = WaitForSingleObjectEx(m_EventHandle, INFINITE, FALSE);
+		auto result = WaitForSingleObjectEx(m_EventHandle, timeout, FALSE);
 		Assert(result == WAIT_OBJECT_0);
 
 #if _DEBUG
 		if (!m_IsManualReset) m_IsSet = false;
 		MemoryBarrier();
 #endif
+
+		return result == WAIT_OBJECT_0;
 	}
 };
 

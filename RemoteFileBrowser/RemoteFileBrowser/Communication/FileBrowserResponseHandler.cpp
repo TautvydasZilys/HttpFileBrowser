@@ -16,7 +16,7 @@ void FileBrowserResponseHandler::ExecuteRequest(SOCKET clientSocket, const strin
 
 FileBrowserResponseHandler::FileBrowserResponseHandler(SOCKET clientSocket, const string& requestedPath, const string& httpVersion) :
 	m_ClientSocket(clientSocket),
-	m_HttpVersion(httpVersion), 
+	m_HttpVersion(httpVersion),
 	m_RequestedPath(requestedPath), 
 	m_FileStatus(FileSystem::QueryFileStatus(Encoding::Utf8ToUtf16(requestedPath))),
 	m_ErrorCode(ERROR_SUCCESS)
@@ -176,7 +176,10 @@ void FileBrowserResponseHandler::StreamFile() const
 			currentDataLength = bytesRead;
 
 			dataReadyEvent.Set();
-			bufferPtrReadEvent.Wait();
+			
+			const DWORD kTimeout = 30000;	// 30 seconds
+			if (!bufferPtrReadEvent.Wait(kTimeout))	// Throw exception if the other thread fails to second data within 30 seconds
+				throw exception();	// This usually happens when browser cancels download but doesn't close the socket
 
 			currentBufferIndex = (currentBufferIndex + 1) % kBufferCount;
 		}

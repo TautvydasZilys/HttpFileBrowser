@@ -139,12 +139,14 @@ namespace Utilities
 
 	namespace String
 	{
-		struct CaseInsensitiveComparer
+		inline size_t PathLength(const std::string& path);
+
+		struct PathComparer
 		{
 			inline bool operator()(const std::string& left, const std::string& right);
 		};
 
-		struct CaseInsensitiveHasher
+		struct PathHasher
 		{
 			inline size_t operator()(const std::string& str);
 		};

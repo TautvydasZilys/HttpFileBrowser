@@ -2,7 +2,7 @@
 
 namespace SharedFiles
 {
-	typedef std::unordered_set<std::string, Utilities::String::CaseInsensitiveHasher, Utilities::String::CaseInsensitiveComparer> FileSet;
+	typedef std::unordered_set<std::string, Utilities::String::PathHasher, Utilities::String::PathComparer> FileSet;
 
 	void SetSharedFiles(FileSet&& fullySharedFolders, FileSet&& partiallySharedFolders, FileSet&& files);
 	bool IsFileShared(const std::string& path);

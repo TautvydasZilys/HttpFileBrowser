@@ -219,14 +219,36 @@ inline HANDLE Utilities::FileSystem::CreateFilePortable(const std::wstring& path
 
 // String
 
-inline bool Utilities::String::CaseInsensitiveComparer::operator()(const std::string& left, const std::string& right)
+inline size_t Utilities::String::PathLength(const std::string& path)
 {
-	return _stricmp(left.c_str(), right.c_str()) == 0;
+	auto length = path.length();
+
+	if (path[length - 1] == '\\')
+		return length - 1;
+
+	return length;
 }
 
-inline size_t Utilities::String::CaseInsensitiveHasher::operator()(const std::string& str)
+inline bool Utilities::String::PathComparer::operator()(const std::string& left, const std::string& right)
 {
-	auto length = str.length();
+	auto leftLength = PathLength(left);
+	auto rightLength = PathLength(right);
+	
+	if (leftLength != rightLength)
+		return false;
+
+	for (size_t i = 0; i < leftLength; i++)
+	{
+		if (tolower(left[i]) != tolower(right[i]))
+			return false;
+	}
+
+	return true;
+}
+
+inline size_t Utilities::String::PathHasher::operator()(const std::string& str)
+{
+	auto length = PathLength(str);
 	std::string lowerCaseStr;
 	lowerCaseStr.resize(length);
 
