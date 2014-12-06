@@ -21,7 +21,8 @@ namespace RemoteFileBrowser.ViewModels
         private bool m_AllowDirectConnections;
         private bool m_EnableMulticast;
         private bool m_RequireAuthentification = true;
-        private ObservableCollection<LocalFileViewModel> m_SharedFiles;
+        private ObservableCollection<LocalFileViewModel> m_FileTree;
+        private LocalFileViewModel[] m_RootFiles;
 
         #region Properties
 
@@ -102,14 +103,14 @@ namespace RemoteFileBrowser.ViewModels
             }
         }
 
-        public IEnumerable<LocalFileViewModel> SharedFiles
+        public IEnumerable<LocalFileViewModel> FileTree
         {
-            get { return m_SharedFiles; }
+            get { return m_FileTree; }
         }
 
-        internal static ObservableCollection<LocalFileViewModel> SharedFilesCollection
+        internal static ObservableCollection<LocalFileViewModel> FileTreeCollection
         {
-            get { return s_Instance.m_SharedFiles; }
+            get { return s_Instance.m_FileTree; }
         }
 
         #endregion
@@ -127,22 +128,23 @@ namespace RemoteFileBrowser.ViewModels
 
         private async void LoadVolumesAsync()
         {
-            m_SharedFiles = new ObservableCollection<LocalFileViewModel>() { LocalFileViewModel.s_ChildrenLoading[0] };
-            m_SharedFiles = await Task.Run(() => LoadVolumes());
-            NotifyPropertyChanged("SharedFiles");
+            m_FileTree = new ObservableCollection<LocalFileViewModel>(LocalFileViewModel.s_ChildrenLoading);
+            m_RootFiles = await Task.Run(() => LoadVolumes());
+            m_FileTree = new ObservableCollection<LocalFileViewModel>(m_RootFiles);
+            NotifyPropertyChanged("FileTree");
         }
 
-        private static unsafe ObservableCollection<LocalFileViewModel> LoadVolumes()
+        private static unsafe LocalFileViewModel[] LoadVolumes()
         {
-            var results = new ObservableCollection<LocalFileViewModel>();
             char** volumes;
             int volumeCount;
 
             NativeFunctions.GetVolumes(out volumes, out volumeCount);
+            var results = new LocalFileViewModel[volumeCount];
 
             for (int i = 0; i < volumeCount; i++)
             {
-                results.Add(new LocalFileViewModel(new string(volumes[i]), true, null));
+                results[i] = new LocalFileViewModel(new string(volumes[i]), true, null);
             }
 
             NativeFunctions.FreeVolumes(volumes, volumeCount);
@@ -178,12 +180,26 @@ namespace RemoteFileBrowser.ViewModels
 
         private async Task StartSharingImpl()
         {
+            List<string> fullySharedFolders, partiallySharedFolders, files;
+            CollectSharedFiles(out fullySharedFolders, out partiallySharedFolders, out files);
             await Task.Delay(2000);
         }
 
         private async Task StopSharingImpl()
         {
             await Task.Delay(2000);
+        }
+
+        private void CollectSharedFiles(out List<string> fullySharedFolders, out List<string> partiallySharedFolders, out List<string> sharedFiles)
+        {
+            fullySharedFolders = new List<string>();
+            partiallySharedFolders = new List<string>();
+            sharedFiles = new List<string>();
+
+            foreach (var volume in m_RootFiles)
+            {
+                volume.CollectSharedFiles(fullySharedFolders, partiallySharedFolders, sharedFiles);
+            }
         }
 
         #region INotifyPropertyChanged

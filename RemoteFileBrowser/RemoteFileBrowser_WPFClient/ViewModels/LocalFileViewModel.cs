@@ -126,6 +126,39 @@ namespace RemoteFileBrowser.ViewModels
             }
         }
 
+        public void CollectSharedFiles(List<string> fullySharedFolders, List<string> partiallySharedFolders, List<string> files)
+        {
+            switch (IsSelected)
+            {
+                case true:
+                    {
+                        if (m_IsFolder)
+                        {
+                            fullySharedFolders.Add(m_Path);
+                        }
+                        else
+                        {
+                            files.Add(m_Path);
+                        }
+                    }
+                    return;
+
+                case false:
+                    return;
+
+                case null:
+                    {
+                        partiallySharedFolders.Add(m_Path);
+
+                        foreach (var child in m_Children)
+                        {
+                            child.CollectSharedFiles(fullySharedFolders, partiallySharedFolders, files);
+                        }
+                    }
+                    return;
+            }
+        }
+
         private void OnExpandedChanged()
         {
             if (m_IsExpanded)
@@ -140,7 +173,7 @@ namespace RemoteFileBrowser.ViewModels
 
         private void DoExpand()
         {
-            var tree = SharingPageViewModel.SharedFilesCollection;
+            var tree = SharingPageViewModel.FileTreeCollection;
 
             var insertionPoint = -1;
             for (int i = 0; i < tree.Count; i++)
@@ -178,7 +211,7 @@ namespace RemoteFileBrowser.ViewModels
 
         private void Collapse()
         {
-            var tree = SharingPageViewModel.SharedFilesCollection;
+            var tree = SharingPageViewModel.FileTreeCollection;
 
             var deletionPoint = -1;
             for (int i = 0; i < tree.Count; i++)
