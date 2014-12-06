@@ -47,9 +47,7 @@ inline void Listener::StartIncomingConnectionThread(Callback callback, SOCKET ac
 	const int bufferSize = 64;
 	char msgBuffer[bufferSize];
 
-	auto msgLength = Utilities::Encoding::IpToString(AF_INET6, &clientAddress.sin6_addr, msgBuffer);
-	Assert(msgLength != 0);
-
+	Utilities::Encoding::IpToString(AF_INET6, &clientAddress.sin6_addr, msgBuffer);
 	Utilities::Logging::Log("Accepted connection from ", msgBuffer, ".");
 
 	u_long nonBlocking = FALSE;

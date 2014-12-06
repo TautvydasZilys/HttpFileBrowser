@@ -6,7 +6,6 @@ private:
 	SOCKET m_ClientSocket;
 	const std::string& m_HttpVersion;
 	const std::string& m_RequestedPath;
-	std::wstring m_WidePath;
 	Utilities::FileSystem::FileStatus m_FileStatus;
 	int m_ErrorCode;
 

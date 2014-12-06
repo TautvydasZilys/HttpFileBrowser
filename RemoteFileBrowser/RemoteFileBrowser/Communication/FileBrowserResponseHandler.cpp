@@ -1,6 +1,7 @@
 #include "PrecompiledHeader.h"
 #include "AssetDatabase.h"
 #include "FileBrowserResponseHandler.h"
+#include "SharedFiles.h"
 #include "Utilities\StreamableFile.h"
 #include "Utilities\Event.h"
 
@@ -17,8 +18,7 @@ FileBrowserResponseHandler::FileBrowserResponseHandler(SOCKET clientSocket, cons
 	m_ClientSocket(clientSocket),
 	m_HttpVersion(httpVersion), 
 	m_RequestedPath(requestedPath), 
-	m_WidePath(Encoding::Utf8ToUtf16(requestedPath)),
-	m_FileStatus(FileSystem::QueryFileStatus(m_WidePath)),
+	m_FileStatus(FileSystem::QueryFileStatus(Encoding::Utf8ToUtf16(requestedPath))),
 	m_ErrorCode(ERROR_SUCCESS)
 {
 	Logging::Log("Requested path: \"", requestedPath, "\".");
@@ -26,6 +26,12 @@ FileBrowserResponseHandler::FileBrowserResponseHandler(SOCKET clientSocket, cons
 
 void FileBrowserResponseHandler::Execute()
 {
+	if (m_RequestedPath.length() > 1 && m_RequestedPath[1] != ':')
+	{
+		SendBuiltinFile();
+		return;
+	}
+
 	if (m_FileStatus == FileSystem::FileStatus::File)
 	{
 		SendFileResponse();
@@ -38,7 +44,7 @@ void FileBrowserResponseHandler::Execute()
 
 void FileBrowserResponseHandler::SendData(const char* data, size_t length) const
 {
-	Assert(length < numeric_limits<int>::max());
+	Assert(length < static_cast<size_t>(numeric_limits<int>::max()));
 	auto sendResult = send(m_ClientSocket, data, static_cast<int>(length), 0);
 
 	if (sendResult == SOCKET_ERROR)
@@ -55,9 +61,9 @@ void FileBrowserResponseHandler::SendNotFoundResponse() const
 
 void FileBrowserResponseHandler::SendFileResponse() const
 {
-	if (m_RequestedPath.length() > 1 && m_RequestedPath[1] != ':')
+	if (!SharedFiles::IsFileShared(m_RequestedPath))
 	{
-		SendBuiltinFile();
+		SendNotFoundResponse();
 		return;
 	}
 
@@ -111,7 +117,7 @@ void FileBrowserResponseHandler::SendBuiltinFile() const
 
 void FileBrowserResponseHandler::StreamFile() const
 {
-	StreamableFile file(m_WidePath);
+	StreamableFile file(Encoding::Utf8ToUtf16(m_RequestedPath));
 
 	// Form and send the header
 
@@ -245,9 +251,13 @@ void FileBrowserResponseHandler::FormHtmlResponseHead(stringstream& html) const
 
 void FileBrowserResponseHandler::FormHtmlResponseBody(stringstream& html) const
 {
+	auto upPath = Utilities::FileSystem::RemoveLastPathComponent(m_RequestedPath);
+	Utilities::Encoding::EncodeUrlInline(upPath);
+
 	html << "<body>"
 				"<h1>HTTP File Browser</h1>"
 				"<br/>"
+				"<a href=/" << upPath << "><h2>Go up</h2></a>"
 				"<h2>File system at path \"" << m_RequestedPath << "\":</h2>"
 				"<br/>"
 				"<br/>";
@@ -308,13 +318,20 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 {
 	using namespace Utilities::FileSystem;
 
-	if (m_WidePath.length() > MAX_PATH - 4)
+	if (m_RequestedPath.length() > MAX_PATH - 4)
 	{
 		GenerateHtmlBodyContentError(html, "Specified path is too long.");
 		return;
 	}
 
-	auto files = EnumerateAndSortFiles(m_WidePath);
+	if (!SharedFiles::IsFolderVisible(m_RequestedPath))
+	{
+		auto errorMessage = Encoding::Utf16ToUtf8(Logging::Win32ErrorToMessage(ERROR_PATH_NOT_FOUND));
+		GenerateHtmlBodyContentError(html, errorMessage);
+		return;
+	}
+
+	auto files = SharedFiles::GetFolderContents(m_RequestedPath);
 
 	if (files.size() > 0)
 	{
@@ -388,7 +405,7 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfSystemVolumes(stringst
 {
 	html << "<table>";
 
-	for (const auto& file : FileSystem::EnumerateSystemVolumes())
+	for (const auto& file : SharedFiles::GetVolumes())
 	{
 		html << "<tr><td><a href=\"/" << file << "\">" << file << "</a></td></tr>";
 	}

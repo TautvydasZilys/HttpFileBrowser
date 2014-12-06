@@ -5,9 +5,7 @@ inline void LogEndpointAddress(sockaddr_in6* addressInfo)
 	const int bufferSize = 64;
 	char msgBuffer[bufferSize];
 
-	auto msgLength = Utilities::Encoding::IpToString(AF_INET6, &addressInfo->sin6_addr, msgBuffer);
-	Assert(msgLength != 0);
-
+	Utilities::Encoding::IpToString(AF_INET6, &addressInfo->sin6_addr, msgBuffer);
 	Utilities::Logging::Log("Endpoint address: ", msgBuffer, ".");
 }
 
@@ -16,9 +14,7 @@ inline void LogEndpointAddress(sockaddr_in* addressInfo)
 	const int bufferSize = 64;
 	char msgBuffer[bufferSize];
 
-	auto msgLength = Utilities::Encoding::IpToString(AF_INET, &addressInfo->sin_addr, msgBuffer);
-	Assert(msgLength != 0);
-
+	Utilities::Encoding::IpToString(AF_INET, &addressInfo->sin_addr, msgBuffer);
 	Utilities::Logging::Log("Endpoint address: ", msgBuffer, ".");
 }
 

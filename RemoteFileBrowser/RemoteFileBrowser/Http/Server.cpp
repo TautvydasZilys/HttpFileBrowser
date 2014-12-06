@@ -94,7 +94,7 @@ std::string Server::ParseRequest()
 
 void Server::SendResponse(const string& response)
 {
-	Assert(response.length() < std::numeric_limits<int>::max());
+	Assert(response.length() < static_cast<size_t>(std::numeric_limits<int>::max()));
 	auto sendResult = send(m_ConnectionSocket, response.c_str(), static_cast<int>(response.length()), 0);
 	Assert(sendResult != SOCKET_ERROR);
 
@@ -149,8 +149,6 @@ void Server::ReportConnectionDroppedError()
 	const int bufferSize = 64;
 	char msgBuffer[bufferSize];
 
-	auto msgLength = Utilities::Encoding::IpToString(AF_INET6, &m_ClientAddress.sin6_addr, msgBuffer);
-	Assert(msgLength != 0);
-
+	Utilities::Encoding::IpToString(AF_INET6, &m_ClientAddress.sin6_addr, msgBuffer);
 	Logging::Error(WSAGetLastError(), "Connection from ", msgBuffer, " dropped: ");
 }

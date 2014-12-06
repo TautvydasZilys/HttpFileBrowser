@@ -516,6 +516,9 @@ vector<FileSystem::FileInfo> FileSystem::EnumerateFiles(wstring path)
 
 	do
 	{
+		if (wcscmp(findData.cFileName, L".") == 0 || wcscmp(findData.cFileName, L"..") == 0)
+			continue;
+
 		auto fileNameLength = wcslen(findData.cFileName);
 		string fileName(Utf16ToUtf8(findData.cFileName, fileNameLength));
 
@@ -602,7 +605,7 @@ bool FileSystem::GetFileSizeFromHandle(HANDLE fileHandle, uint64_t& fileSize)
 {
 	FILE_STANDARD_INFO fileInfo;
 	
-	if (GetFileInformationByHandleEx(fileHandle, FileStandardInfo, &fileInfo, sizeof(fileInfo) == FALSE))
+	if (GetFileInformationByHandleEx(fileHandle, FileStandardInfo, &fileInfo, sizeof(fileInfo)) == FALSE)
 	{
 		return false;
 	}

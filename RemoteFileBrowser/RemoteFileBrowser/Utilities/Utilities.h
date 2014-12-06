@@ -84,7 +84,7 @@ namespace Utilities
 		inline std::string EncodeBase64(const std::string& data);
 
 		template <size_t bufferLength>
-		inline size_t IpToString(int ipFamily, void* ipAddress, char (&buffer)[bufferLength]);
+		inline void IpToString(int ipFamily, void* ipAddress, char (&buffer)[bufferLength]);
 
 		int inet_pton(int af, const char* src, void* dst);
 	}

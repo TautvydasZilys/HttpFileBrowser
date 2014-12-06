@@ -8,5 +8,6 @@ namespace SharedFiles
 	bool IsFileShared(const std::string& path);
 	bool IsFolderVisible(const std::string& path);
 	std::vector<Utilities::FileSystem::FileInfo> GetFolderContents(const std::string& path);
+	std::vector<std::string> GetVolumes();
 };
 

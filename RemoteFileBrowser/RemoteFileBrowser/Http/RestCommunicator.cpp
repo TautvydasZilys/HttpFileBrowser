@@ -11,11 +11,11 @@ static void SendPostRequest(SOCKET s, const Http::Request& httpRequest)
 {
 	auto header = httpRequest.BuildHeaderString();
 
-	Assert(header.length() < numeric_limits<int>::max());
+	Assert(header.length() < static_cast<size_t>(numeric_limits<int>::max()));
 	auto result = send(s, header.c_str(), static_cast<int>(header.length()), 0);
 	if (result != header.length()) goto fail;
 
-	Assert(httpRequest.content.length() < numeric_limits<int>::max());
+	Assert(httpRequest.content.length() < static_cast<size_t>(numeric_limits<int>::max()));
 	result = send(s, httpRequest.content.c_str(), static_cast<int>(httpRequest.content.length()), 0);
 	if (result != httpRequest.content.length()) goto fail;
 

@@ -94,3 +94,16 @@ std::vector<Utilities::FileSystem::FileInfo> SharedFiles::GetFolderContents(cons
 	SortFiles(folderContents);
 	return folderContents;
 }
+
+std::vector<std::string> SharedFiles::GetVolumes()
+{
+	auto volumes = Utilities::FileSystem::EnumerateSystemVolumes();
+
+	Utilities::Algorithms::FilterVector(volumes, [](const std::string& path)
+	{
+		return IsFolderVisible(path);
+	});
+
+	std::sort(volumes.begin(), volumes.end());
+	return volumes;
+}
