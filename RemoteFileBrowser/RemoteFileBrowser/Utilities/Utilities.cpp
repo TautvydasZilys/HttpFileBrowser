@@ -14,15 +14,14 @@ void Logging::Initialize(bool forceOverwrite)
 {
 	auto openMode = forceOverwrite ? CREATE_ALWAYS : CREATE_NEW;
 
-	s_OutputFile = CreateFile2(kLogFileName, FILE_GENERIC_WRITE, FILE_SHARE_READ, openMode, nullptr);
+	s_OutputFile = FileSystem::CreateFilePortable(kLogFileName, FILE_GENERIC_WRITE, FILE_SHARE_READ, openMode);
 	Assert(s_OutputFile != INVALID_HANDLE_VALUE || !forceOverwrite);
 
 	if (s_OutputFile == INVALID_HANDLE_VALUE)
 	{
 		Assert(GetLastError() == ERROR_FILE_EXISTS);
 
-		s_OutputFile = CreateFile2(kLogFileName, FILE_GENERIC_WRITE, FILE_SHARE_READ, OPEN_EXISTING, nullptr);
-		Assert(s_OutputFile != INVALID_HANDLE_VALUE);
+		s_OutputFile = FileSystem::CreateFilePortable(kLogFileName, FILE_GENERIC_WRITE, FILE_SHARE_READ, OPEN_EXISTING);
 
 		const char threeNewLines[] = "\r\n\r\n\r\n";
 		DWORD bytesWritten;
@@ -618,7 +617,7 @@ vector<uint8_t> FileSystem::ReadFileToVector(const std::wstring& path)
 {
 	using namespace Utilities;
 
-	auto fileHandle = CreateFile2(path.c_str(), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, nullptr);
+	auto fileHandle = CreateFilePortable(path.c_str(), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING);
 
 	if (fileHandle == INVALID_HANDLE_VALUE)
 	{

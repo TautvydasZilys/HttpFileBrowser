@@ -208,6 +208,15 @@ inline std::vector<Utilities::FileSystem::FileInfo> Utilities::FileSystem::Enume
 	return files;
 }
 
+inline HANDLE Utilities::FileSystem::CreateFilePortable(const std::wstring& path, DWORD desiredAccess, DWORD shareMode, DWORD creationDisposition)
+{
+#if !PHONE
+	return CreateFileW(path.c_str(), desiredAccess, shareMode, nullptr, creationDisposition, FILE_ATTRIBUTE_NORMAL, nullptr);
+#else
+	return CreateFile2(path.c_str(), desiredAccess, shareMode, creationDisposition, nullptr);
+#endif
+}
+
 // String
 
 inline bool Utilities::String::CaseInsensitiveComparer::operator()(const std::string& left, const std::string& right)

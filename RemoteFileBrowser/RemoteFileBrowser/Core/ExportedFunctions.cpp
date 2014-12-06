@@ -7,6 +7,10 @@
 
 #define EXPORT extern "C" __declspec(dllexport)
 
+EXPORT void __stdcall EmptyEntry()
+{
+}
+
 enum class FileType
 {
 	File,
@@ -120,7 +124,7 @@ EXPORT void __stdcall GetUniqueSystemId(const char*& uniqueSystemIdPtr, int& len
 	const auto& uniqueSystemId = Utilities::System::GetUniqueSystemId();
 
 	uniqueSystemIdPtr = uniqueSystemId.c_str();
-	length = uniqueSystemId.length();
+	length = static_cast<int>(uniqueSystemId.length());
 }
 
 struct SharedFilesInterop

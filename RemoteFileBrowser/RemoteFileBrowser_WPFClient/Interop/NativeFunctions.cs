@@ -41,6 +41,9 @@ namespace RemoteFileBrowser.Interop
         };
 
         [DllImport("RemoteFileBrowser.dll")]
+        extern internal static void EmptyEntry();
+
+        [DllImport("RemoteFileBrowser.dll")]
         extern internal static unsafe void GetFilesInDirectory(char* directoryName, out SimpleFileInfo* files, out int fileCount);
         
         [DllImport("RemoteFileBrowser.dll")]

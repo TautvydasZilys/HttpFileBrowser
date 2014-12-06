@@ -7,7 +7,7 @@ StreamableFile::StreamableFile(const std::wstring& filePath) :
 	m_FilePosition(0)
 {
 	bool succeeded = false;
-	m_FileHandle = CreateFile2(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, nullptr);
+	m_FileHandle = Utilities::FileSystem::CreateFilePortable(filePath, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING);
 
 	if (m_FileHandle == INVALID_HANDLE_VALUE)
 	{

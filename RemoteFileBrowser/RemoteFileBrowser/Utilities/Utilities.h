@@ -133,6 +133,8 @@ namespace Utilities
 		inline std::vector<FileInfo> EnumerateAndSortFiles(WideStr&& path);
 
 		std::vector<uint8_t> ReadFileToVector(const std::wstring& path);
+
+		inline HANDLE CreateFilePortable(const std::wstring& path, DWORD desiredAccess, DWORD shareMode, DWORD creationDisposition);
 	}
 
 	namespace String
