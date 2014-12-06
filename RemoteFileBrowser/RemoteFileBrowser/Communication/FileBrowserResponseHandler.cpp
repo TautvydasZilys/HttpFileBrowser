@@ -42,7 +42,7 @@ void FileBrowserResponseHandler::Execute()
 	}
 }
 
-void FileBrowserResponseHandler::SendData(const char* data, size_t length) const
+bool FileBrowserResponseHandler::SendData(const char* data, size_t length) const
 {
 	Assert(length < static_cast<size_t>(numeric_limits<int>::max()));
 	auto sendResult = send(m_ClientSocket, data, static_cast<int>(length), 0);
@@ -51,6 +51,8 @@ void FileBrowserResponseHandler::SendData(const char* data, size_t length) const
 	{
 		Logging::Error(WSAGetLastError(), "Failed to send response: ");
 	}
+
+	return sendResult == static_cast<int>(length);
 }
 
 void FileBrowserResponseHandler::SendNotFoundResponse() const
@@ -141,12 +143,13 @@ void FileBrowserResponseHandler::StreamFile() const
 	char* volatile currentBuffer;
 	volatile int currentDataLength;
 	volatile bool doneReading = false;
+	volatile bool doneSending = false;
 	bool failed = false;
 
 	Event dataReadyEvent(false),
 		  bufferPtrReadEvent(false);
 
-	thread sendingThread([this, &currentBuffer, &currentDataLength, &doneReading, &dataReadyEvent, &bufferPtrReadEvent]()
+	thread sendingThread([this, &currentBuffer, &currentDataLength, &doneReading, &doneSending, &dataReadyEvent, &bufferPtrReadEvent]()
 	{
 		for (;;)
 		{
@@ -162,7 +165,12 @@ void FileBrowserResponseHandler::StreamFile() const
 
 			bufferPtrReadEvent.Set();
 
-			SendData(dataPtr, currentDataLength);
+			if (!SendData(dataPtr, currentDataLength))
+			{
+				bufferPtrReadEvent.Set();
+				doneSending = true;
+				return;
+			}
 		}
 	});
 
@@ -180,6 +188,9 @@ void FileBrowserResponseHandler::StreamFile() const
 			const DWORD kTimeout = 30000;	// 30 seconds
 			if (!bufferPtrReadEvent.Wait(kTimeout))	// Throw exception if the other thread fails to second data within 30 seconds
 				throw exception();	// This usually happens when browser cancels download but doesn't close the socket
+
+			if (doneSending)
+				break;
 
 			currentBufferIndex = (currentBufferIndex + 1) % kBufferCount;
 		}
