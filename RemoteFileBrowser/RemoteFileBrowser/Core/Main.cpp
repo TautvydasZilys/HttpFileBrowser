@@ -1,5 +1,4 @@
 #include "PrecompiledHeader.h"
-#include "Communication\AssetDatabase.h"
 #include "Communication\ClientServerConnection.h"
 #include "Communication\FileBrowserResponseHandler.h"
 #include "Http\Server.h"
@@ -13,7 +12,6 @@
 int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	Initializer winSockContext;
-	AssetDatabase::Initialize();
 	/*
 	Tcp::Listener listener;
 	listener.WhitelistIP(0);

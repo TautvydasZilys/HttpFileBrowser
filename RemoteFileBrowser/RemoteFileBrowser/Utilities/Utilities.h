@@ -56,6 +56,12 @@ namespace Utilities
 		static CriticalSection s_LogCriticalSection;
 	};
 
+	namespace Algorithms
+	{
+		template <typename T, typename Predicate>
+		void FilterVector(std::vector<T>& items, Predicate&& predicate);
+	}
+
 	namespace Encoding
 	{
 		size_t Utf8ToUtf16Inline(const char* str, size_t strLength, wchar_t* destination, size_t destinationLength);
@@ -102,6 +108,12 @@ namespace Utilities
 
 			FileInfo(const std::string& fileName, FileStatus fileStatus, const std::string& dateModified, uint64_t fileSize);
 			FileInfo(std::string&& fileName, FileStatus fileStatus, std::string&& dateModified, uint64_t fileSize);
+
+			FileInfo(FileInfo&& other);
+			FileInfo& operator=(FileInfo&& other);
+
+			FileInfo(const FileInfo&) = delete;
+			FileInfo& operator=(const FileInfo&) = delete;
 		};
 
 		void RemoveLastPathComponentInline(std::string& path);
@@ -114,9 +126,26 @@ namespace Utilities
 		FileStatus QueryFileStatus(const std::wstring& path);
 		bool GetFileSizeFromHandle(HANDLE fileHandle, uint64_t& fileSize);
 		std::vector<FileInfo> EnumerateFiles(std::wstring path);
+		void SortFiles(std::vector<Utilities::FileSystem::FileInfo>& files);
 		std::vector<std::string> EnumerateSystemVolumes();
 
+		template <typename WideStr>
+		inline std::vector<FileInfo> EnumerateAndSortFiles(WideStr&& path);
+
 		std::vector<uint8_t> ReadFileToVector(const std::wstring& path);
+	}
+
+	namespace String
+	{
+		struct CaseInsensitiveComparer
+		{
+			inline bool operator()(const std::string& left, const std::string& right);
+		};
+
+		struct CaseInsensitiveHasher
+		{
+			inline size_t operator()(const std::string& str);
+		};
 	}
 
 	namespace System

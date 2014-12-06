@@ -314,7 +314,7 @@ void FileBrowserResponseHandler::GenerateHtmlBodyContentOfDirectory(stringstream
 		return;
 	}
 
-	auto files = EnumerateFiles(m_WidePath);
+	auto files = EnumerateAndSortFiles(m_WidePath);
 
 	if (files.size() > 0)
 	{

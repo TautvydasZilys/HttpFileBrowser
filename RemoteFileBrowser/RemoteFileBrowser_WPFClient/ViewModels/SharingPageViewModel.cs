@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -182,12 +183,66 @@ namespace RemoteFileBrowser.ViewModels
         {
             List<string> fullySharedFolders, partiallySharedFolders, files;
             CollectSharedFiles(out fullySharedFolders, out partiallySharedFolders, out files);
-            await Task.Delay(2000);
+
+            await Task.Run(() =>
+            {
+                var sharedFiles = default(NativeFunctions.SharedFiles);
+
+                unsafe
+                {
+                    sharedFiles.fullySharedFolders = MarshalStringList(fullySharedFolders);
+                    sharedFiles.fullySharedFolderCount = fullySharedFolders.Count;
+
+                    sharedFiles.partiallySharedFolders = MarshalStringList(partiallySharedFolders);
+                    sharedFiles.partiallySharedFolderCount = partiallySharedFolders.Count;
+
+                    sharedFiles.sharedFiles = MarshalStringList(files);
+                    sharedFiles.sharedFileCount = files.Count;
+
+                    NativeFunctions.StartSharingFiles(ref sharedFiles);
+
+                    MarshalStringListCleanup(sharedFiles.fullySharedFolders, sharedFiles.fullySharedFolderCount);
+                    MarshalStringListCleanup(sharedFiles.partiallySharedFolders, sharedFiles.partiallySharedFolderCount);
+                    MarshalStringListCleanup(sharedFiles.sharedFiles, sharedFiles.sharedFileCount);
+                }
+            });
         }
 
         private async Task StopSharingImpl()
         {
             await Task.Delay(2000);
+        }
+
+        private unsafe char** MarshalStringList(List<string> strings)
+        {
+            var result = (char**)Marshal.AllocHGlobal(sizeof(char*) * strings.Count);
+
+            for (int i = 0; i < strings.Count; i++)
+            {
+                result[i] = (char*)Marshal.AllocHGlobal(sizeof(char) * (strings[i].Length + 1));
+                
+                fixed (char* source = strings[i])
+                {
+                    for (int j = 0; j < strings[i].Length; j++)
+                    {
+                        result[i][j] = source[j];
+                    }
+                }
+
+                result[i][strings[i].Length] = '\0';
+            }
+
+            return result;
+        }
+
+        private unsafe void MarshalStringListCleanup(char** ptr, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                Marshal.FreeHGlobal((IntPtr)ptr[i]);
+            }
+
+            Marshal.FreeHGlobal((IntPtr)ptr);
         }
 
         private void CollectSharedFiles(out List<string> fullySharedFolders, out List<string> partiallySharedFolders, out List<string> sharedFiles)

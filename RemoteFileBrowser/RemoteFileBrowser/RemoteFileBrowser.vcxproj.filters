@@ -77,6 +77,9 @@
     <ClCompile Include="Core\ExportedFunctions.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Communication\SharedFiles.cpp">
+      <Filter>Source\Communication</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utilities\Utilities.inl">
@@ -129,6 +132,9 @@
     </ClInclude>
     <ClInclude Include="Utilities\Initializer.h">
       <Filter>Source\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Communication\SharedFiles.h">
+      <Filter>Source\Communication</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

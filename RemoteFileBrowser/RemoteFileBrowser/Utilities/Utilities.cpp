@@ -448,13 +448,30 @@ string FileSystem::FormatFileSizeString(uint64_t size)
 }
 
 FileSystem::FileInfo::FileInfo(const string& fileName, FileStatus fileStatus, const string& dateModified, uint64_t fileSize) :
-	fileName(std::move(fileName)), fileStatus(fileStatus), dateModified(std::move(dateModified)), fileSize(fileSize)
+	fileName(fileName), fileStatus(fileStatus), dateModified(dateModified), fileSize(fileSize)
 {
 }
 
 FileSystem::FileInfo::FileInfo(string&& fileName, FileStatus fileStatus, string&& dateModified, uint64_t fileSize) :
 	fileName(std::move(fileName)), fileStatus(fileStatus), dateModified(std::move(dateModified)), fileSize(fileSize)
 {
+}
+
+FileSystem::FileInfo::FileInfo(FileInfo&& other)
+{
+	fileName = std::move(other.fileName);
+	fileStatus = other.fileStatus;
+	dateModified = std::move(other.dateModified);
+	fileSize = other.fileSize;
+}
+
+FileSystem::FileInfo& FileSystem::FileInfo::operator=(FileInfo&& other)
+{
+	fileName = std::move(other.fileName);
+	fileStatus = other.fileStatus;
+	dateModified = std::move(other.dateModified);
+	fileSize = other.fileSize;
+	return *this;
 }
 
 FileSystem::FileStatus FileSystem::QueryFileStatus(const wstring& path)
@@ -516,8 +533,14 @@ vector<FileSystem::FileInfo> FileSystem::EnumerateFiles(wstring path)
 	FindClose(findHandle);
 	SetLastError(ERROR_SUCCESS);
 
+
+	return result;
+}
+
+void FileSystem::SortFiles(std::vector<Utilities::FileSystem::FileInfo>& files)
+{
 	// Sort by name, but place directories first
-	sort(begin(result), end(result), [](FileInfo& left, FileInfo& right) -> bool
+	sort(begin(files), end(files), [](FileInfo& left, FileInfo& right) -> bool
 	{
 		if (left.fileStatus == right.fileStatus)
 		{
@@ -526,8 +549,6 @@ vector<FileSystem::FileInfo> FileSystem::EnumerateFiles(wstring path)
 
 		return left.fileStatus == FileStatus::Directory;
 	});
-
-	return result;
 }
 
 vector<string> FileSystem::EnumerateSystemVolumes()

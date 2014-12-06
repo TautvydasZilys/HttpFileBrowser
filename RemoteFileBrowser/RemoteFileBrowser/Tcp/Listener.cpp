@@ -3,8 +3,8 @@
 
 using namespace Tcp;
 
-Listener::Listener() :
-	m_Running(false)
+Listener::Listener(bool acceptAnonymousConnections) :
+	m_Running(false), m_AcceptAnonymousConnections(acceptAnonymousConnections)
 {
 }
 

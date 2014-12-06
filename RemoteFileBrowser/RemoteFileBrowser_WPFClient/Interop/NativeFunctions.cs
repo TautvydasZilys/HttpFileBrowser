@@ -28,6 +28,18 @@ namespace RemoteFileBrowser.Interop
             public int height;
         }
 
+        internal unsafe struct SharedFiles
+        {
+	        public char** fullySharedFolders;
+            public int fullySharedFolderCount;
+
+            public char** partiallySharedFolders;
+            public int partiallySharedFolderCount;
+
+            public char** sharedFiles;
+            public int sharedFileCount;
+        };
+
         [DllImport("RemoteFileBrowser.dll")]
         extern internal static unsafe void GetFilesInDirectory(char* directoryName, out SimpleFileInfo* files, out int fileCount);
         
@@ -48,5 +60,8 @@ namespace RemoteFileBrowser.Interop
 
         [DllImport("RemoteFileBrowser.dll")]
         extern internal static void GetUniqueSystemId(out IntPtr uniqueSystemIdPtr, out int length);
+
+        [DllImport("RemoteFileBrowser.dll")]
+        extern internal static IntPtr StartSharingFiles(ref SharedFiles sharedFiles);
     }
 }

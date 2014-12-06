@@ -7,6 +7,7 @@ namespace Tcp
 	class Listener
 	{
 	private:
+		bool m_AcceptAnonymousConnections;
 		std::vector<IN6_ADDR> m_IpWhitelist;
 		CriticalSection m_IpWhitelistCriticalSection;
 		std::thread m_ListeningThread;
@@ -22,7 +23,7 @@ namespace Tcp
 		static inline void StartIncomingConnectionThread(Callback callback, SOCKET acceptedSocket, sockaddr_in6& clientAddress);
 
 	public:
-		Listener();
+		Listener(bool acceptAnonymousConnections = false);
 		~Listener();
 
 		Listener(const Listener&) = delete;

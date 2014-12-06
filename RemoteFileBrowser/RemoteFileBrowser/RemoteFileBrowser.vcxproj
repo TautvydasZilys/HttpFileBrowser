@@ -623,6 +623,7 @@
     <ClCompile Include="Communication\AssetDatabase.cpp" />
     <ClCompile Include="Communication\ClientServerConnection.cpp" />
     <ClCompile Include="Communication\FileBrowserResponseHandler.cpp" />
+    <ClCompile Include="Communication\SharedFiles.cpp" />
     <ClCompile Include="Core\ExportedFunctions.cpp" />
     <ClCompile Include="Http\Request.cpp" />
     <ClCompile Include="Http\Server.cpp" />
@@ -634,6 +635,7 @@
     <ClCompile Include="Tcp\Listener.cpp" />
     <ClCompile Include="Utilities\Initializer.cpp" />
     <ClInclude Include="Communication\ClientServerConnection.h" />
+    <ClInclude Include="Communication\SharedFiles.h" />
     <ClInclude Include="Utilities\CriticalSection.h" />
     <ClInclude Include="Http\Request.h" />
     <ClInclude Include="Http\RestCommunicator.h" />

@@ -1,4 +1,9 @@
 #include "PrecompiledHeader.h"
+#include "Communication\FileBrowserResponseHandler.h"
+#include "Communication\SharedFiles.h"
+#include "Http\Server.h"
+#include "Tcp\Listener.h"
+#include "Utilities\Initializer.h"
 
 #define EXPORT extern "C" __declspec(dllexport)
 
@@ -16,7 +21,7 @@ struct SimpleFileInfo
 
 EXPORT void __stdcall GetFilesInDirectory(const wchar_t* directoryName, SimpleFileInfo*& results, int& resultCount)
 {
-	auto files = Utilities::FileSystem::EnumerateFiles(directoryName);
+	auto files = Utilities::FileSystem::EnumerateAndSortFiles(directoryName);
 	Assert(files.size() < static_cast<size_t>(std::numeric_limits<int>::max()) && static_cast<int>(files.size()) > -1);
 
 	resultCount = static_cast<int>(files.size());
@@ -116,4 +121,65 @@ EXPORT void __stdcall GetUniqueSystemId(const char*& uniqueSystemIdPtr, int& len
 
 	uniqueSystemIdPtr = uniqueSystemId.c_str();
 	length = uniqueSystemId.length();
+}
+
+struct SharedFilesInterop
+{
+	wchar_t** fullySharedFolders;
+	int fullySharedFolderCount;
+
+	wchar_t** partiallySharedFolders;
+	int partiallySharedFolderCount;
+
+	wchar_t** sharedFiles;
+	int sharedFileCount;
+};
+
+static inline void InsertToFileSet(SharedFiles::FileSet& fileSet, const wchar_t* wstr)
+{
+	auto str = Utilities::Encoding::Utf16ToUtf8(wstr, wcslen(wstr));
+	fileSet.insert(std::move(str));
+}
+
+EXPORT void __stdcall SetSharedFiles(const SharedFilesInterop& sharedFiles)
+{
+	SharedFiles::FileSet fullySharedFolders, partiallySharedFolders, files;
+
+	for (int i = 0; i < sharedFiles.fullySharedFolderCount; i++)
+	{
+		InsertToFileSet(fullySharedFolders, sharedFiles.fullySharedFolders[i]);
+	}
+
+	for (int i = 0; i < sharedFiles.partiallySharedFolderCount; i++)
+	{
+		InsertToFileSet(partiallySharedFolders, sharedFiles.partiallySharedFolders[i]);
+	}
+
+	for (int i = 0; i < sharedFiles.sharedFileCount; i++)
+	{
+		InsertToFileSet(files, sharedFiles.sharedFiles[i]);
+	}
+
+	SharedFiles::SetSharedFiles(std::move(fullySharedFolders), std::move(partiallySharedFolders), std::move(files));
+}
+
+static void InitializeLazy()
+{
+	static Initializer initializerContext;
+}
+
+EXPORT Tcp::Listener* __stdcall StartSharingFiles(const SharedFilesInterop& sharedFiles)
+{
+	InitializeLazy();
+	SetSharedFiles(sharedFiles);
+
+	auto listener = new Tcp::Listener(true);
+	in6_addr anyAddress = { 0 };
+
+	listener->RunAsync(anyAddress, htons(18882), [](SOCKET incomingSocket, sockaddr_in6 clientAddress)
+	{
+		Http::Server::StartServiceClient(incomingSocket, clientAddress, &FileBrowserResponseHandler::ExecuteRequest);
+	});
+
+	return listener;
 }

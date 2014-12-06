@@ -1,5 +1,6 @@
 #include "PrecompiledHeader.h"
 #include "Initializer.h"
+#include "Communication\AssetDatabase.h"
 
 using namespace Utilities;
 
@@ -40,6 +41,7 @@ static void ShutdownWinSock()
 Initializer::Initializer()
 {
 	Logging::Initialize();
+	AssetDatabase::Initialize();
 	InitializeWinSock();
 }
 

@@ -116,6 +116,26 @@ inline void Utilities::Logging::LogFatalErrorIfFailed(bool failed, Message&& ...
 	}, std::forward<Message>(message)...);
 }
 
+// Algorithms
+
+template <typename T, typename Predicate>
+void Utilities::Algorithms::FilterVector(std::vector<T>& items, Predicate&& predicate)
+{
+	for (size_t i = 0; i < items.size(); i++)
+	{
+		if (!predicate(items[i]))
+		{
+			if (i < items.size() - 1)
+			{
+				items[i] = std::move(items[items.size() - 1]);
+				i--;
+			}
+
+			items.pop_back();
+		}
+	}
+}
+
 // Encoding
 
 inline std::wstring Utilities::Encoding::Utf8ToUtf16(const std::string& str)
@@ -179,4 +199,33 @@ inline std::string Utilities::FileSystem::RemoveLastPathComponent(const std::str
 	std::string result = path;
 	RemoveLastPathComponentInline(result);
 	return result;
+}
+
+template <typename WideStr>
+inline std::vector<Utilities::FileSystem::FileInfo> Utilities::FileSystem::EnumerateAndSortFiles(WideStr&& path)
+{
+	auto files = EnumerateFiles(std::forward<WideStr>(path));
+	SortFiles(files);
+	return files;
+}
+
+// String
+
+inline bool Utilities::String::CaseInsensitiveComparer::operator()(const std::string& left, const std::string& right)
+{
+	return _stricmp(left.c_str(), right.c_str()) == 0;
+}
+
+inline size_t Utilities::String::CaseInsensitiveHasher::operator()(const std::string& str)
+{
+	auto length = str.length();
+	std::string lowerCaseStr;
+	lowerCaseStr.resize(length);
+
+	for (size_t i = 0; i < length; i++)
+	{
+		lowerCaseStr[i] = tolower(str[i]);
+	}
+
+	return std::hash<std::string>()(lowerCaseStr);
 }

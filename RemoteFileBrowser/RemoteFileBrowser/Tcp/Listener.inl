@@ -54,7 +54,7 @@ inline void Listener::StartIncomingConnectionThread(Callback callback, SOCKET ac
 
 	u_long nonBlocking = FALSE;
 	auto result = ioctlsocket(acceptedSocket, FIONBIO, &nonBlocking);
-	Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, "Failed to set the listening socket to blocking mode: ");
+	Utilities::Logging::LogFatalErrorIfFailed(result == SOCKET_ERROR, "Failed to set the listening socket to blocking mode: ");
 
 	std::thread t(callback, acceptedSocket, clientAddress);
 	t.detach();
@@ -66,9 +66,7 @@ inline bool Listener::IsIpWhitelisted(const IN6_ADDR& ip)
 
 	for (const auto whitelistedIp : m_IpWhitelist)
 	{
-		if (memcmp(&whitelistedIp, &ip, sizeof(IN6_ADDR)) == 0 ||
-			(whitelistedIp.u.Word[0] == 0 && whitelistedIp.u.Word[1] == 0 && whitelistedIp.u.Word[2] == 0 && whitelistedIp.u.Word[3] == 0 &&
-			whitelistedIp.u.Word[4] == 0 && whitelistedIp.u.Word[5] == 0 && whitelistedIp.u.Word[6] == 0 && whitelistedIp.u.Word[7] == 0))
+		if (memcmp(&whitelistedIp, &ip, sizeof(IN6_ADDR)) == 0)
 		{
 			return true;
 		}
@@ -91,7 +89,7 @@ void Listener::Run(const in6_addr& address, uint16_t port, Callback callback)
 			
 		if (acceptedSocket != INVALID_SOCKET)
 		{
-			if (IsIpWhitelisted(clientAddress.sin6_addr))
+			if (m_AcceptAnonymousConnections || IsIpWhitelisted(clientAddress.sin6_addr))
 			{
 				StartIncomingConnectionThread(callback, acceptedSocket, clientAddress);
 			}
